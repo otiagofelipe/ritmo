@@ -23,6 +23,7 @@ import "./styles/05-componentes.css";
 import "./styles/06-editores.css";
 import "./styles/07-celular.css";
 import "./styles/08-responsivo.css";
+import "./styles/09-claro.css";
 
 import "virtual:ritmo";
 import "./lista-suspensa.js";

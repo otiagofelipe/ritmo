@@ -8,12 +8,14 @@
 
 /* ═══════════ tema ═══════════
 
-   As três paletas vivem no CSS. O JS precisa das mesmas cores em
+   As paletas vivem no CSS. O JS precisa das mesmas cores em
    hex literal para desenhar SVG, então em vez de duplicar a lista
    ele lê as variáveis já resolvidas pelo navegador — trocar de tema
    é trocar um atributo e reler.                                    */
 
-const TEMAS = ["retrowave","yellow","blue"];
+const TEMAS = ["retrowave","blue","menta","grafite"];
+/** Temas de fundo claro: a raiz ganha data-claro (ver 09-claro.css). */
+const TEMAS_CLAROS = ["menta","grafite"];
 const PALETA = [];                 // séries dos gráficos, vem do tema
 const CORES  = {};                 // cores nomeadas, vem do tema
 
@@ -23,7 +25,11 @@ const lerCor = nome =>
 function aplicarTema(id){
   if(!TEMAS.includes(id)) id = TEMAS[0];
   document.documentElement.setAttribute("data-tema", id);
+  document.documentElement.toggleAttribute("data-claro", TEMAS_CLAROS.includes(id));
   S.tema = id;
+  // barra do navegador no celular na cor do fundo do tema
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute("content", lerCor("--bg-primary"));
   try{ localStorage.setItem("ritmo:tema-rw", id); }catch(e){}
 
   Object.assign(CORES, {

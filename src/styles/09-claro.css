@@ -1,0 +1,66 @@
+/* ══════════════════════════════════════════════════════════════
+   Temas claros (Menta, Grafite)
+
+   O JS marca a raiz com data-claro quando o tema é claro. O resto da
+   folha foi escrita para fundo escuro: aqui vão só os pontos em que
+   isso aparece — texto branco fixo sobre superfície clara e brilho
+   neon, que no claro vira sombra suave. Texto branco sobre gradiente
+   (botões, chips, aba ativa) continua branco.
+   ══════════════════════════════════════════════════════════════ */
+
+:root[data-claro]{
+  color-scheme:light;
+  --glow-pink-sm:0 1px 3px #0000001A;
+  --glow-pink-md:0 4px 12px #0000001F;
+  --glow-pink-lg:0 8px 24px #00000024;
+  --glow-purple-sm:0 1px 3px #0000001A;
+  --glow-purple-md:0 4px 12px #0000001F;
+  --glow-blue-sm:0 1px 3px #0000001A;
+  --glow-blue-md:0 4px 12px #0000001F;
+  --glow-combo:0 4px 16px #0000001F;
+}
+
+/* marca e títulos */
+:root[data-claro] .brand{
+  background:linear-gradient(180deg, var(--rt-text) 10%, var(--rt-pink) 100%);
+  -webkit-background-clip:text;background-clip:text;filter:none}
+:root[data-claro] .topbar .ttl{color:var(--rt-text);text-shadow:none}
+
+/* números grandes */
+:root[data-claro] .total,
+:root[data-claro] .pz-tot,
+:root[data-claro] .hol-liq b,
+:root[data-claro] .kpi.destaque .vl{color:var(--rt-text);text-shadow:none}
+:root[data-claro] .hol-liq.neg b,
+:root[data-claro] .kpi.destaque .vl.neg{color:var(--rt-error)}
+
+/* card em destaque (saldo) e holerite: fundo claro, texto escuro */
+:root[data-claro] .kpi.destaque .nm,
+:root[data-claro] .kpi.destaque .sb,
+:root[data-claro] .kpi.destaque .kx-card,
+:root[data-claro] .hol-liq span,
+:root[data-claro] .hol-liq .hol-seta{color:var(--rt-text-secondary)}
+:root[data-claro] .kpi.destaque .info{border-color:var(--rt-border);color:var(--rt-text-secondary)}
+:root[data-claro] .kpi.destaque .info:hover,
+:root[data-claro] .kpi.destaque .info:focus{border-color:var(--rt-text);color:var(--rt-text)}
+
+/* navegação: item ativo sem gradiente atrás */
+:root[data-claro] .tabbar button[aria-current="true"],
+:root[data-claro] .tb-menu button[aria-current="true"],
+:root[data-claro] .fx-novo:hover,
+:root[data-claro] .fx-add:hover,
+:root[data-claro] .link-btn:hover{color:var(--rt-text)}
+
+/* detalhes que eram branco translúcido */
+:root[data-claro] .cal-d.n0{background:color-mix(in srgb, var(--rt-text) 6%, transparent)}
+:root[data-claro] .cal-d.esc{box-shadow:inset 0 0 0 2px var(--rt-text)}
+:root[data-claro] .cal-d.n4.esc{box-shadow:inset 0 0 0 2px var(--rt-text),0 0 12px -2px var(--rt-pink)}
+:root[data-claro] .filters .chip .sw{background:color-mix(in srgb, var(--rt-text) 15%, transparent)}
+:root[data-claro] .temas button{border-color:var(--rt-border)}
+:root[data-claro] .temas button[aria-pressed="true"]{border-color:var(--rt-text)}
+:root[data-claro] .chart-tip b{color:var(--rt-text)}
+:root[data-claro] .btn:hover{outline-color:color-mix(in srgb, var(--rt-text) 40%, transparent)}
+
+/* sombras: o preto forte do tema escuro pesa no claro */
+:root[data-claro] .tb-veu,
+:root[data-claro] .modal-veu{background:color-mix(in srgb, var(--rt-text) 35%, transparent)}
