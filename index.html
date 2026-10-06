@@ -1028,7 +1028,9 @@ body.modal-aberto .main{filter:blur(6px);transform:scale(.97)}
 .modal-veu{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:24px;
   background:color-mix(in srgb, #02020C 72%, transparent);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
   animation:rt-fade .3s var(--ease)}
-.modal-card{width:min(620px,100%);max-height:min(86vh,860px);overflow-y:auto;overscroll-behavior:contain;
+body .modal-veu{padding-top:max(24px, var(--veu-topo, 0px))}
+@media(max-width:760px){ body .modal-veu{padding-top:max(12px, var(--veu-topo, 0px))} }
+.modal-card{width:min(620px,100%);max-height:min(calc(100dvh - max(24px, var(--veu-topo, 0px)) - 24px), 860px);overflow-y:auto;overscroll-behavior:contain;
   background:var(--rt-surface);border:1px solid color-mix(in srgb, var(--rt-purple) 45%, var(--rt-border));
   border-radius:var(--rt-radius-lg);padding:var(--sp-4) var(--sp-5) var(--sp-5);
   box-shadow:var(--glow-purple-sm),0 24px 60px #000000B3;animation:rt-foco .45s cubic-bezier(.2,.9,.3,1);
@@ -1046,7 +1048,7 @@ body.modal-aberto .main{filter:blur(6px);transform:scale(.97)}
 @media (max-width:640px){
   /* no celular continua centralizado, só com menos margem em volta */
   .modal-veu{padding:12px}
-  .modal-card{max-height:calc(100dvh - 24px);padding:var(--sp-3) var(--sp-4) var(--sp-4)}
+  .modal-card{max-height:calc(100dvh - max(12px, var(--veu-topo, 0px)) - 12px);padding:var(--sp-3) var(--sp-4) var(--sp-4)}
   .modal-topo{top:calc(-1 * var(--sp-3));margin:calc(-1 * var(--sp-3)) calc(-1 * var(--sp-4)) var(--sp-3);
     padding:var(--sp-3) var(--sp-4)}
 }
@@ -1462,6 +1464,21 @@ button.pz-item:hover,button.pz-item:focus-visible{background:var(--rt-hover);out
 }
 /* cartõezinhos de Eu devo, Me devem e Caju */
 .cd-lista{display:grid;gap:8px}
+.fx-ed .cd-lista,.cd-wrap > .cd-lista{max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;
+  padding-right:6px;margin-right:-6px;scrollbar-width:thin;scrollbar-color:color-mix(in srgb, var(--rt-pink) 55%, transparent) transparent}
+.fx-ed .cd-lista::-webkit-scrollbar,.cd-wrap > .cd-lista::-webkit-scrollbar{width:5px}
+.fx-ed .cd-lista::-webkit-scrollbar-thumb,.cd-wrap > .cd-lista::-webkit-scrollbar-thumb{background:color-mix(in srgb, var(--rt-pink) 55%, transparent);border-radius:9px}
+.cd-wrap{min-width:0}
+/* listas longas dentro dos cards: rolam sozinhas, com os totais à vista */
+.fx-ed .fx-itens,.fx-ed .sem-itens{max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;
+  padding-right:6px;margin-right:-6px;scrollbar-width:thin;scrollbar-color:color-mix(in srgb, var(--rt-pink) 55%, transparent) transparent}
+.fx-ed .fx-itens::-webkit-scrollbar,.fx-ed .sem-itens::-webkit-scrollbar{width:5px}
+.fx-ed .fx-itens::-webkit-scrollbar-thumb,.fx-ed .sem-itens::-webkit-scrollbar-thumb{background:color-mix(in srgb, var(--rt-pink) 55%, transparent);border-radius:9px}
+/* formulários longos: Salvar e Voltar ficam presos no rodapé do card */
+.modal-card .eacoes{position:sticky;bottom:calc(-1 * var(--sp-5));z-index:2;background:var(--rt-surface);
+  margin:var(--sp-3) calc(-1 * var(--sp-5)) calc(-1 * var(--sp-5));padding:12px var(--sp-5) var(--sp-5);
+  border-top:1px solid var(--rt-border)}
+@media(max-width:760px){ .modal-card .eacoes{bottom:calc(-1 * var(--sp-4));margin:var(--sp-3) calc(-1 * var(--sp-4)) calc(-1 * var(--sp-4));padding:10px var(--sp-4) var(--sp-4)} }
 .cd-it{--cd:var(--rt-warning);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 12px;align-items:center;width:100%;text-align:left;
   padding:12px 14px;border-radius:12px;border:1px solid var(--rt-border);
   background:color-mix(in srgb, var(--rt-surface-2) 40%, transparent);box-shadow:inset 3px 0 0 var(--cd);transition:background-color .12s,border-color .12s}
@@ -1473,9 +1490,8 @@ button.cd-it:hover{background:color-mix(in srgb, var(--rt-surface-2) 70%, transp
 .cd-t b{font-weight:500;font-size:13.5px;color:var(--rt-text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cd-v{font-family:var(--mono);font-size:13.5px;color:var(--rt-text);text-align:right;white-space:nowrap}
 .cd-v .dif{font-size:10px;color:var(--rt-text-muted)}
-.cd-l2{display:flex;align-items:center;gap:8px;min-width:0;font-family:var(--mono);font-size:10px;color:var(--rt-text-muted);
-  overflow:hidden;white-space:nowrap}
-.cd-l2 > *{flex:0 0 auto}
+.cd-l2{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;min-width:0;font-family:var(--mono);font-size:10px;color:var(--rt-text-muted)}
+.cd-pts{flex-wrap:wrap}
 .cd-d{font-family:var(--mono);font-size:10px;color:var(--rt-text-muted)}
 .cd-r2{display:flex;justify-content:flex-end;align-items:center}
 .cd-r2 .badge{font-size:10px;padding:2px 9px}
@@ -2154,7 +2170,7 @@ table.tab-fat.resumo-pes :is(th,td){text-align:center}
       <div class="block" style="margin-top:16px">
         <div class="block-head"><h2>Cadastro</h2>
           <button class="link-btn r" id="fx-editar">adicionar / editar</button></div>
-        <div id="fx-lista"></div>
+        <div class="cd-wrap" id="fx-lista"></div>
         <div id="m-editor-fixas"></div>
       </div>
       <div class="block" style="margin-top:16px">
@@ -2170,13 +2186,13 @@ table.tab-fat.resumo-pes :is(th,td){text-align:center}
       <div class="block" style="margin-top:16px">
         <div class="block-head"><h2>Registros</h2>
           <button class="link-btn r" id="dv-editar">adicionar / editar</button></div>
-        <div class="tab-wrap" id="dv-lista"></div>
+        <div class="cd-wrap" id="dv-lista"></div>
         <div id="m-editor-devem"></div>
       </div>
       <div class="block" style="margin-top:16px">
         <div class="block-head"><h2>Resumo</h2>
           <span class="eyebrow r">por pessoa</span></div>
-        <div class="tab-wrap vis" id="dv-resumo"></div>
+        <div class="cd-wrap" id="dv-resumo"></div>
       </div>
     </section>
 
@@ -2186,13 +2202,13 @@ table.tab-fat.resumo-pes :is(th,td){text-align:center}
       <div class="block" style="margin-top:16px">
         <div class="block-head"><h2>Registros</h2>
           <button class="link-btn r" id="dd-editar">adicionar / editar</button></div>
-        <div class="tab-wrap" id="dd-lista"></div>
+        <div class="cd-wrap" id="dd-lista"></div>
         <div id="m-editor-devo"></div>
       </div>
       <div class="block" style="margin-top:16px">
         <div class="block-head"><h2>Resumo</h2>
           <span class="eyebrow r">por pessoa</span></div>
-        <div class="tab-wrap vis" id="dd-resumo"></div>
+        <div class="cd-wrap" id="dd-resumo"></div>
       </div>
       <div class="block" style="margin-top:16px">
         <div class="block-head"><h2>Parcelas à frente</h2>
@@ -2238,7 +2254,7 @@ table.tab-fat.resumo-pes :is(th,td){text-align:center}
       <div class="block" style="margin-top:16px">
         <div class="block-head"><h2>Lançamentos</h2>
           <button class="link-btn r" id="cj-editar">adicionar</button></div>
-        <div class="tab-wrap" id="cj-lista"></div>
+        <div class="cd-wrap" id="cj-lista"></div>
       </div>
       <div class="block" style="margin-top:16px">
         <div class="block-head"><h2>Gasto e vale</h2>
@@ -3814,9 +3830,13 @@ function soltarBarra(sim){
     bar._lugar = lugar; bar._estilo = bar.getAttribute("style") || "";
     bar.classList.add("sobre-veu");
     Object.assign(bar.style, { top: r.top+"px", left: r.left+"px", width: r.width+"px" });
+
     document.body.appendChild(bar);
+    // o card começa abaixo da barra (medida já no lugar novo), sem ficar por baixo dela
+    document.documentElement.style.setProperty("--veu-topo", Math.ceil(bar.getBoundingClientRect().bottom + 10) + "px");
   } else if(!sim && bar._lugar){
     bar._lugar.replaceWith(bar); bar._lugar = null;
+    document.documentElement.style.removeProperty("--veu-topo");
     bar.classList.remove("sobre-veu");
     bar.setAttribute("style", bar._estilo);
   }
