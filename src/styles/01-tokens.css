@@ -10,9 +10,9 @@
       espaço, tipografia. Tudo o que vem depois usa só eles.
    3. Componentes.
 
-   RetroWave é o tema padrão. Yellow e Blue são variações do mesmo
-   sistema: cada uma traz os seus três neons (--neon-1/2/3), e o resto
-   da folha se adapta sozinho.
+   RetroWave é o tema padrão e Blue é uma variação dele: cada um traz
+   os seus três neons (--neon-1/2/3), e o resto da folha se adapta
+   sozinho. Menta e Grafite são os temas claros (data-claro na raiz).
    ══════════════════════════════════════════════════════════════ */
 
 /* ── 1. paletas ─────────────────────────────────────────────── */
@@ -26,27 +26,6 @@
   --purple-primary:#FF006E; --purple-secondary:#8338EC;
   --blue-primary:#3A86FF; --blue-light:#3A86FF; --highlight:#F4F2FF;
   --success:#8338EC; --warning:#ed85dc; --danger:#FF3366;  /*mudar sucess e warning*/
-  --c-itau:#3A86FF; --c-picpay:#A66BFF; --c-caju:#FF8E3C;
-  --c-devem:#00F5A0; --c-devo:#FF3366; --c-fixos:#B4B3E0;
-  --c-serie-1:#3A86FF;
-  --c-serie-2:#00F5A0;
-  --c-serie-3:#FF8E3C;
-  --c-serie-4:#A66BFF;
-  --c-serie-5:#FF006E;
-  --c-serie-6:#00D1FF;
-  --c-serie-7:#FFD700;
-  --c-serie-8:#B4B3E0;
-}
-:root[data-tema="yellow"]{
-  /* RetroWave Yellow: igual ao RetroWave, neons amarelo → azul */
-  --bg-primary:#050514; --bg-secondary:#030310; --bg-card:#070217 ; --bg-raise:#151538;
-  --bg-sunken:#02020B;
-  --border:#1C1C46;
-  --text-primary:#F4F2FF; --text-secondary:#B4B3E0; --text-faint:#7C7BB5;
-  --neon-1:#FFD700; --neon-2:#8338EC; --neon-3:#3A86FF;
-  --purple-primary:#FFD700; --purple-secondary:#8338EC;
-  --blue-primary:#3A86FF; --blue-light:#3A86FF; --highlight:#F4F2FF;
-  --success:#8338EC; --warning:#fcefa7; --danger:#FF3366;  /*mudar sucess e warning*/
   --c-itau:#3A86FF; --c-picpay:#A66BFF; --c-caju:#FF8E3C;
   --c-devem:#00F5A0; --c-devo:#FF3366; --c-fixos:#B4B3E0;
   --c-serie-1:#3A86FF;
@@ -78,6 +57,52 @@
   --c-serie-6:#00D1FF;
   --c-serie-7:#FFD700;
   --c-serie-8:#B4B3E0;
+}
+
+/* Temas claros: mesmas variáveis, com destaques escurecidos para
+   passar no contraste sobre fundo claro (4,5:1 ou mais). O ajuste do
+   que era branco fixo e dos brilhos fica em 09-claro.css. */
+:root[data-tema="menta"]{
+  /* Menta: verde suave e calmo */
+  --bg-primary:#F2F8F5; --bg-secondary:#E5F0EA; --bg-card:#FFFFFF; --bg-raise:#E5F0EA;
+  --bg-sunken:#E5F0EA;
+  --border:#CDE2D8;
+  --text-primary:#0F2A20; --text-secondary:#3E5B50; --text-faint:#587269;
+  --neon-1:#047857; --neon-2:#7C3AED; --neon-3:#0369A1;
+  --purple-primary:#047857; --purple-secondary:#7C3AED;
+  --blue-primary:#0369A1; --blue-light:#0369A1; --highlight:#0F2A20;
+  --success:#0F8A5F; --warning:#B45309; --danger:#D92D45;
+  --c-itau:#0369A1; --c-picpay:#7C3AED; --c-caju:#E06A1B;
+  --c-devem:#0F8A5F; --c-devo:#D92D45; --c-fixos:#3E5B50;
+  --c-serie-1:#0369A1;
+  --c-serie-2:#0F8A5F;
+  --c-serie-3:#E06A1B;
+  --c-serie-4:#7C3AED;
+  --c-serie-5:#047857;
+  --c-serie-6:#0E8BA8;
+  --c-serie-7:#B98900;
+  --c-serie-8:#587269;
+}
+:root[data-tema="grafite"]{
+  /* Grafite: branco puro, preto e um rosa */
+  --bg-primary:#FFFFFF; --bg-secondary:#F3F3F3; --bg-card:#FFFFFF; --bg-raise:#F3F3F3;
+  --bg-sunken:#F3F3F3;
+  --border:#E2E2E2;
+  --text-primary:#0A0A0A; --text-secondary:#3D3D3D; --text-faint:#5E5E5E;
+  --neon-1:#D6005F; --neon-2:#111111; --neon-3:#1F5FD6;
+  --purple-primary:#D6005F; --purple-secondary:#111111;
+  --blue-primary:#1F5FD6; --blue-light:#1F5FD6; --highlight:#0A0A0A;
+  --success:#0F8A5F; --warning:#B45309; --danger:#D92D45;
+  --c-itau:#1F5FD6; --c-picpay:#111111; --c-caju:#E06A1B;
+  --c-devem:#0F8A5F; --c-devo:#D92D45; --c-fixos:#3D3D3D;
+  --c-serie-1:#1F5FD6;
+  --c-serie-2:#0F8A5F;
+  --c-serie-3:#E06A1B;
+  --c-serie-4:#111111;
+  --c-serie-5:#D6005F;
+  --c-serie-6:#0E8BA8;
+  --c-serie-7:#B98900;
+  --c-serie-8:#5E5E5E;
 }
 
 /* ── 2. tokens RetroWave ────────────────────────────────────── */
