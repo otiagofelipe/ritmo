@@ -54,7 +54,11 @@ Para conferir quem está logado: `/api/eu`.
 
 ## Imagens
 
-Imagens fixas ficam em `public/img/` e são servidas em `/img/nome.png`. Quando o banco crescer, ou para subir imagens sem fazer deploy, o caminho é um bucket R2.
+Imagens fixas ficam em `public/img/` e são servidas em `/img/...`, atrás do mesmo login.
+
+- `public/img/bancos/`: logos das contas, quadrados, 128×128 px, PNG. O mapa conta → arquivo é o `LOGOS` em `src/js/01-config.js`. Conta sem logo fica com o selo da inicial.
+
+Para muitas imagens (logos de lojas, por exemplo), ou para subir imagens sem fazer deploy, o caminho é um bucket R2.
 
 ## Segredos
 
