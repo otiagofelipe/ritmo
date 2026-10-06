@@ -38,13 +38,9 @@ export default defineConfig({
   plugins: [ritmo()],
   build: { outDir: "dist", assetsDir: "assets" },
   server: {
-    // no `npm run dev`, /api vai para o Worker publicado
-    proxy: {
-      "/api": {
-        target: "https://ritmo-caju.tfrsantos99.workers.dev",
-        changeOrigin: true,
-        rewrite: p => p.replace(/^\/api/, ""),
-      },
-    },
+    /* no `npm run dev`, /api vai para o Worker rodando na sua máquina
+       (`npm run api`, em outro terminal). O publicado não serve: ele
+       pede login do Access, e o proxy não tem como fazer esse login. */
+    proxy: { "/api": "http://localhost:8787" },
   },
 });

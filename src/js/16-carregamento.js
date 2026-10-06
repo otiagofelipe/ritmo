@@ -20,14 +20,32 @@ async function api(caminho, corpo){
     r = await fetch(API + caminho, {
       method: corpo ? "POST" : "GET",
       headers: corpo ? {"Content-Type":"application/json"} : {},
-      body: corpo ? JSON.stringify(corpo) : undefined
+      body: corpo ? JSON.stringify(corpo) : undefined,
+      // login do Access vencido vira redirecionamento: tratado abaixo
+      redirect: "manual"
     });
   }catch(e){
     throw new Error("Não consegui falar com o Worker. Confira a internet e tente de novo.");
   }
+  if(r.type === "opaqueredirect" || r.status === 401) refazerLogin();
   const d = await r.json().catch(()=>null);
   if(!r.ok || !d) throw new Error((d && d.erro) || `O Worker respondeu ${r.status}.`);
   return d;
+}
+
+/**
+ * O login do Access venceu: recarregar a página leva à tela de login e
+ * volta para cá. Se já recarregou há menos de um minuto, não insiste
+ * (evita ficar recarregando sem parar) e mostra o erro.
+ */
+function refazerLogin(){
+  let ultima = 0;
+  try{ ultima = Number(sessionStorage.getItem("ritmo-relogin")) || 0; }catch(e){}
+  if(Date.now() - ultima > 60000){
+    try{ sessionStorage.setItem("ritmo-relogin", String(Date.now())); }catch(e){}
+    location.reload();
+  }
+  throw new Error("O login venceu. Recarregue a página para entrar de novo.");
 }
 
 function aplicarDados(d){
