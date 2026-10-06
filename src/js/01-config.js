@@ -105,18 +105,20 @@ const salarioDe = mes => {
 };
 
 /**
- * Logotipos das contas.
+ * Logotipos das contas, pela chave da conta (conta.id).
  *
- * Vem vazio de propósito: os logos do Itaú, do PicPay e do Caju são
- * marcas registradas e não acompanham este arquivo. Cole aqui a URL
- * da imagem ou um data URI ("data:image/svg+xml;base64,...") e o app
- * passa a desenhar a imagem no lugar da letra. O que ficar vazio
- * continua com o selo de inicial.
+ * Os arquivos ficam em public/img/bancos/: quadrados, 128×128 px. Para
+ * uma conta nova, salve a imagem lá e acrescente uma linha aqui. Conta
+ * sem linha (ou imagem que não carregar) fica com o selo da inicial.
+ *
+ * nubank e ticket já estão prontos para quando essas contas existirem.
  */
 const LOGOS = {
-  itau:   "https://upload.wikimedia.org/wikipedia/commons/2/2d/2023_Ita%C3%BA_Unibanco_Logo.png?utm_source=pt.wikipedia.org&utm_campaign=index&utm_content=original",
-  picpay: "https://static.wikia.nocookie.net/logopedia/images/b/b5/Picpayicon.jpg/revision/latest?cb=20181222023507",
-  caju:   "https://play-lh.googleusercontent.com/gZ30d07fvm6p_2kW3-2wiOfTI3MtzQkAZWwzvUs0MhaNUS8cgUDmLtJnIc1bkq-qIUDRvMautvrfvwebE5v7"
+  itau:   "/img/bancos/itau.png",
+  picpay: "/img/bancos/picpay.png",
+  caju:   "/img/bancos/caju.png",
+  nubank: "/img/bancos/nubank.png",
+  ticket: "/img/bancos/ticket.png"
 };
 
 /** Referência semanal de gasto, desenhada no gráfico por semana. */
