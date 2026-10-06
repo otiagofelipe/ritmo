@@ -41,6 +41,15 @@
     }
   },
 
+  // Prévias dos PRs (npx wrangler preview, nos builds automáticos):
+  // precisam declarar os próprios recursos. Usam o mesmo KV, só para
+  // ler a foto; sem os segredos do Databricks, a prévia não grava nada.
+  "previews": {
+    "kv_namespaces": [
+      { "binding": "RITMO_CACHE", "id": "e755d52c7cfb437d985d89b005c0944a" }
+    ]
+  },
+
   // Variáveis de texto criadas no painel não são apagadas pelo deploy.
   "keep_vars": true,
 
