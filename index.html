@@ -1016,15 +1016,14 @@ select.status option{background:var(--rt-surface);color:var(--rt-text)}
 body.modal-aberto{overflow:hidden}
 /* Foco: a página de trás desfoca e recua; o card entra saindo do desfoque */
 /* (só o conteúdo recua; menu e barra de baixo ficam com o desfoque do véu) */
-.main{transition:filter .35s var(--ease),transform .35s var(--ease)}
-body.modal-aberto .main{filter:blur(6px);transform:scale(.97)}
+.main{transition:filter .3s var(--ease)}
+body.modal-aberto .main{filter:blur(6px)}
 /* com um card aberto, a barra do mês sai de trás do véu (ver soltarBarra) */
 #barra-filtros.sobre-veu{position:fixed;z-index:85;margin:0}
 .modal-veu.saindo{opacity:0;transition:opacity .25s var(--ease)}
-.modal-veu.saindo .modal-card{opacity:0;filter:blur(8px);transform:scale(1.04);
-  transition:opacity .22s var(--ease),filter .25s var(--ease),transform .25s var(--ease)}
-@keyframes rt-foco{from{opacity:0;filter:blur(10px);transform:scale(1.06)}
-  60%{opacity:1}to{opacity:1;filter:none;transform:none}}
+/* o card só aparece e some (sem zoom nem desfoque nele): quem desfoca é o fundo */
+.modal-veu.saindo .modal-card{opacity:0;transition:opacity .2s var(--ease)}
+@keyframes rt-foco{from{opacity:0}to{opacity:1}}
 .modal-veu{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:24px;
   background:color-mix(in srgb, #02020C 72%, transparent);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
   animation:rt-fade .3s var(--ease)}
@@ -1033,7 +1032,7 @@ body .modal-veu{padding-top:max(24px, var(--veu-topo, 0px))}
 .modal-card{width:min(620px,100%);max-height:min(calc(100dvh - max(24px, var(--veu-topo, 0px)) - 24px), 860px);overflow-y:auto;overscroll-behavior:contain;
   background:var(--rt-surface);border:1px solid color-mix(in srgb, var(--rt-purple) 45%, var(--rt-border));
   border-radius:var(--rt-radius-lg);padding:var(--sp-4) var(--sp-5) var(--sp-5);
-  box-shadow:var(--glow-purple-sm),0 24px 60px #000000B3;animation:rt-foco .45s cubic-bezier(.2,.9,.3,1);
+  box-shadow:var(--glow-purple-sm),0 24px 60px #000000B3;animation:rt-foco .25s var(--ease);
   scrollbar-width:thin;scrollbar-color:color-mix(in srgb, var(--rt-purple) 45%, var(--rt-border)) transparent}
 @keyframes rt-fade{from{opacity:0}to{opacity:1}}
 .modal-topo{display:flex;align-items:center;gap:var(--sp-2);position:sticky;top:calc(-1 * var(--sp-4));z-index:2;
@@ -3825,7 +3824,12 @@ function soltarBarra(sim){
     const r = bar.getBoundingClientRect();
     if(r.bottom <= 0 || r.top >= innerHeight) return;        // fora da tela: deixa quieta
     const lugar = document.createElement("div");
-    lugar.style.height = bar.offsetHeight + "px";
+    // presa no topo ela já está fora do fluxo (o espaço dela é o #filtros-lugar):
+    // o marcador fica sem altura, senão a página cresce e pula ao abrir o card
+    const cs = getComputedStyle(bar);
+    lugar.style.height = cs.position === "fixed" ? "0px"
+      : (bar.offsetHeight + (parseFloat(cs.marginTop)||0) + (parseFloat(cs.marginBottom)||0)) + "px";
+    lugar.style.overflowAnchor = "none";
     bar.parentNode.insertBefore(lugar, bar);
     bar._lugar = lugar; bar._estilo = bar.getAttribute("style") || "";
     bar.classList.add("sobre-veu");
@@ -3847,7 +3851,11 @@ addEventListener("popstate", ()=>{
   const veu = document.getElementById("modal-veu");
   if(veu && !veu._fechando){ veu._porVoltar = true; veu._fechar(); }
 });
-function abrirModal(aoFechar){
+/**
+ * refazer: redesenha o conteúdo do card com os filtros atuais (mês, pix,
+ * rolê, chips). Quem não passa, fica como está ao mexer nos filtros.
+ */
+function abrirModal(aoFechar, refazer){
   let veu = document.getElementById("modal-veu");
   // fechado e reaberto no mesmo instante (ex.: salvar e voltar para a lista):
   // o mesmo card continua, sem animar de novo
@@ -3864,6 +3872,7 @@ function abrirModal(aoFechar){
   }
   veu.onclick = e => { if(e.target === veu) aoFechar(); };
   veu._fechar = aoFechar;
+  veu._refazer = refazer || null;
   const card = veu.firstElementChild;
   card.scrollTop = 0;
   return card;
@@ -3883,6 +3892,14 @@ function fecharModal(){
     veu.removeAttribute("id");
     setTimeout(()=>veu.remove(), 260);
   });
+}
+/** Mudou um filtro com o card aberto: o card acompanha, no mesmo ponto da rolagem. */
+function refazerCard(){
+  const veu = document.getElementById("modal-veu");
+  if(!veu || veu._fechando || !veu._refazer) return;
+  const card = veu.firstElementChild, y = card.scrollTop;
+  veu._refazer();
+  card.scrollTop = y;
 }
 document.addEventListener("keydown", e=>{
   const veu = document.getElementById("modal-veu");
@@ -5407,12 +5424,14 @@ function abrirHolerite(){
   const sobraCaju = Math.max(teto - gastoCaju, 0), sobraCartao = posso - sobraCaju;
   const valor = l => `<b>${l.t==="p" ? "+" : "−"} ${esc(BRL.format(l.v))}</b>`;
   const linha = l => (l.sub && l.sub.length)
-    ? `<div class="hol-g"><button type="button" class="hol-l ${l.t}${l.v ? "" : " zero"}" aria-expanded="false">
+    ? `<div class="hol-g" data-k="${esc(l.n)}"><button type="button" class="hol-l ${l.t}${l.v ? "" : " zero"}" aria-expanded="false">
         <span>${esc(l.n)}<svg class="hol-seta" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg></span>${valor(l)}</button>
         <div class="hol-sub"><div class="hol-sub-in">${l.sub.map(([n,v])=>
           `<div class="hol-s${v ? "" : " zero"}"><span>${esc(n)}</span><b>${esc(BRL.format(v))}</b></div>`).join("")}</div></div></div>`
     : `<div class="hol-l ${l.t}${l.v ? "" : " zero"}"><span>${esc(l.n)}</span>${valor(l)}</div>`;
-  const box = abrirModal(()=>fecharModal());
+  const box = abrirModal(()=>fecharModal(), abrirHolerite);
+  // redesenhado por um filtro: o que estava aberto continua aberto
+  const abertos = new Set([...box.querySelectorAll(".hol .aberto[data-k]")].map(e=>e.dataset.k));
   box.innerHTML = `<div class="fx-ed hol">
     <div class="modal-topo">
       <h3><span class="fx-titulo">Holerite</span> <span class="mes">${rotuloFaturaHTML(S.mesSel)}</span></h3>
@@ -5422,7 +5441,7 @@ function abrirHolerite(){
       <div class="hol-soma p"><span>Entradas</span><b>${esc(BRL.format(tEnt))}</b></div>
       ${SAI.map(linha).join("")}
       <div class="hol-soma d"><span>Saídas</span><b>${esc(BRL.format(tSai))}</b></div></div>
-    <div class="hol-fim">
+    <div class="hol-fim" data-k="fim">
       <button type="button" class="hol-liq${posso<0?" neg":""}" aria-expanded="false"><span>Saldo do mês<svg class="hol-seta" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg></span><b>${esc(BRL.format(posso))}</b></button>
       <div class="hol-sub"><div class="hol-sub-in">
         <div class="hol-s"><span>Cartões</span><b>${esc(BRL.format(sobraCartao))}</b></div>
@@ -5438,6 +5457,8 @@ function abrirHolerite(){
     g.classList.toggle("aberto", sim); b.setAttribute("aria-expanded", String(sim));
   });
   box.querySelector(".fx-x").onclick = fecharModal;
+  box.querySelectorAll("[data-k]").forEach(el=>{ if(abertos.has(el.dataset.k)){
+    el.classList.add("aberto"); el.querySelector("[aria-expanded]").setAttribute("aria-expanded","true"); } });
 }
 
 /**
@@ -5451,7 +5472,11 @@ function cardSemana(i, semanas){
   const ls = linhasDosGraficos().filter(l=>semanaDe(l, semanas)===i)
     .sort((a,b)=>(b.data?b.data.getTime():0)-(a.data?a.data.getTime():0) || b.valor-a.valor);
   const tot = ls.reduce((a,l)=>a+l.valor,0), livre = TARGET_SEMANA - tot;
-  const box = abrirModal(()=>fecharModal());
+  // com outro filtro (ou outro mês), mostra a mesma semana do mês aberto
+  const box = abrirModal(()=>fecharModal(), ()=>{
+    const sem = semanasDoMes(S.mesSel);
+    sem[i] ? cardSemana(i, sem) : fecharModal();
+  });
   box.innerHTML = `<div class="fx-ed">
     <div class="modal-topo">
       <h3><span class="fx-titulo">Semana</span> <span class="mes">${esc(w.rot)}</span></h3>
@@ -7502,23 +7527,21 @@ document.querySelectorAll("#temas button").forEach(b=>b.onclick=()=>{
 });
 
 // filtros — comportamento idêntico ao de antes, só mudaram de lugar
-/* Troca de mês (lista ou setas). Com um card aberto: o holerite se refaz
-   no mês novo e o card da semana fecha (as semanas mudam). */
+/* Troca de mês (lista ou setas). Com um card aberto, ele se refaz no mês
+   novo: o holerite e a semana (mesma posição) acompanham; os editores já
+   se redesenham pelo render. */
 function trocarMes(v){
   if(!v || v===S.mesSel) return;
   S.mesSel = v; $("f-month").value = v;
-  render();
-  const veu = $("modal-veu");
-  if(veu && veu.querySelector(".hol")) abrirHolerite();
-  else if(veu && veu.querySelector(".sem-itens")) fecharModal();
+  render(); refazerCard();
 }
 $("f-month").addEventListener("change", e=>trocarMes(e.target.value));
 document.querySelectorAll(".f-mes-seta").forEach(b=>b.onclick = () => {
   const i = S.faturas.indexOf(S.mesSel) + Number(b.dataset.d);
   if(i>=0 && i<S.faturas.length) trocarMes(S.faturas[i]);
 });
-$("f-pix").addEventListener("change",   e=>{ S.incluirPix=e.target.checked; render(); });
-$("f-role").addEventListener("change",  e=>{ S.soRole=e.target.checked; render(); });
+$("f-pix").addEventListener("change",   e=>{ S.incluirPix=e.target.checked; render(); refazerCard(); });
+$("f-role").addEventListener("change",  e=>{ S.soRole=e.target.checked; render(); refazerCard(); });
 /* funil: desce e recolhe a grade de filtros; tocar fora recolhe */
 function filtrosAbertos(sim){
   const f = $("barra-filtros");
@@ -7554,7 +7577,7 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") filtrosAbertos(fa
   }, {passive:false});
 })();
 document.querySelectorAll("#barra-filtros input[data-inc]").forEach(inp=>
-  inp.addEventListener("change", e=>{ S.inc[e.target.dataset.inc]=e.target.checked; render(); }));
+  inp.addEventListener("change", e=>{ S.inc[e.target.dataset.inc]=e.target.checked; render(); refazerCard(); }));
 
 /* Ao rolar, a barra de filtros fica fixa no topo (celular e desktop).
    No celular ela vira uma linha só que rola de lado (mês + chips); no
