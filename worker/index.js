@@ -8,8 +8,7 @@
 
    página → este Worker → Databricks SQL Statement API → tabelas.
 
-   Rotas (também respondem sem o /api, para o endereço antigo no
-   GitHub Pages seguir funcionando durante a troca)
+   Rotas
      GET  /api/dados      lê tudo que o dashboard precisa, numa ida só
      GET  /api/snapshot   a última leitura completa guardada no KV ("foto"),
                           sem passar pelo Databricks
@@ -17,6 +16,7 @@
      POST /api/ligar      liga o warehouse (a página chama quando ele
                           desliga com ela aberta)
      POST /api/salvar     { op, linhas: [...] } grava na bronze
+     GET  /api/eu         quem está logado (para conferir o Access)
 
    Foto: toda leitura completa do /dados é guardada no KV, e o
    agendamento (Cron Trigger) refaz a leitura a cada 4 horas, depois do
@@ -32,20 +32,18 @@
    KV:      RITMO_CACHE (binding do namespace onde fica a foto,
             declarado no wrangler.jsonc)
 
-   Sem senha por enquanto: qualquer um com o endereço lê e grava os
-   dados. O próximo passo é pôr o Cloudflare Access na frente.
+   Acesso: o Cloudflare Access fica na frente do Worker inteiro
+   (página e API) e só deixa entrar quem fez login. Mesmo assim, toda
+   rota da API confere o login de novo (ctx.access): se um dia o Access
+   for desligado por engano, a página até abre, mas os dados não saem.
    ══════════════════════════════════════════════════════════════ */
 
-/* O CORS só existe para a página antiga (GitHub Pages), que está em
-   outro endereço. Depois que ela sair do ar, pode virar {}: a página
-   nova é servida por este mesmo Worker e não precisa dele. */
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
+// Sem CORS: a página é servida por este mesmo Worker, no mesmo endereço.
 const json = (o, s = 200) =>
-  new Response(JSON.stringify(o), { status: s, headers: { ...CORS, "Content-Type": "application/json" } });
+  new Response(JSON.stringify(o), {
+    status: s,
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+  });
 
 class Erro extends Error {
   constructor(status, msg) { super(msg); this.status = status; }
@@ -407,12 +405,19 @@ async function guardarFoto(env, dados) {
 
 export default {
   async fetch(req, env, ctx) {
-    if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
+    const caminho = new URL(req.url).pathname;
+    if (!/^\/api(\/|$)/.test(caminho)) return json({ erro: "rota não encontrada" }, 404);
+    const rota = caminho.replace(/^\/api/, "").replace(/\/+$/, "");
 
-    // /api/dados e /dados são a mesma rota (o segundo é o endereço antigo)
-    const rota = new URL(req.url).pathname.replace(/^\/api(?=\/|$)/, "").replace(/\/+$/, "");
+    // sem login do Access, nada da API responde
+    if (!ctx.access) return json({ erro: "login necessário" }, 401);
 
     try {
+      if (req.method === "GET" && rota === "/eu") {
+        const quem = await ctx.access.getIdentity().catch(() => null);
+        return json({ email: quem?.email || "" });
+      }
+
       if (req.method === "GET" && rota === "/dados") {
         const saida = await lerTudo(env);
         // a resposta não espera a gravação da foto; falha aparece no log do Worker
@@ -450,7 +455,7 @@ export default {
         const foto = await env.RITMO_CACHE.get(CHAVE_FOTO);
         if (!foto) return json({ erro: "ainda não há foto guardada" }, 404);
         // já está em JSON: devolve como veio, sem reprocessar
-        return new Response(foto, { headers: { ...CORS, "Content-Type": "application/json" } });
+        return new Response(foto, { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
       }
 
       if (req.method === "POST" && rota === "/salvar") {

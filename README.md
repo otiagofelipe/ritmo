@@ -28,11 +28,29 @@ Os arquivos de `src/js/` ainda dividem o mesmo escopo, como quando eram um `<scr
 
 ```bash
 npm install          # uma vez
-npm run dev          # página em localhost, usando o Worker publicado
 npm run deploy       # build + publica página e Worker
 ```
 
-`npm run dev` recarrega sozinho a cada arquivo salvo.
+Para mexer na página com recarga automática, use dois terminais:
+
+```bash
+npm run api          # Worker na sua máquina (porta 8787)
+npm run dev          # página em localhost, chamando esse Worker
+```
+
+O `npm run api` precisa de um arquivo `.dev.vars` na raiz (ele não vai para o Git) com os mesmos segredos do painel:
+
+```
+DBX_HOST=https://...
+DBX_TOKEN=...
+WAREHOUSE_ID=...
+```
+
+## Acesso
+
+O Cloudflare Access fica na frente do Worker inteiro: sem login, nem a página nem a API respondem. Ele é ligado no painel, na aba **Access** do Worker. Toda rota da API confere o login de novo (`ctx.access`), então, se o Access for desligado, a API para de responder.
+
+Para conferir quem está logado: `/api/eu`.
 
 ## Imagens
 
