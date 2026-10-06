@@ -23,8 +23,14 @@
   // "triggers": { "crons": ["30 */4 * * *"] },
 
   // Login: o Cloudflare Access é ligado no painel (aba Access do
-  // Worker). Este bloco só vale no `wrangler dev`: finge um login para
-  // a API responder na sua máquina.
+  // Worker). O Worker confere o token do Access com as chaves do seu
+  // time; ACCESS_TEAM é o endereço da tela de login do Access.
+  "vars": {
+    "ACCESS_TEAM": "https://COLE_AQUI_O_TIME.cloudflareaccess.com"
+  },
+
+  // Só vale no `wrangler dev`: finge um login para a API responder na
+  // sua máquina.
   "access": {
     "dev": {
       "aud": "ritmo-dev",
