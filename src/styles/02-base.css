@@ -1,0 +1,76 @@
+/* ── 3. base ────────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;background:var(--rt-bg);
+  scrollbar-color:color-mix(in srgb, var(--rt-purple) 45%, var(--rt-border)) transparent}
+body{background-color:var(--rt-bg);color:var(--rt-text);font-family:var(--body);
+  font-size:15px;line-height:1.5;font-weight:400;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh;
+  /* halos de luz: pink no alto à direita, purple embaixo à esquerda */
+  background-image:
+    radial-gradient(900px 520px at 88% -8%, color-mix(in srgb, var(--rt-pink) 13%, transparent), transparent 62%),
+    radial-gradient(760px 560px at -6% 108%, color-mix(in srgb, var(--rt-purple) 17%, transparent), transparent 64%),
+    radial-gradient(1200px 700px at 50% 120%, color-mix(in srgb, var(--rt-blue) 7%, transparent), transparent 70%);
+  background-attachment:fixed}
+/* chão quadriculado em perspectiva, parado e bem apagado */
+body::before{content:"";position:fixed;left:-40%;right:-40%;bottom:-2px;height:42vh;
+  pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--rt-pink) 55%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--rt-purple) 70%, transparent) 1px, transparent 1px);
+  background-size:56px 56px;background-position:center bottom;
+  transform:perspective(320px) rotateX(62deg);transform-origin:50% 100%;
+  -webkit-mask-image:linear-gradient(to top, #000 0%, transparent 78%);
+          mask-image:linear-gradient(to top, #000 0%, transparent 78%);
+  opacity:.16}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+::placeholder{color:var(--rt-text-muted);opacity:1}
+::selection{background:color-mix(in srgb, var(--rt-pink) 45%, transparent);color:#fff}
+:focus-visible{outline:2px solid var(--rt-pink);outline-offset:2px;border-radius:var(--rt-radius-sm)}
+.hidden{display:none !important}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--body);font-size:10.5px;font-weight:500;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--rt-text-muted)}
+h2{font-family:var(--disp);font-weight:400;font-size:24px;line-height:1.05;
+  letter-spacing:.045em;color:var(--rt-text)}
+h3{font-family:var(--disp);font-weight:400;font-size:21px;line-height:1.1;letter-spacing:.045em}
+svg.ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.scroller,.tab-wrap,.rail,textarea{scrollbar-width:thin;
+  scrollbar-color:color-mix(in srgb, var(--rt-purple) 45%, var(--rt-border)) transparent}
+
+/* controles de formulário: o mesmo afundado em todo lugar */
+.busca,.panel input,.panel textarea,.erow input,.erow select.parc,.erow select.cob,
+.ff select,.comp select,.gper input[type=month],.tab-fat.edicao input,.tab-fat.edicao select:not(.status),
+.sel-month{
+  background-color:var(--rt-sunken);border:1px solid var(--rt-border-strong);
+  border-radius:var(--rt-radius-md);color:var(--rt-text);
+  transition:border-color .15s var(--ease),box-shadow .15s var(--ease)}
+.busca:hover,.panel input:hover,.panel textarea:hover,.erow input:not([type=checkbox]):hover,.erow select.parc:hover,.erow select.cob:hover,
+.ff select:hover,.comp select:hover,.gper input[type=month]:hover,.tab-fat.edicao input:hover,
+.tab-fat.edicao select:not(.status):hover,.sel-month:hover{
+  border-color:color-mix(in srgb, var(--rt-border-strong) 50%, var(--rt-text-secondary))}
+.busca:focus,.panel input:focus,.panel textarea:focus,.erow input:not([type=checkbox]):focus,.erow select.parc:focus,.erow select.cob:focus,
+.ff select:focus,.comp select:focus,.gper input[type=month]:focus,.tab-fat.edicao input:focus,
+.tab-fat.edicao select:not(.status):focus,.sel-month:focus{
+  outline:none;border-color:var(--rt-pink);box-shadow:var(--glow-pink-sm)}
+select option{background:var(--rt-surface);color:var(--rt-text)}
+
+/* seta dos selects: um chevron só, igual em todo lugar */
+.sel-month,.erow select.parc,.erow select.cob,.ff select,.comp select{appearance:none;-webkit-appearance:none;cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,var(--rt-text-secondary) 50%),
+                   linear-gradient(135deg,var(--rt-text-secondary) 50%,transparent 50%);
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+
+/* checkbox RetroWave: 2px de borda, gradiente quando marcado */
+input[type=checkbox]{appearance:none;-webkit-appearance:none;flex:0 0 auto;
+  border:2px solid var(--rt-border-strong);border-radius:var(--rt-radius-sm);
+  background-color:transparent;cursor:pointer;vertical-align:middle;
+  transition:background-color .15s var(--ease),border-color .15s var(--ease),box-shadow .15s var(--ease)}
+input[type=checkbox]:hover{border-color:color-mix(in srgb, var(--rt-pink) 60%, var(--rt-border-strong))}
+input[type=checkbox]:checked{border-color:transparent;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.4 6.6 11.3 12.5 4.9' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat,
+             var(--rt-grad)}
+input[type=checkbox]:focus-visible{outline:none;box-shadow:0 0 0 2px var(--rt-bg),0 0 0 3px var(--rt-pink),var(--glow-pink-sm)}
+input[type=checkbox]:disabled{opacity:.35;cursor:default}
+
