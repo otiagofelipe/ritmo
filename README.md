@@ -48,7 +48,7 @@ WAREHOUSE_ID=...
 
 ## Acesso
 
-O Cloudflare Access fica na frente do Worker inteiro: sem login, nem a página nem a API respondem. Ele é ligado no painel, na aba **Access** do Worker. Toda rota da API confere o login de novo (`ctx.access`), então, se o Access for desligado, a API para de responder.
+O Cloudflare Access fica na frente do Worker inteiro: sem login, nem a página nem a API respondem. Ele é ligado no painel, na aba **Access** do Worker. Toda rota da API confere o login de novo, validando o token que o Access anexa a cada requisição (cabeçalho `Cf-Access-Jwt-Assertion`) com as chaves públicas do time em `ACCESS_TEAM` (`wrangler.jsonc`). Se o Access for desligado, a API para de responder.
 
 Para conferir quem está logado: `/api/eu`.
 

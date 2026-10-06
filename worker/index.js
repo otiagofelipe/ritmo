@@ -34,8 +34,14 @@
 
    Acesso: o Cloudflare Access fica na frente do Worker inteiro
    (página e API) e só deixa entrar quem fez login. Mesmo assim, toda
-   rota da API confere o login de novo (ctx.access): se um dia o Access
-   for desligado por engano, a página até abre, mas os dados não saem.
+   rota da API confere o login de novo: se um dia o Access for
+   desligado por engano, a página até abre, mas os dados não saem.
+
+   A conferência lê o token que o Access põe em toda requisição
+   (cabeçalho Cf-Access-Jwt-Assertion) e valida a assinatura com as
+   chaves públicas do seu time (ACCESS_TEAM). O ctx.access não serve
+   aqui: com a página servida pelo próprio Worker (static assets), a
+   requisição passa por um roteador interno que não o repassa.
    ══════════════════════════════════════════════════════════════ */
 
 // Sem CORS: a página é servida por este mesmo Worker, no mesmo endereço.
@@ -47,6 +53,65 @@ const json = (o, s = 200) =>
 
 class Erro extends Error {
   constructor(status, msg) { super(msg); this.status = status; }
+}
+
+
+/* ═══════════════ login (Cloudflare Access) ═══════════════ */
+
+const b64url = t => Uint8Array.from(atob(t.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+const textoB64 = t => JSON.parse(new TextDecoder().decode(b64url(t)));
+
+// chaves públicas do time, guardadas por uma hora entre requisições
+let chaves = { ts: 0, keys: [] };
+async function chavesDoTime(time, forcar) {
+  if (!forcar && Date.now() - chaves.ts < 3600e3 && chaves.keys.length) return chaves.keys;
+  const r = await fetch(`${time}/cdn-cgi/access/certs`);
+  if (!r.ok) throw new Error(`certs do Access: ${r.status}`);
+  chaves = { ts: Date.now(), keys: (await r.json()).keys || [] };
+  return chaves.keys;
+}
+
+/**
+ * Quem fez login, ou null. Vale o ctx.access quando ele vier (no
+ * `wrangler dev`, com o bloco access.dev); senão, valida o token do
+ * cabeçalho: assinatura RS256 com as chaves do time, emissor = o time,
+ * não vencido e, com ACCESS_AUD preenchido, para esta aplicação.
+ */
+async function logado(req, env, ctx) {
+  if (ctx.access) {
+    const quem = await ctx.access.getIdentity().catch(() => null);
+    return { email: quem?.email || "" };
+  }
+
+  const token = req.headers.get("Cf-Access-Jwt-Assertion");
+  const time = String(env.ACCESS_TEAM || "").replace(/\/+$/, "");
+  if (!token || !time) return null;
+
+  const partes = token.split(".");
+  if (partes.length !== 3) return null;
+  let cab, dados;
+  try { cab = textoB64(partes[0]); dados = textoB64(partes[1]); } catch { return null; }
+  if (cab.alg !== "RS256") return null;
+
+  // chave trocada pelo Access desde a última busca: busca de novo uma vez
+  let jwk = (await chavesDoTime(time)).find(k => k.kid === cab.kid);
+  if (!jwk) jwk = (await chavesDoTime(time, true)).find(k => k.kid === cab.kid);
+  if (!jwk) return null;
+
+  const chave = await crypto.subtle.importKey(
+    "jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
+  const ok = await crypto.subtle.verify(
+    "RSASSA-PKCS1-v1_5", chave, b64url(partes[2]), new TextEncoder().encode(`${partes[0]}.${partes[1]}`));
+  if (!ok) return null;
+
+  const agora = Date.now() / 1000;
+  if (dados.iss !== time) return null;
+  if (!dados.exp || dados.exp < agora) return null;
+  if (env.ACCESS_AUD) {
+    const aud = Array.isArray(dados.aud) ? dados.aud : [dados.aud];
+    if (!aud.includes(env.ACCESS_AUD)) return null;
+  }
+  return { email: dados.email || "" };
 }
 
 
@@ -409,14 +474,12 @@ export default {
     if (!/^\/api(\/|$)/.test(caminho)) return json({ erro: "rota não encontrada" }, 404);
     const rota = caminho.replace(/^\/api/, "").replace(/\/+$/, "");
 
-    // sem login do Access, nada da API responde
-    if (!ctx.access) return json({ erro: "login necessário" }, 401);
-
     try {
-      if (req.method === "GET" && rota === "/eu") {
-        const quem = await ctx.access.getIdentity().catch(() => null);
-        return json({ email: quem?.email || "" });
-      }
+      // sem login do Access, nada da API responde
+      const quem = await logado(req, env, ctx);
+      if (!quem) return json({ erro: "login necessário" }, 401);
+
+      if (req.method === "GET" && rota === "/eu") return json({ email: quem.email });
 
       if (req.method === "GET" && rota === "/dados") {
         const saida = await lerTudo(env);
