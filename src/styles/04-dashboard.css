@@ -1,0 +1,217 @@
+/* ═══ herói: o KPI principal ═══ */
+.hero{position:relative;border:1px solid transparent;border-radius:var(--rt-radius-lg);
+  background:
+    var(--rt-grad-surface) padding-box,
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--rt-pink) 85%, transparent),
+      color-mix(in srgb, var(--rt-purple) 55%, transparent) 45%,
+      color-mix(in srgb, var(--rt-purple) 12%, transparent) 100%) border-box;
+  box-shadow:0 0 34px -8px color-mix(in srgb, var(--rt-pink) 45%, transparent),
+             0 0 70px -18px color-mix(in srgb, var(--rt-purple) 45%, transparent);
+  padding:var(--sp-4);display:grid;gap:var(--sp-4);
+  grid-template-columns:minmax(300px,400px) 1fr;align-items:center;
+  animation:rt-acende .9s var(--ease) both}
+.hero-l{min-width:0;text-align:center;position:relative;padding:var(--sp-3) 0}
+/* marca d'água: RITMO na fonte do menu, esticado até as bordas do
+   texto do herói (em cima, embaixo e dos lados). O viewBox é a caixa
+   de tinta das letras em Bebas Neue, e preserveAspectRatio="none"
+   estica essa caixa até ocupar o bloco inteiro. */
+.hero-l>.hero-marca{position:absolute;left:0;right:0;top:var(--sp-3);bottom:var(--sp-3);
+  width:100%;height:calc(100% - 2 * var(--sp-3));pointer-events:none;overflow:visible;opacity:.13}
+.hero-marca text{font-family:var(--disp);font-weight:400;fill:url(#rt-marca-g)}
+.hero-l>*:not(.hero-marca){position:relative}
+.hero-label{display:flex;align-items:baseline;gap:var(--sp-2);margin-bottom:var(--sp-2);flex-wrap:wrap;
+  justify-content:center}
+.hero-label #m-titulo{color:var(--rt-text-secondary)}
+.hero-label i{font-style:normal;color:var(--rt-blue)}
+.total{font-family:var(--disp);font-weight:400;font-size:clamp(56px,6.4vw,84px);
+  line-height:.9;letter-spacing:.02em;font-variant-numeric:tabular-nums;color:#FFFFFF;
+  text-shadow:0 0 18px color-mix(in srgb, var(--rt-pink) 60%, transparent),
+              0 0 44px color-mix(in srgb, var(--rt-purple) 40%, transparent)}
+.total .cents{font-size:.5em;letter-spacing:.03em;color:var(--rt-text-secondary);text-shadow:none}
+.split{margin-top:var(--sp-2);font-size:13px;color:var(--rt-text-secondary)}
+.split b{font-weight:500;color:var(--rt-text);font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.hero-r{min-width:0;padding-left:var(--sp-4);border-left:1px solid color-mix(in srgb, var(--rt-border) 80%, transparent)}
+
+/* ═══ KPIs ═══ */
+.kpis{display:grid;gap:var(--sp-3);grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.kpi{background:var(--rt-surface);border:1px solid var(--rt-border);border-radius:var(--rt-radius-md);
+  padding:var(--sp-3);text-align:left;width:100%;min-width:0;
+  display:flex;flex-direction:column;container-type:inline-size;
+  transition:border-color .15s var(--ease),box-shadow .2s var(--ease),transform .2s var(--ease),background-color .15s}
+.kpi.clicavel{cursor:pointer}
+.kpi.clicavel:hover{background:color-mix(in srgb, var(--rt-surface-2) 60%, var(--rt-surface));
+  border-color:color-mix(in srgb, var(--rt-purple) 70%, var(--rt-border));
+  box-shadow:var(--glow-purple-sm);transform:translateY(-1px)}
+.kpi.clicavel:active{transform:none}
+/* sem overflow:hidden — ele recortava o balão do selo de ajuda */
+.kpi .nm{font-family:var(--body);font-size:10.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--rt-text-secondary);display:flex;align-items:center;gap:6px;margin-bottom:var(--sp-2);
+  min-height:20px;white-space:nowrap;overflow:visible}
+.kpi .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;
+  box-shadow:0 0 0 2px color-mix(in srgb, var(--rt-surface) 60%, transparent)}
+.kpi .vl{font-family:var(--disp);font-weight:400;letter-spacing:.03em;white-space:nowrap;
+  /* acompanha a largura do card: com seis cards lado a lado o valor
+     não cabia em 30px entre 1100 e 1300px de tela */
+  font-size:26px;font-size:min(30px,22cqi);
+  font-variant-numeric:tabular-nums;line-height:1;color:var(--rt-text)}
+.kpi .vl.neg{color:var(--rt-error)}
+.kpi .vl.pos{color:var(--rt-success)}
+.kpi .sb{font-size:11.5px;color:var(--rt-text-muted);margin-top:auto;padding-top:var(--sp-2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .plus{font-family:var(--mono);font-size:10.5px;color:var(--rt-text-muted);margin-top:var(--sp-1)}
+.kpi .edit{font-family:var(--body);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--rt-pink);margin-top:6px}
+.kpi.zero .vl{color:var(--rt-text-muted)}
+/* KPI em destaque da página: card elevado (neon) do DS */
+/* cards com tom: a cor do ícone acende no canto de cima e some até o meio */
+.kpi.tom{border-color:color-mix(in srgb, var(--k) 32%, var(--rt-border));
+  background:radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--k) 26%, var(--rt-surface)) 0%, var(--rt-surface) 70%)}
+.kpi.tom.clicavel:hover{background:radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--k) 34%, var(--rt-surface)) 0%, var(--rt-surface) 75%);
+  border-color:color-mix(in srgb, var(--k) 55%, var(--rt-border))}
+/* Itaú e PicPay: abrem no próprio card */
+.kpi .kx-seta{width:14px;height:14px;margin-left:auto;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2;
+  color:var(--rt-text-muted);transition:transform .25s var(--ease)}
+.kpi.aberto .kx-seta{transform:rotate(180deg)}
+.kpi .kx-card{width:13px;height:13px;margin-left:auto;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;color:var(--rt-text-muted);opacity:.8;transition:opacity .15s,color .15s}
+.kpi.clicavel:hover .kx-card{opacity:1;color:var(--rt-text)}
+.kpi.destaque .kx-card{color:#FFFFFFB3}
+.kpis:has(.kpi.aberto){align-items:start}
+.kpi .kx{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s var(--ease)}
+.kpi.aberto .kx{grid-template-rows:1fr}
+.kpi .kx-in{overflow:hidden;min-height:0}
+.kpi .kx-in > :first-child{margin-top:10px;padding-top:8px;border-top:1px solid color-mix(in srgb, var(--k, var(--rt-purple)) 35%, var(--rt-border))}
+.kpi .kx-l{display:flex;align-items:baseline;gap:6px;padding:2px 0;font-size:clamp(10px, 8cqi, 11.5px);color:var(--rt-text-secondary);white-space:nowrap}
+.kpi .kx-l::after{content:"";order:1;flex:1;min-width:8px;border-bottom:1px dotted var(--rt-border);transform:translateY(-3px)}
+.kpi .kx-l b{order:2;font-family:var(--mono);font-weight:500;font-size:clamp(10px, 8cqi, 11.5px);color:var(--rt-text)}
+.kpi .kx-l.zero b{color:var(--rt-text-muted);font-weight:400}
+.kpi.destaque{border:1px solid transparent;
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--rt-pink) 24%, var(--rt-surface)),
+      color-mix(in srgb, var(--rt-purple) 30%, var(--rt-surface))) padding-box,
+    var(--rt-grad) border-box;
+  box-shadow:0 0 22px -4px color-mix(in srgb, var(--rt-pink) 55%, transparent)}
+.kpi.destaque .nm,.kpi.destaque .sb{color:#FFFFFFC7}
+.kpi.destaque .vl{color:#FFFFFF;text-shadow:0 0 14px color-mix(in srgb, var(--rt-pink) 70%, transparent)}
+.kpi.destaque .vl.neg{color:#FFB8C8}
+
+/* ═══ gráficos ═══ */
+.chart{position:relative;width:100%}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.gline{fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round;filter:url(#rt-neon)}
+.garea{stroke:none;opacity:.34;mask:url(#rt-fade)}
+.ggrid{stroke:var(--rt-border);stroke-width:1;stroke-dasharray:2 5;opacity:.75}
+.gaxis{font-family:var(--mono);font-size:9.5px;fill:var(--rt-text-muted)}
+.gnow{stroke:var(--rt-pink);stroke-width:1.2;stroke-dasharray:3 3;opacity:.75}
+.gsep{stroke:var(--rt-border);stroke-width:1;opacity:.6}
+.gfaixa{font-family:var(--mono);font-size:8px;letter-spacing:.06em;fill:var(--rt-text-muted);opacity:.9}
+.gdot{stroke:var(--rt-surface);stroke-width:2}
+.ghit{fill:transparent;cursor:crosshair}
+.ghit:hover ~ .gcursor,.ghit.on{opacity:1}
+.chart-tip{position:absolute;pointer-events:none;opacity:0;transform:translate(-50%,-100%);
+  background:var(--rt-surface-2);color:var(--rt-text);
+  border:1px solid color-mix(in srgb, var(--rt-purple) 45%, var(--rt-border));
+  box-shadow:var(--glow-purple-sm),0 8px 24px #0000004D;
+  border-radius:var(--rt-radius-sm);padding:6px 12px;
+  font-size:12px;line-height:1.45;white-space:nowrap;z-index:5;transition:opacity .1s}
+.chart-tip b{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:500;color:#FFFFFF}
+.chart-tip .k{display:flex;align-items:center;gap:6px}
+.chart-tip i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.chart-tip .k.sub{opacity:.85;font-size:11px;margin-top:1px}
+.chart-tip .k.sub b{font-weight:400}
+.gbar{opacity:.9;mask:url(#rt-fade-bar);transition:opacity .15s}
+.gbar.agora{opacity:1;stroke:#FFFFFF;stroke-width:1;filter:url(#rt-neon)}
+.chart svg:hover .gbar{opacity:.55}
+.chart svg .gbar:hover{opacity:1}
+.legend{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin-top:var(--sp-3)}
+.legend span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--rt-text-secondary)}
+.legend i{width:12px;height:3px;border-radius:2px}
+
+/* ═══ listas ═══ */
+.busca{width:100%;padding:10px 16px 10px 38px;font-size:13.5px;margin-bottom:var(--sp-3);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237C7BB5' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3Cpath d='m20 20-4.2-4.2'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:13px 50%;background-size:16px 16px}
+/* Em tela larga a linha esticava até a borda e o valor ficava a meio
+   metro do nome. A lista ganha uma largura de leitura e se centraliza;
+   a coluna de valores continua alinhada, só que ao alcance do olho. */
+.scroller{max-height:440px;overflow-y:auto;margin:0 -4px;padding:0 12px 0 4px;scrollbar-gutter:stable}
+.scroller .tx,.scroller .daymark{max-width:none}
+.scroller .daymark{width:100%}
+
+.daymark{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--rt-text-secondary);padding:var(--sp-3) var(--sp-2) 6px;position:sticky;top:0;
+  background:var(--rt-surface);z-index:1}
+.daymark .dsem{color:var(--rt-text-muted)}
+.tx{display:flex;align-items:center;gap:12px;padding:10px var(--sp-2);
+  border-top:1px solid color-mix(in srgb, var(--rt-border) 75%, transparent);
+  transition:background-color .12s}
+.tx:hover{background:var(--rt-hover)}
+.tx-main{flex:1;min-width:0}
+.tx-topo{display:flex;align-items:baseline;gap:var(--sp-2)}
+.tx-desc{font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;flex:0 1 auto;min-width:0}
+/* guia pontilhada entre o nome e o valor */
+.tx-guia{flex:1 1 auto;min-width:12px;align-self:center;height:1px;
+  border-bottom:1px dotted var(--rt-border-strong);opacity:.6}
+.tx-val{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;
+  font-weight:500;flex:0 0 auto;white-space:nowrap;color:var(--rt-text)}
+.tx-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:3px;
+  font-family:var(--mono);font-size:10px;color:var(--rt-text-muted)}
+.tx.futura{opacity:.6}
+.pill{display:inline-flex;align-items:center;padding:1px 8px;border-radius:var(--rt-radius-pill);
+  font-family:var(--body);font-size:10px;font-weight:500;line-height:1.6;white-space:nowrap;
+  background:color-mix(in srgb, var(--rt-blue) 14%, transparent);color:var(--rt-blue)}
+.pill.parc{background:color-mix(in srgb, var(--rt-warning) 15%, transparent);color:var(--rt-warning)}
+.tx.role .tx-desc::after{content:"";display:inline-block;width:6px;height:6px;
+  border-radius:50%;background:var(--rt-pink);margin-left:var(--sp-2);vertical-align:middle;
+  box-shadow:var(--glow-pink-sm)}
+.tx .chk-role{width:16px;height:16px;margin:2px 0 0;cursor:pointer;flex:0 0 auto}
+.tx .chk-role:disabled{cursor:default;opacity:.45}
+
+.lrow{display:flex;align-items:flex-start;gap:12px;padding:10px 0;
+  border-top:1px solid color-mix(in srgb, var(--rt-border) 75%, transparent)}
+.lrow:first-child{border-top:none}
+.lrow .nm{flex:1;min-width:0;font-size:13.5px;font-weight:500}
+.lrow .sub{font-family:var(--mono);font-size:10px;color:var(--rt-text-muted);margin-top:3px;font-weight:400}
+.lrow .vl{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;text-align:right}
+.lrow .dif{font-size:10px;color:var(--rt-text-muted)}
+/* status depois do valor, todos da mesma largura: valor e selo ficam em coluna */
+.lrow .vl{min-width:92px}
+.lrow>.badge{flex:0 0 84px;justify-content:center;padding-left:6px;padding-right:6px;margin-top:-1px}
+.lrow.quitada .nm,.lrow.quitada .vl{color:var(--rt-text-secondary)}
+.lrow>.marca{margin-top:1px}
+.lrow .chk-pago{width:16px;height:16px;margin:2px 0 0;cursor:pointer;flex:0 0 auto}
+/* "pago" é estado de sucesso: verde neon em vez do gradiente */
+.lrow .chk-pago:checked{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.4 6.6 11.3 12.5 4.9' fill='none' stroke='%23060620' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat,var(--rt-success);
+  box-shadow:0 0 8px color-mix(in srgb, var(--rt-success) 40%, transparent)}
+.lrow.de-outro{opacity:.7}
+.lrow .tag,.tab-fat .tag{font-family:var(--body);font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--rt-text-secondary);border:1px solid var(--rt-border-strong);border-radius:var(--rt-radius-sm);padding:0 5px;margin-left:6px}
+.lrow .acao{color:var(--rt-text-muted);padding:3px;border-radius:6px;display:flex;transition:color .15s,background-color .15s}
+.lrow .acao.excluir{font-size:17px;line-height:1;width:26px;height:26px;
+  align-items:center;justify-content:center;flex:0 0 auto;margin-top:-2px}
+.lrow .acao.excluir:hover{color:var(--rt-error);background:color-mix(in srgb, var(--rt-error) 10%, transparent)}
+.lrow .acao:hover{color:var(--rt-pink);background:var(--rt-hover)}
+.ltotal{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  padding:12px 0 0;margin-top:var(--sp-2);
+  border-top:1px solid color-mix(in srgb, var(--rt-purple) 55%, var(--rt-border))}
+.ltotal .nm{font-family:var(--body);font-size:10.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--rt-text-secondary)}
+.ltotal .vl{font-family:var(--disp);font-weight:400;font-size:24px;letter-spacing:.03em;line-height:1;font-variant-numeric:tabular-nums}
+.ltotal.sub2{border-top:1px dashed var(--rt-border);margin-top:2px;padding-top:var(--sp-2)}
+.ltotal.sub2 .vl{font-size:13px;font-weight:500;font-family:var(--mono);letter-spacing:0}
+
+.subhead{font-family:var(--body);font-size:10.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--rt-text-muted);margin:var(--sp-3) 0 var(--sp-1);display:flex;justify-content:space-between;align-items:baseline}
+.subhead:first-child{margin-top:0}
+
+/* categorias */
+.cat{display:grid;grid-template-columns:1fr auto;gap:var(--sp-1) 10px;padding:10px 0;
+  border-top:1px solid color-mix(in srgb, var(--rt-border) 75%, transparent)}
+.cat:first-child{border-top:none}
+.cat-name{font-size:13px;font-weight:500}
+.cat-val{font-family:var(--mono);font-size:11.5px;color:var(--rt-text-secondary);text-align:right;font-variant-numeric:tabular-nums}
+.cat-track{grid-column:1/-1;height:4px;border-radius:2px;background:var(--rt-surface-2);overflow:hidden}
+.cat-fill{display:block;height:100%;border-radius:2px}
+

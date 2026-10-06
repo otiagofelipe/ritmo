@@ -1,0 +1,30 @@
+{
+  // Mesmo nome do Worker que já existe: o deploy atualiza ele, e os
+  // secrets DBX_HOST, DBX_TOKEN e WAREHOUSE_ID continuam onde estão.
+  "name": "ritmo-caju",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-01",
+
+  // A página: o que o `vite build` gera em dist/. Arquivo que existe
+  // é servido direto; o resto (as rotas /api/...) cai no Worker.
+  "assets": {
+    "directory": "./dist"
+  },
+
+  // Onde fica a foto. O id está no painel, em Storage & Databases → KV,
+  // ou no terminal com: npx wrangler kv namespace list
+  "kv_namespaces": [
+    { "binding": "RITMO_CACHE", "id": "COLE_AQUI_O_ID_DO_KV" }
+  ],
+
+  // O mesmo agendamento que está hoje no painel, em Settings → Triggers.
+  // O deploy substitui o que estiver lá pelo que estiver aqui.
+  "triggers": {
+    "crons": ["COLE_AQUI_O_CRON"]
+  },
+
+  // Variáveis de texto criadas no painel não são apagadas pelo deploy.
+  "keep_vars": true,
+
+  "observability": { "enabled": true }
+}

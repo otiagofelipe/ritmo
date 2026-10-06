@@ -1,0 +1,153 @@
+/* ══════════════════════════════════════════════════════════════
+   RITMO · RetroWave
+   Design system: retrowave-DESIGN.md.
+
+   Três camadas:
+   1. Paletas cruas (uma por tema). O JS lê algumas dessas variáveis
+      para pintar os gráficos em hex literal — por isso elas ficam em
+      hex puro, sem var() nem color-mix().
+   2. Tokens RetroWave (--rt-*): superfícies, neon, glow, raio,
+      espaço, tipografia. Tudo o que vem depois usa só eles.
+   3. Componentes.
+
+   RetroWave é o tema padrão. Yellow e Blue são variações do mesmo
+   sistema: cada uma traz os seus três neons (--neon-1/2/3), e o resto
+   da folha se adapta sozinho.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── 1. paletas ─────────────────────────────────────────────── */
+:root,
+:root[data-tema="retrowave"]{
+  --bg-primary:#050514; --bg-secondary:#030310; --bg-card:#070217 ; --bg-raise:#151538;
+  --bg-sunken:#02020B;
+  --border:#1C1C46;
+  --text-primary:#F4F2FF; --text-secondary:#B4B3E0; --text-faint:#7C7BB5;
+  --neon-1:#FF006E; --neon-2:#8338EC; --neon-3:#3A86FF;
+  --purple-primary:#FF006E; --purple-secondary:#8338EC;
+  --blue-primary:#3A86FF; --blue-light:#3A86FF; --highlight:#F4F2FF;
+  --success:#8338EC; --warning:#ed85dc; --danger:#FF3366;  /*mudar sucess e warning*/
+  --c-itau:#3A86FF; --c-picpay:#A66BFF; --c-caju:#FF8E3C;
+  --c-devem:#00F5A0; --c-devo:#FF3366; --c-fixos:#B4B3E0;
+  --c-serie-1:#3A86FF;
+  --c-serie-2:#00F5A0;
+  --c-serie-3:#FF8E3C;
+  --c-serie-4:#A66BFF;
+  --c-serie-5:#FF006E;
+  --c-serie-6:#00D1FF;
+  --c-serie-7:#FFD700;
+  --c-serie-8:#B4B3E0;
+}
+:root[data-tema="yellow"]{
+  /* RetroWave Yellow: igual ao RetroWave, neons amarelo → azul */
+  --bg-primary:#050514; --bg-secondary:#030310; --bg-card:#070217 ; --bg-raise:#151538;
+  --bg-sunken:#02020B;
+  --border:#1C1C46;
+  --text-primary:#F4F2FF; --text-secondary:#B4B3E0; --text-faint:#7C7BB5;
+  --neon-1:#FFD700; --neon-2:#8338EC; --neon-3:#3A86FF;
+  --purple-primary:#FFD700; --purple-secondary:#8338EC;
+  --blue-primary:#3A86FF; --blue-light:#3A86FF; --highlight:#F4F2FF;
+  --success:#8338EC; --warning:#fcefa7; --danger:#FF3366;  /*mudar sucess e warning*/
+  --c-itau:#3A86FF; --c-picpay:#A66BFF; --c-caju:#FF8E3C;
+  --c-devem:#00F5A0; --c-devo:#FF3366; --c-fixos:#B4B3E0;
+  --c-serie-1:#3A86FF;
+  --c-serie-2:#00F5A0;
+  --c-serie-3:#FF8E3C;
+  --c-serie-4:#A66BFF;
+  --c-serie-5:#FF006E;
+  --c-serie-6:#00D1FF;
+  --c-serie-7:#FFD700;
+  --c-serie-8:#B4B3E0;
+}
+:root[data-tema="blue"]{
+  /* RetroWave Blue: igual ao RetroWave, neons ciano → azul */
+  --bg-primary:#050514; --bg-secondary:#030310; --bg-card:#070217 ; --bg-raise:#151538;
+  --bg-sunken:#02020B;
+  --border:#1C1C46;
+  --text-primary:#F4F2FF; --text-secondary:#B4B3E0; --text-faint:#7C7BB5;
+  --neon-1:#03F8FC; --neon-2:#8338EC; --neon-3:#3A86FF;
+  --purple-primary:#03F8FC; --purple-secondary:#8338EC;
+  --blue-primary:#3A86FF; --blue-light:#3A86FF; --highlight:#F4F2FF;
+  --success:#8338EC; --warning:#94f6f7; --danger:#FF3366;  /*mudar sucess e warning*/
+  --c-itau:#3A86FF; --c-picpay:#A66BFF; --c-caju:#FF8E3C;
+  --c-devem:#00F5A0; --c-devo:#FF3366; --c-fixos:#B4B3E0;
+  --c-serie-1:#3A86FF;
+  --c-serie-2:#00F5A0;
+  --c-serie-3:#FF8E3C;
+  --c-serie-4:#A66BFF;
+  --c-serie-5:#FF006E;
+  --c-serie-6:#00D1FF;
+  --c-serie-7:#FFD700;
+  --c-serie-8:#B4B3E0;
+}
+
+/* ── 2. tokens RetroWave ────────────────────────────────────── */
+:root{
+  color-scheme:dark;
+
+  /* superfícies */
+  --rt-bg:var(--bg-primary);
+  --rt-rail:var(--bg-secondary);
+  --rt-surface:var(--bg-card);
+  --rt-surface-2:var(--bg-raise);
+  --rt-sunken:var(--bg-sunken);
+  --rt-inset:color-mix(in srgb, var(--bg-primary) 55%, var(--bg-card));
+  --rt-grad-surface:linear-gradient(135deg, var(--bg-primary), var(--bg-raise));
+
+  /* neon */
+  --rt-pink:var(--neon-1);
+  --rt-purple:var(--neon-2);
+  --rt-blue:var(--neon-3);
+  --rt-grad:linear-gradient(135deg, var(--rt-pink), var(--rt-purple));
+
+  /* estados */
+  --rt-success:var(--success);
+  --rt-warning:var(--warning);
+  --rt-error:var(--danger);
+  --rt-info:var(--rt-blue);
+
+  /* texto */
+  --rt-text:var(--text-primary);
+  --rt-text-secondary:var(--text-secondary);
+  --rt-text-muted:var(--text-faint);
+
+  /* linhas */
+  --rt-border:var(--border);
+  --rt-border-strong:color-mix(in srgb, var(--border) 55%, var(--text-faint));
+  --rt-border-neon:color-mix(in srgb, var(--rt-pink) 55%, var(--border));
+  --rt-hover:color-mix(in srgb, var(--rt-pink) 6%, transparent);
+  --rt-active:color-mix(in srgb, var(--rt-pink) 12%, transparent);
+
+  /* glow */
+  --glow-pink-sm:0 0 8px color-mix(in srgb, var(--rt-pink) 40%, transparent);
+  --glow-pink-md:0 0 20px color-mix(in srgb, var(--rt-pink) 50%, transparent);
+  --glow-pink-lg:0 0 40px color-mix(in srgb, var(--rt-pink) 60%, transparent);
+  --glow-purple-sm:0 0 8px color-mix(in srgb, var(--rt-purple) 40%, transparent);
+  --glow-purple-md:0 0 20px color-mix(in srgb, var(--rt-purple) 50%, transparent);
+  --glow-blue-sm:0 0 8px color-mix(in srgb, var(--rt-blue) 40%, transparent);
+  --glow-blue-md:0 0 20px color-mix(in srgb, var(--rt-blue) 50%, transparent);
+  --glow-combo:0 0 20px color-mix(in srgb, var(--rt-pink) 30%, transparent),
+               0 0 40px color-mix(in srgb, var(--rt-purple) 20%, transparent);
+
+  /* raio */
+  --rt-radius-sm:4px; --rt-radius-md:8px; --rt-radius-lg:12px; --rt-radius-pill:9999px;
+
+  /* espaço (base 8) */
+  --sp-1:4px; --sp-2:8px; --sp-3:16px; --sp-4:24px; --sp-5:32px; --sp-6:48px; --sp-7:64px; --sp-8:96px;
+
+  /* tipografia */
+  --disp:'Bebas Neue',Impact,'Arial Narrow',sans-serif;
+  --body:'Poppins',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  /* nomes antigos — o JS ainda escreve alguns em style="" */
+  --paper:var(--rt-bg); --card:var(--rt-surface); --rail:var(--rt-rail);
+  --ink:var(--rt-text); --ink-soft:var(--rt-text-secondary); --ink-faint:var(--rt-text-muted);
+  --rule:var(--rt-border); --over:var(--rt-error); --under:var(--rt-success);
+  --indigo:var(--rt-pink);
+  --hover:var(--rt-hover); --hover-forte:var(--rt-active);
+
+  /* layout */
+  --r:var(--rt-radius-lg); --gap:var(--sp-3); --rail-w:240px; --rail-min:68px;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+

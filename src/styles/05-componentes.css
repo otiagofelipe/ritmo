@@ -1,0 +1,285 @@
+/* ═══ editor ═══ */
+.editor{border:1px solid color-mix(in srgb, var(--rt-purple) 40%, var(--rt-border));border-radius:var(--rt-radius-lg);
+  background:var(--rt-inset);padding:var(--sp-4);margin-top:var(--sp-3);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--rt-purple) 25%, transparent)}
+.editor h3{display:flex;align-items:baseline;gap:var(--sp-2);margin-bottom:var(--sp-3)}
+.editor h3 .mes{font-family:var(--body);font-size:10.5px;font-weight:500;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--rt-text-muted)}
+.ecab{font-family:var(--body);font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--rt-text-muted);margin-bottom:var(--sp-2)}
+.erow{display:flex;gap:var(--sp-2);align-items:center;margin-bottom:var(--sp-2)}
+.erow.duplo{flex-direction:column;align-items:stretch;gap:6px;
+  padding-bottom:10px;border-bottom:1px solid var(--rt-border)}
+.erow .l2{display:flex;gap:var(--sp-2);align-items:flex-end;flex-wrap:wrap}
+.erow input[type=text],.erow input:not([type]),.erow input[type=url]{flex:1;min-width:0}
+.erow input{padding:8px 10px;font-size:13.5px;min-width:0}
+.erow input.num{flex:0 0 104px;text-align:right;font-family:var(--mono);font-size:13px}
+.erow input.num.neg{color:var(--rt-error)}
+.erow input.dt{flex:0 0 auto;width:118px;font-family:var(--mono);font-size:12px;padding:8px}
+.erow input.dia{flex:0 0 auto;width:58px;text-align:center}
+.erow select.cob{padding:10px 26px 10px 12px;font-size:13px;
+  background-position:calc(100% - 14px) 52%,calc(100% - 9px) 52%}
+.erow select.parc{flex:0 0 auto;width:126px;padding:8px 26px 8px 10px;font-size:12.5px;
+  font-family:var(--mono);background-position:calc(100% - 14px) 52%,calc(100% - 9px) 52%}
+.erow.continuacao input:not([type=checkbox]){opacity:.72}
+.erow.continuacao{border-top:1px dashed var(--rt-border);margin-top:-2px;padding-top:6px}
+.erow input[type=checkbox]{flex:0 0 auto;width:17px;height:17px;margin:0;padding:0;
+  background-color:transparent;border:2px solid var(--rt-border-strong);border-radius:var(--rt-radius-sm);cursor:pointer;box-shadow:none}
+.erow input[type=checkbox]:checked{border-color:transparent}
+.erow .setas{display:flex;gap:3px;flex:0 0 auto}
+.erow .setas button{width:26px;height:30px;border:1px solid var(--rt-border);border-radius:var(--rt-radius-md);
+  background:var(--rt-surface);font-size:12px;color:var(--rt-text-secondary);display:flex;align-items:center;justify-content:center;
+  transition:color .15s,border-color .15s,box-shadow .15s}
+.erow .setas button:hover{color:var(--rt-pink);border-color:var(--rt-pink);box-shadow:var(--glow-pink-sm)}
+.erow .rm{flex:0 0 auto;width:28px;height:30px;border-radius:var(--rt-radius-md);color:var(--rt-text-muted);font-size:17px;line-height:1;
+  transition:color .15s,background-color .15s}
+.erow .rm:hover{background:color-mix(in srgb, var(--rt-error) 12%, transparent);color:var(--rt-error)}
+.erow.quitada input:not([type=checkbox]){opacity:.62}
+.erow.de-outro{opacity:.72}
+/* Campo com etiqueta em cima. O invólucro é quem carrega a largura:
+   dentro dele o eixo do flex é vertical, então um flex-basis no
+   próprio input viraria altura — era isso que inflava a caixa. */
+.efield{display:flex;flex-direction:column;gap:var(--sp-1);min-width:0;flex:0 0 auto}
+.efield>.tagx{font-family:var(--body);font-size:9.5px;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--rt-text-muted);white-space:nowrap}
+.erow .efield>input,.erow .efield>select{flex:none;width:100%;min-width:0}
+.efield.f-num{width:120px}
+.efield.f-dt{width:158px}
+.efield.f-parc{width:140px}
+.efield.f-dia{width:68px}
+.efield.f-cob{width:118px}
+.efield.f-txt{flex:1 1 150px;min-width:120px}
+.efield.f-chk{width:auto;align-items:flex-start}
+.efield.f-chk>input{width:17px}
+.esoma{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  padding-top:12px;margin-top:var(--sp-1);border-top:1px solid color-mix(in srgb, var(--rt-purple) 55%, var(--rt-border));
+  font-family:var(--body);font-size:10.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--rt-text-secondary)}
+.esoma .v,.esoma .p,.esoma .a{font-family:var(--disp);font-weight:400;font-size:24px;line-height:1;
+  letter-spacing:.03em;text-transform:none;color:var(--rt-text);font-variant-numeric:tabular-nums}
+.esoma.sub{border-top:1px dashed var(--rt-border);margin-top:0;padding-top:6px}
+.esoma.sub .p,.esoma.sub .a{font-size:12.5px;font-family:var(--mono);font-weight:500;letter-spacing:0}
+.eacoes{display:flex;gap:var(--sp-2);margin-top:var(--sp-3);flex-wrap:wrap}
+
+/* ═══ botões ═══ */
+/* primário: gradiente pink → purple */
+.btn{background:var(--rt-grad);color:#FFFFFF;border-radius:var(--rt-radius-md);padding:10px 22px;
+  font-size:12.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;line-height:1.2;
+  transition:filter .15s var(--ease),box-shadow .2s var(--ease)}
+.btn:hover{filter:brightness(1.15);box-shadow:var(--glow-pink-md)}
+.btn:active{filter:brightness(.9);box-shadow:none}
+.btn:disabled{opacity:.35;cursor:default;filter:none;box-shadow:none}
+/* ghost: sem preenchimento, fica em segundo plano ao lado do primário */
+.btn.ghost{background:transparent;color:var(--rt-text-secondary);border:1px solid var(--rt-border-strong);box-shadow:none}
+.btn.ghost:hover{color:var(--rt-pink);border-color:color-mix(in srgb, var(--rt-pink) 55%, var(--rt-border));
+  background:var(--rt-hover);filter:none}
+.actions{display:flex;gap:var(--sp-2);margin-top:var(--sp-3)}
+
+/* ═══ banner / painel dados ═══ */
+.banner{border-radius:var(--rt-radius-md);padding:12px 16px;font-size:13px;margin-bottom:var(--sp-3);border:1px solid var(--rt-border)}
+.banner.err{background:color-mix(in srgb, var(--rt-error) 10%, var(--rt-surface));
+  border-color:color-mix(in srgb, var(--rt-error) 45%, transparent);color:#FFC2CE;
+  box-shadow:0 0 8px color-mix(in srgb, var(--rt-error) 25%, transparent)}
+.banner.load{background:var(--rt-surface);color:var(--rt-text-secondary);
+  border-color:color-mix(in srgb, var(--rt-blue) 35%, var(--rt-border))}
+.panel label{display:block;font-family:var(--body);font-size:11px;font-weight:500;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--rt-text-muted);margin:var(--sp-3) 0 6px}
+.panel input,.panel textarea{width:100%;padding:10px 16px;font-size:13px;font-family:var(--mono)}
+.panel textarea{min-height:110px;resize:vertical}
+.panel input[type=file]{padding:8px;cursor:pointer}
+.panel input[type=file]::file-selector-button{font:600 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--rt-blue);background:transparent;border:1px solid var(--rt-blue);border-radius:var(--rt-radius-md);
+  padding:8px 14px;margin-right:12px;cursor:pointer;transition:background-color .15s,box-shadow .15s}
+.panel input[type=file]::file-selector-button:hover{background:color-mix(in srgb, var(--rt-blue) 12%, transparent);box-shadow:var(--glow-blue-sm)}
+.panel .hint{font-size:12px;color:var(--rt-text-muted);margin-top:10px;line-height:1.6}
+.panel .hint b{color:var(--rt-text-secondary);font-weight:500}
+.panel code{font-family:var(--mono);font-size:11px;background:color-mix(in srgb, var(--rt-blue) 12%, transparent);
+  color:var(--rt-blue);padding:1px 5px;border-radius:var(--rt-radius-sm)}
+.tabs{display:flex;gap:var(--sp-2);margin-top:var(--sp-3)}
+.tab{padding:6px 16px;border-radius:var(--rt-radius-pill);border:1px solid var(--rt-border-strong);font-size:12.5px;
+  color:var(--rt-text-secondary);transition:color .15s,border-color .15s,box-shadow .2s}
+.tab:hover{color:var(--rt-text);border-color:color-mix(in srgb, var(--rt-pink) 55%, var(--rt-border))}
+.tab[aria-selected="true"]{background:var(--rt-grad);color:#FFFFFF;border-color:transparent;
+  box-shadow:0 0 14px -2px color-mix(in srgb, var(--rt-pink) 50%, transparent)}
+
+/* ═══ selo de ajuda (tooltip do DS) ═══ */
+.info{display:inline-flex;width:15px;height:15px;border-radius:50%;
+  border:1px solid var(--rt-border-strong);align-items:center;justify-content:center;
+  font-family:var(--body);font-size:9px;font-weight:700;line-height:1;
+  color:var(--rt-text-muted);cursor:help;position:relative;flex:0 0 auto;
+  vertical-align:1px;text-transform:none;letter-spacing:0;
+  transition:color .15s,border-color .15s,box-shadow .15s}
+.info:hover,.info:focus{color:var(--rt-text);border-color:var(--rt-pink);outline:none;box-shadow:var(--glow-pink-sm)}
+.info::after{content:attr(data-dica);position:absolute;bottom:calc(100% + 9px);left:50%;
+  transform:translateX(-50%);background:var(--rt-surface-2);color:var(--rt-text);
+  border:1px solid var(--rt-border);border-radius:var(--rt-radius-sm);padding:6px 12px;
+  box-shadow:var(--glow-purple-sm),0 8px 24px #00000059;
+  font-family:var(--body);font-size:12px;font-weight:400;line-height:1.5;
+  width:max-content;max-width:240px;text-align:left;white-space:normal;
+  display:none;pointer-events:none;z-index:60}
+/* setinha do balão */
+.info::before{content:"";position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-bottom:0;border-top-color:var(--rt-surface-2);
+  display:none;pointer-events:none;z-index:61}
+/* fechado, o balão sai do layout: invisível mas presente, ele alargava
+   a página no celular quando o selo ficava perto da borda */
+.info:hover::after,.info:focus::after,.info:hover::before,.info:focus::before{display:block;animation:rt-tip .14s var(--ease)}
+@keyframes rt-tip{from{opacity:0}to{opacity:1}}
+/* no último card da fileira o balão abre para a esquerda, senão sai da tela */
+.kpis .kpi:last-child .info::after{left:auto;right:-10px;transform:none}
+.kpi.destaque .info{border-color:#FFFFFF66;color:#FFFFFFCC}
+.kpi.destaque .info:hover,.kpi.destaque .info:focus{color:#FFF;border-color:#FFF}
+
+/* ═══ marca das contas ═══ */
+.marca{width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;
+  justify-content:center;font-family:var(--body);font-weight:700;font-size:10px;
+  letter-spacing:0;font-style:normal;flex:0 0 auto;line-height:1}
+.marca.sm{width:15px;height:15px;font-size:8.5px;border-radius:4px}
+/* Com logotipo, a própria imagem é o selo: fundo transparente e
+   cantos arredondados. A letra fica por baixo e reaparece se a
+   imagem não carregar — o onerror devolve a classe do selo simples. */
+.marca.img{position:relative;background:none !important;color:transparent;overflow:hidden}
+.marca.img img{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;display:block;border-radius:inherit}
+.tab-fat th .marca{vertical-align:-3px;margin-right:2px}
+
+/* ═══ badges de status ═══ */
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:var(--rt-radius-pill);
+  font-family:var(--body);font-size:10.5px;font-weight:500;letter-spacing:.02em;line-height:1.4;
+  border:1px solid transparent;white-space:nowrap}
+.badge::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;
+  box-shadow:0 0 6px currentColor}
+.badge.pago{color:var(--rt-success);background:color-mix(in srgb, var(--rt-success) 15%, transparent)}
+.badge.pendente{color:var(--rt-warning);background:color-mix(in srgb, var(--rt-warning) 15%, transparent)}
+.badge.vencido{color:var(--rt-error);background:color-mix(in srgb, var(--rt-error) 15%, transparent)}
+.badge.neutro{color:var(--rt-text-secondary);background:color-mix(in srgb, var(--rt-text-muted) 14%, transparent)}
+.badge.neutro::before{box-shadow:none}
+
+/* ═══ filtros da lista ═══ */
+.lista-filtros{display:flex;gap:var(--sp-2) 12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:var(--sp-3)}
+.ff{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ff>.tagx{font-family:var(--body);font-size:9.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--rt-text-muted)}
+.ff select{padding:8px 30px 8px 12px;font-size:13px;
+  background-position:calc(100% - 15px) 52%,calc(100% - 10px) 52%}
+.ff.faixa{flex:1;min-width:210px}
+.slider{position:relative;height:30px;display:flex;align-items:center}
+.slider .trilho{position:absolute;left:0;right:0;height:4px;border-radius:2px;background:var(--rt-surface-2)}
+.slider .ativo{position:absolute;height:4px;border-radius:2px;background:var(--rt-grad);
+  box-shadow:0 0 8px color-mix(in srgb, var(--rt-pink) 50%, transparent)}
+.slider input[type=range]{position:absolute;left:0;width:100%;margin:0;background:none;
+  pointer-events:none;appearance:none;-webkit-appearance:none;height:30px}
+.slider input[type=range]:focus{outline:none}
+.slider input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;pointer-events:auto;
+  width:16px;height:16px;border-radius:50%;background:#FFFFFF;
+  border:2px solid var(--rt-pink);cursor:grab;box-shadow:var(--glow-pink-sm);transition:box-shadow .15s}
+.slider input[type=range]::-moz-range-thumb{pointer-events:auto;width:14px;height:14px;
+  border-radius:50%;background:#FFFFFF;border:2px solid var(--rt-pink);cursor:grab;box-shadow:var(--glow-pink-sm)}
+.slider input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px color-mix(in srgb, var(--rt-pink) 35%, transparent),var(--glow-pink-md)}
+.slider input[type=range]:focus-visible::-moz-range-thumb{box-shadow:0 0 0 3px color-mix(in srgb, var(--rt-pink) 35%, transparent),var(--glow-pink-md)}
+.slider input[type=range]::-moz-range-track{background:none}
+.faixa-val{font-family:var(--mono);font-size:11px;color:var(--rt-text-secondary);font-variant-numeric:tabular-nums;
+  text-transform:none;letter-spacing:0;margin-left:4px}
+.btn-limpar{font-family:var(--body);font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--rt-text-secondary);border:1px solid var(--rt-border-strong);border-radius:var(--rt-radius-md);padding:9px 14px;
+  transition:color .15s,border-color .15s}
+.btn-limpar:hover{color:var(--rt-pink);border-color:color-mix(in srgb, var(--rt-pink) 55%, var(--rt-border))}
+
+/* ═══ rótulos nos pontos do gráfico ═══ */
+.glabel{font-family:var(--mono);font-size:9.5px;font-weight:500;fill:var(--rt-text);
+  paint-order:stroke;stroke:var(--rt-surface);stroke-width:3px;stroke-linejoin:round}
+.gpico{font-family:var(--mono);font-size:9.5px;font-weight:600;fill:var(--rt-warning);
+  paint-order:stroke;stroke:var(--rt-surface);stroke-width:3px;stroke-linejoin:round}
+.gref{stroke-width:1.4;stroke-dasharray:6 4;opacity:.85;fill:none}
+.gref-txt{font-family:var(--mono);font-size:9.5px;font-weight:500}
+.gref-txt.dentro{paint-order:stroke;stroke:var(--rt-surface);stroke-width:3px;stroke-linejoin:round}
+.gchecks{display:flex;gap:var(--sp-2) var(--sp-3);flex-wrap:wrap;align-items:center;margin-bottom:var(--sp-3)}
+.gchecks label{display:inline-flex;align-items:center;gap:var(--sp-2);font-size:13px;
+  color:var(--rt-text-secondary);cursor:pointer;user-select:none;transition:color .15s}
+.gchecks label:hover{color:var(--rt-text)}
+.gchecks input[type=checkbox]{width:16px;height:16px;margin:0;cursor:pointer}
+.gper{display:inline-flex;align-items:center;gap:var(--sp-2);margin-left:auto;flex-wrap:wrap}
+.gper label{font-family:var(--body);font-size:10.5px;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--rt-text-muted)}
+.gper input[type=month]{padding:7px 10px;font-family:var(--mono);font-size:12px;width:auto;min-width:0}
+.gper{flex-wrap:nowrap}
+.gper .sel-per{appearance:none;-webkit-appearance:none;cursor:pointer;
+  background-color:var(--rt-sunken);border:1px solid var(--rt-border-strong);border-radius:var(--rt-radius-md);
+  color:var(--rt-text);padding:7px 26px 7px 10px;font-family:var(--mono);font-size:12px;
+  background-image:linear-gradient(45deg,transparent 50%,var(--rt-text-secondary) 50%),
+                   linear-gradient(135deg,var(--rt-text-secondary) 50%,transparent 50%);
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat;
+  background-position:calc(100% - 14px) 52%,calc(100% - 9px) 52%;
+  transition:border-color .15s var(--ease),box-shadow .15s var(--ease)}
+.gper .sel-per:hover{border-color:color-mix(in srgb, var(--rt-border-strong) 50%, var(--rt-text-secondary))}
+.gper .sel-per:focus{outline:none;border-color:var(--rt-pink);box-shadow:var(--glow-pink-sm)}
+
+/* ═══ tabela fatura a fatura ═══ */
+.tab-fat{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.tab-fat th{font-family:var(--body);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--rt-text-muted);font-weight:600;text-align:center;padding:0 0 10px;white-space:nowrap}
+.tab-fat th:first-child{text-align:left}
+.tab-fat td{padding:10px 0;border-top:1px solid color-mix(in srgb, var(--rt-border) 75%, transparent);font-family:var(--mono);
+  font-size:12.5px;text-align:center;white-space:nowrap;transition:background-color .12s}
+.tab-fat td:first-child{text-align:left;font-family:var(--body);font-size:13.5px;font-weight:500}
+.tab-fat tr{cursor:pointer}
+.tab-fat tbody tr:hover td{background:var(--rt-hover)}
+.tab-fat tr[aria-current="true"] td{background:var(--rt-active)}
+.tab-fat tr[aria-current="true"] td:first-child{box-shadow:inset 2px 0 0 var(--rt-pink)}
+/* Largura pelo conteúdo: com centavos, coluna em porcentagem fixa
+   não cabe o valor e ele vaza por cima da vizinha. */
+.tab-fat.larga{table-layout:auto;min-width:1400px}
+.tab-fat.larga td,.tab-fat.larga th{padding-left:8px;padding-right:8px}
+.tab-fat.larga td:first-child,.tab-fat.larga th:first-child{padding-left:0}
+.tab-fat.larga .c-fat{min-width:190px}
+.tab-fat th .th-ic{display:inline-flex;align-items:center;gap:6px;vertical-align:bottom;text-indent:0}
+.tab-fat th:has(.th-ic){text-indent:0}
+.tab-fat th .th-ic>span:last-child{margin-right:-.12em}
+.tab-fat th .th-ic .marca{margin:0;vertical-align:0}
+/* o espaçamento entre letras deixa sobra à direita da última: compensa para centrar */
+.tab-fat th{text-indent:.12em}
+.tab-fat th:first-child{text-indent:0}
+/* com muitas colunas a tabela rola de lado: a fatura fica presa à
+   esquerda para a linha continuar identificável */
+.tab-fat.larga th:first-child,.tab-fat.larga td:first-child{position:sticky;left:0;z-index:2;
+  background:var(--rt-surface);padding-right:12px}
+/* sem respiro à esquerda: o que rola por baixo da coluna presa não aparece na fresta */
+#ev-meses.tab-wrap{margin-left:0;padding-left:0}
+.tab-fat.larga tbody tr:hover td:first-child{background:linear-gradient(var(--rt-hover),var(--rt-hover)),var(--rt-surface)}
+.tab-fat.larga tr[aria-current="true"] td:first-child{background:linear-gradient(var(--rt-active),var(--rt-active)),var(--rt-surface);
+  box-shadow:inset 2px 0 0 var(--rt-pink)}
+.tab-fat .grupo{border-left:1px solid var(--rt-border)}
+.tab-fat .soma{background:color-mix(in srgb, var(--rt-purple) 8%, transparent)}
+.tab-fat td.neg{color:var(--rt-error)}
+.tab-fat thead th{vertical-align:bottom}
+.tab-fat{table-layout:fixed}
+.tab-fat td,.tab-fat th{padding-left:10px}
+.tab-fat td:first-child,.tab-fat th:first-child{padding-left:0}
+.tab-fat .fat-nm{white-space:nowrap}
+.tab-fat td.c-fat{white-space:normal}
+.tab-fat td.c-fat .badge{margin-left:var(--sp-2);vertical-align:1px}
+.tab-fat .tot{font-family:var(--disp);font-weight:400;font-size:19px;letter-spacing:.04em;line-height:1;color:var(--rt-text)}
+.tab-fat .zero{color:var(--rt-text-muted)}
+.tab-fat .delta{font-size:10.5px;display:block;font-weight:400;margin-top:3px}
+.tab-fat .delta.up{color:var(--rt-error)}
+.tab-fat .delta.down{color:var(--rt-success)}
+/* respiro embaixo e à direita: a barra de rolagem (que no celular fica
+   por cima do conteúdo) cai no respiro, não sobre os valores */
+.tab-wrap{overflow-x:auto;margin:0 -4px;padding:0 4px 12px}
+.tab-wrap.alto{padding-right:12px;scrollbar-gutter:stable}
+.tab-wrap.alto{max-height:420px;overflow-y:auto}
+
+/* ═══ seletor de tema ═══ */
+.temas{display:flex;gap:6px;align-items:center;flex:0 0 auto;padding:4px;
+  border:1px solid var(--rt-border);border-radius:var(--rt-radius-pill);background:color-mix(in srgb, var(--rt-surface) 70%, transparent)}
+.temas button{width:22px;height:22px;border-radius:50%;border:1px solid #FFFFFF26;
+  padding:0;position:relative;overflow:hidden;transition:box-shadow .15s,border-color .15s}
+.temas button::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--t-bg) 0 50%,var(--t-ac) 50% 100%)}
+.temas button:hover{border-color:var(--rt-pink)}
+.temas button[aria-pressed="true"]{border-color:#FFFFFF;
+  box-shadow:0 0 0 2px var(--rt-bg),0 0 0 3px var(--rt-pink),var(--glow-pink-sm)}
+
+/* ═══ escada progressiva do herói ═══ */
+.escada{margin:0;padding:0}
+.escada .split{margin:0}
+.escada .nota{font-size:11px;color:var(--rt-text-muted);margin-top:var(--sp-2);line-height:1.45}
+

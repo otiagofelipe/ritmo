@@ -1,0 +1,288 @@
+/* ═══ responsivo ═══ */
+/* O herói empilha quando falta espaço para o gráfico ao lado do total.
+   Medido pela área de conteúdo (não pela janela): com o menu aberto,
+   uma janela de 1100px deixava o gráfico com menos de 300px. */
+@container conteudo (max-width: 900px){
+  .hero{grid-template-columns:1fr}
+  .hero-r{padding-left:0;border-left:none;padding-top:var(--sp-4);
+    border-top:1px solid color-mix(in srgb, var(--rt-border) 80%, transparent)}
+}
+@media(max-width:1080px){
+  .hero{grid-template-columns:1fr}
+  .hero-r{padding-left:0;border-left:none;padding-top:var(--sp-4);
+    border-top:1px solid color-mix(in srgb, var(--rt-border) 80%, transparent)}
+  .g3{grid-template-columns:1fr 1fr}
+}
+@media(max-width:860px){
+  .g2,.g3{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .burger{display:flex}
+
+  /* barra inferior no lugar do menu hambúrguer */
+  .burger{display:none}
+  .tabbar{display:flex;flex-direction:column;position:fixed;left:0;right:0;bottom:0;z-index:60;
+    padding:0 0 calc(6px + env(safe-area-inset-bottom,0px));
+    background:color-mix(in srgb, var(--rt-rail) 88%, transparent);
+    -webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);
+    border-top:1px solid var(--rt-border)}
+  .tabbar::before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;pointer-events:none;
+    background:linear-gradient(90deg, transparent, color-mix(in srgb, var(--rt-pink) 60%, transparent) 30%,
+      color-mix(in srgb, var(--rt-purple) 60%, transparent) 70%, transparent)}
+  .tb-botoes{display:flex;align-items:flex-end;padding:6px 2px 0}
+  .tabbar button{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;
+    padding:2px 1px;color:var(--rt-text-muted);-webkit-tap-highlight-color:transparent}
+  .tabbar .tb-ic{display:flex;align-items:center;justify-content:center;width:44px;height:28px;
+    border-radius:var(--rt-radius-pill);transition:background .2s var(--ease),box-shadow .2s var(--ease),color .2s}
+  .tabbar .tb-ic svg.ic{width:19px;height:19px}
+  .tabbar .tb-lbl{font-size:9px;font-weight:500;line-height:1.15;letter-spacing:-.01em;text-align:center;
+    max-width:100%;overflow-wrap:normal;word-break:keep-all}
+  .tabbar button[aria-current="true"]{color:#FFFFFF}
+  .tabbar button[aria-current="true"] .tb-ic{background:var(--rt-grad);
+    box-shadow:0 0 14px -2px color-mix(in srgb, var(--rt-pink) 60%, transparent)}
+  .tabbar button:focus-visible{outline:none}
+  .tabbar button:focus-visible .tb-ic{outline:2px solid var(--rt-pink);outline-offset:2px}
+  /* fim da página livre: a barra inteira mais o "+", que salta para fora dela */
+  .main{padding-bottom:calc(var(--tb-h, 128px) + 40px + var(--sp-4))}
+  /* faixa de resumo, em cima dos botões */
+  /* posso gastar à esquerda; semana e Caju empilhados à direita; o meio
+     fica livre porque o "+" sobe por cima da faixa */
+  .tb-resumo{display:grid;grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr);align-items:center;gap:0 var(--sp-2);
+    padding:8px 16px;border-bottom:1px solid var(--rt-border);
+    background:linear-gradient(90deg, color-mix(in srgb, var(--rt-purple) 14%, transparent), transparent 70%)}
+  .tb-resumo:empty{display:none}
+  .tb-resumo b{display:block;font-family:var(--body);font-size:8.5px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--rt-text-muted);white-space:nowrap}
+  .tb-resumo i{font-style:normal;font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--rt-text);
+    font-size:12px;white-space:nowrap}
+  .tb-resumo i.neg{color:var(--rt-error)}
+  .r-posso{grid-column:1;min-width:0}
+  .r-posso i{display:block;font-size:15px;font-weight:600;margin-top:2px}
+  .r-dir{grid-column:3;display:flex;flex-direction:column;gap:6px;min-width:0}
+  .r-linha{display:grid;grid-template-columns:auto 1fr;align-items:baseline;gap:2px 8px}
+  .r-linha i{text-align:right}
+  .r-trilho{grid-column:1/-1;display:block;height:4px;border-radius:9px;overflow:hidden;
+    background:color-mix(in srgb, var(--rt-purple) 22%, transparent)}
+  .r-trilho span{display:block;height:100%;border-radius:9px;background:var(--rt-grad);
+    box-shadow:0 0 8px color-mix(in srgb, var(--rt-pink) 60%, transparent)}
+  /* "+" no meio, saltado para fora da barra */
+  .tabbar .tb-fab{flex:0 0 64px;align-self:flex-start;margin-top:-26px}
+  .tabbar .tb-fab .tb-ic{width:56px;height:56px;border-radius:50%;color:#FFFFFF;background:var(--rt-grad);
+    box-shadow:0 0 0 5px var(--rt-rail),0 0 22px -2px color-mix(in srgb, var(--rt-pink) 75%, transparent)}
+  .tabbar .tb-fab .tb-ic svg.ic{width:26px;height:26px;stroke-width:2.2;transition:transform .45s var(--ease)}
+  .tabbar .tb-fab[aria-expanded="true"] .tb-ic svg.ic{transform:rotate(45deg)}
+  .tabbar .tb-ic{position:relative}
+  .tb-ponto{position:absolute;top:3px;right:11px;width:8px;height:8px;border-radius:50%;background:var(--rt-pink);
+    box-shadow:0 0 0 2px var(--rt-rail),0 0 8px var(--rt-pink)}
+  .tb-ponto[hidden]{display:none}
+  /* opções do "+": pílulas empilhadas acima do botão */
+  /* opções do "+" (a animação 5): sempre montadas, aparecem por transição;
+     ao abrir entram pelos lados, alternando, desfocadas até assentar — a
+     de baixo primeiro; ao fechar saem juntas pelo mesmo caminho */
+  .tb-lancar{position:fixed;left:50%;transform:translateX(-50%);bottom:var(--fab-topo, calc(var(--tb-h, 128px) + 18px));z-index:61;
+    display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+  .tb-lancar.aberto{pointer-events:auto}
+  .tb-lancar button{display:flex;align-items:center;gap:9px;padding:10px 18px 10px 14px;border-radius:var(--rt-radius-pill);
+    background:var(--bg-raise);border:1px solid color-mix(in srgb, var(--rt-purple) 45%, var(--rt-border));
+    font-size:14px;font-weight:500;color:var(--rt-text);white-space:nowrap;box-shadow:0 10px 24px #000000B3;
+    opacity:0;transform:translateX(-30px);filter:blur(4px);
+    transition:opacity .4s,transform .5s cubic-bezier(.2,.9,.3,1),filter .5s}
+  .tb-lancar button:nth-child(even){transform:translateX(30px)}
+  .tb-lancar.aberto button{opacity:1;transform:none;filter:none}
+  .tb-lancar.aberto button:nth-child(4){transition-delay:.08s}.tb-lancar.aberto button:nth-child(3){transition-delay:.16s}
+  .tb-lancar.aberto button:nth-child(2){transition-delay:.24s}.tb-lancar.aberto button:nth-child(1){transition-delay:.32s}
+  .tb-lancar button svg.ic{width:17px;height:17px;color:var(--rt-pink)}
+  .tb-lancar button:active{background:var(--rt-hover)}
+  /* onda de luz que sai do "+" no toque */
+  .tb-onda{display:block;position:fixed;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;z-index:59;pointer-events:none;
+    background:radial-gradient(circle, color-mix(in srgb, var(--rt-pink) 85%, transparent) 0%,
+      color-mix(in srgb, var(--rt-pink) 45%, transparent) 35%, transparent 70%);
+    transform:scale(0);opacity:0}
+  .tb-onda.on{animation:rt-onda 1s cubic-bezier(.2,.7,.3,1)}
+  @keyframes rt-onda{0%{transform:scale(0);opacity:1}40%{opacity:.85}100%{transform:scale(70);opacity:0}}
+  /* véu escuro que entra e sai suave */
+  .tb-veu{display:block;position:fixed;inset:0;z-index:59;background:color-mix(in srgb, #02020C 80%, transparent);
+    opacity:0;pointer-events:none;transition:opacity .35s}
+  body.lancar-aberto .tb-veu{opacity:1;pointer-events:auto}
+  /* a faixa de resumo apaga junto com a página: as opções passam por cima dela */
+  .tb-resumo{transition:opacity .35s}
+  body.lancar-aberto .tb-resumo{opacity:.15}
+  /* selos dentro do "Mais" */
+  .tb-selo{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:99px;font-style:normal;
+    font-family:var(--mono);font-size:11px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
+  .tb-selo:empty{display:none}
+  .tb-selo.devem{color:var(--c-devem);background:color-mix(in srgb, var(--c-devem) 16%, transparent)}
+  .tb-selo.devo{color:var(--c-devo);background:color-mix(in srgb, var(--c-devo) 16%, transparent)}
+  /* "Mais": lista das abas que não cabem na barra, presa acima dela à direita */
+  .tb-menu{position:fixed;right:8px;bottom:calc(var(--tb-h, 128px) + 8px);z-index:61;
+    min-width:190px;padding:6px;display:flex;flex-direction:column;gap:2px;
+    background:var(--rt-surface);border:1px solid color-mix(in srgb, var(--rt-purple) 45%, var(--rt-border));
+    border-radius:var(--rt-radius-lg);box-shadow:var(--glow-purple-sm),0 16px 40px #000000B3;animation:rt-dl .16s var(--ease)}
+  .tb-menu[hidden]{display:none}
+  .tb-menu button{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--rt-radius-md);
+    font-size:14px;font-weight:500;color:var(--rt-text);text-align:left}
+  .tb-menu button svg.ic{width:18px;height:18px;color:var(--rt-text-muted)}
+  .tb-menu button:hover,.tb-menu button:focus-visible{background:var(--rt-hover);outline:none}
+  .tb-menu button[aria-current="true"]{background:var(--rt-active);color:#FFFFFF}
+  .tb-menu button[aria-current="true"] svg.ic{color:var(--rt-pink)}
+  /* gráficos: escala 1:1 no celular, então estes tamanhos são reais */
+  .gaxis{font-size:9.5px}
+  .glabel,.gpico,.gref-txt{font-size:10px}
+  .gfaixa{font-size:8.5px}
+  .legend{gap:var(--sp-2) var(--sp-3)}
+
+  /* tabelas: primeira coluna presa ao rolar para o lado, sombra na
+     borda que ainda tem conteúdo, texto e linhas maiores para o dedo */
+  /* a rolagem vai até a borda do cartão; o recuo de 16px passa para
+     dentro da primeira célula, que fica presa em left:0 sem deixar
+     fresta por onde o conteúdo rolado aparecia */
+  .tab-wrap{margin:0 -16px;padding:0 16px 12px 0;
+    background:
+      linear-gradient(to left, var(--rt-surface) 45%, transparent) right center / 36px 100% no-repeat local,
+      radial-gradient(farthest-side at 100% 50%, color-mix(in srgb, var(--rt-pink) 30%, transparent), transparent) right center / 14px 100% no-repeat scroll}
+  .tab-fat td,.tab-fat th{font-size:12.5px}
+  .tab-fat th{font-size:10px;padding-bottom:12px}
+  .tab-fat td{padding-top:13px;padding-bottom:13px}
+  .tab-fat td:first-child,.tab-fat th:first-child{position:sticky;left:0;z-index:2;
+    background:var(--rt-surface);padding-right:12px;
+    box-shadow:8px 0 10px -8px #000000B3}
+  .tab-wrap .tab-fat td:first-child,.tab-wrap .tab-fat th:first-child{padding-left:16px}
+  .tab-fat td:first-child{font-size:13.5px}
+  .tab-fat tbody tr:hover td:first-child{background:linear-gradient(var(--rt-hover),var(--rt-hover)),var(--rt-surface)}
+  .tab-fat tr[aria-current="true"] td:first-child{
+    background:linear-gradient(var(--rt-active),var(--rt-active)),var(--rt-surface);
+    box-shadow:inset 2px 0 0 var(--rt-pink),8px 0 10px -8px #000000B3}
+  .tab-fat.quadro tfoot td:first-child{background:var(--rt-surface)}
+  .tab-fat .tot{font-size:21px}
+  .tab-fat.edicao td:first-child{min-width:140px}
+  /* primeiro cartão (total) na linha inteira, com tudo centralizado */
+  :is(#en-kpis,#fx-kpis) .kpi:first-child{grid-column:1/-1;align-items:center;text-align:center}
+  :is(#en-kpis,#fx-kpis) .kpi:first-child .nm{justify-content:center}
+  :is(#en-kpis,#fx-kpis) .kpi:first-child .vl{font-size:min(36px,12cqi)}
+  /* Registros de Me devem / Eu devo: nada de coluna presa */
+  .tab-wrap .tab-fat.quadro td:first-child,.tab-wrap .tab-fat.quadro th:first-child{
+    position:static;background:transparent;box-shadow:none}
+  .tab-wrap .tab-fat.quadro tbody tr:hover td:first-child{background:var(--rt-hover)}
+  /* tabelas dos gráficos têm poucas colunas: cabem sem rolar de lado,
+     então nada de coluna presa nem aviso de rolagem */
+  .tab-wrap.vis{background:none;margin:0;padding:0 0 12px}
+  .tab-wrap.alto.vis{padding-right:12px}
+  .tab-wrap.vis .tab-fat td:first-child,.tab-wrap.vis .tab-fat th:first-child{
+    position:static;background:transparent;box-shadow:none;padding-left:0}
+  .tab-wrap.vis .tab-fat tbody tr:hover td:first-child{background:var(--rt-hover)}
+  .tab-wrap.vis .tab-vis tr.semana td:first-child{background:color-mix(in srgb, var(--rt-blue) 7%, transparent);padding-left:8px}
+  .tab-wrap.vis .tab-fat tr[aria-current="true"] td:first-child{background:var(--rt-active);
+    box-shadow:inset 2px 0 0 var(--rt-pink);padding-left:10px}
+  /* na tabela de faturas, a coluna presa fica só do tamanho do nome;
+     o selo "aberta" desce para a linha de baixo */
+  .tab-fat.larga .c-fat{min-width:0;width:1%}
+  .tab-fat.larga td.c-fat .badge{display:flex;width:max-content;margin:6px 0 0}
+
+
+  /* filtros: o mesmo arranjo do computador, só com respiro nas bordas */
+  .filters{margin:0 -16px var(--sp-4);padding:8px 16px}
+  .filters .chip{padding:6px 6px 6px 8px;font-size:11.5px;gap:4px}
+  .filters.presa{position:fixed;top:0;left:0;right:0;z-index:60;margin:0;padding:6px 16px;
+    padding-top:calc(6px + env(safe-area-inset-top,0px));
+    background:color-mix(in srgb, var(--rt-bg) 86%, transparent);
+    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--rt-border);box-shadow:0 8px 24px #00000066}
+  .filters.presa .sel-month{padding:6px 26px 6px 10px;font-size:12.5px;
+    background-position:calc(100% - 15px) 52%,calc(100% - 10px) 52%}
+  .filters.presa .f-funil{width:34px;height:34px}
+  .gper{margin-left:0}
+  /* pizza no celular: igual ao desktop, só empilhada — rosca em cima,
+     a mesma legenda (data completa, valor e %) embaixo */
+  .pz{gap:12px}
+  .pz-item{gap:6px;padding:5px 6px;font-size:10.5px}
+  .pz-item .pz-nm{font-size:10px}
+  .pz-item .pz-p{min-width:0;font-size:9.5px}
+  .pz-tot{font-size:20px}
+  /* resumo por pessoa: cabe na largura do celular sem cortar o status */
+  .resumo-pes{width:100%}
+  .resumo-pes .c-nm{width:23%}
+  .resumo-pes .c-par{width:50%}
+  .resumo-pes .c-st{width:27%}
+  .tab-wrap .resumo-pes td.n{font-size:11.5px}
+  .resumo-pes .sep{margin:0 3px}
+  .tab-wrap .resumo-pes :is(td,th){font-size:12px;padding-left:6px;padding-right:0}
+  .tab-wrap .resumo-pes th{white-space:normal;font-size:9.5px}
+  .tab-wrap .resumo-pes :is(td,th):first-child{padding-left:0;padding-right:4px}
+  .resumo-pes .badge{padding:2px 7px;font-size:10px}
+  .rail{position:fixed;top:0;left:0;z-index:70;width:272px;flex-basis:272px;
+    transform:translateX(-100%);transition:transform .22s var(--ease);box-shadow:0 0 0 100vmax transparent;
+    padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  body.drawer .rail{transform:none;box-shadow:2px 0 30px #00000080,0 0 40px -10px color-mix(in srgb, var(--rt-pink) 45%, transparent)}
+  body.drawer .scrim{display:block;position:fixed;inset:0;background:color-mix(in srgb, var(--rt-sunken) 72%, transparent);
+    -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);z-index:65}
+  body.rail-min .rail{width:272px;flex-basis:272px}
+  body.rail-min .brand{display:block}
+  body.rail-min .rail-top{justify-content:space-between;padding:var(--sp-4)}
+  body.rail-min .menu{padding:var(--sp-2) var(--sp-3)}
+  body.rail-min .menu button{justify-content:flex-start;padding:10px 12px}
+  body.rail-min .menu .lbl{display:inline}
+  body.rail-min .menu button::after{display:none}
+  body.rail-min .rail-foot{display:block}
+  /* embaixo: a barra de baixo inteira (faixa de resumo + botões) mais um respiro */
+  .main{padding:max(var(--sp-3), env(safe-area-inset-top,0px)) var(--sp-3) calc(var(--tb-h, 128px) + 40px + var(--sp-4))}
+  .topbar{gap:12px}
+  .topbar .ttl{font-size:34px}
+  .kpis{grid-template-columns:1fr 1fr;gap:12px}
+  .kpi .vl{font-size:min(26px,22cqi)}
+  .scroller{max-height:62vh}
+  .scroller .tx,.scroller .daymark{max-width:none}
+  .hero{padding:var(--sp-3)}
+  .hero-r{padding-top:var(--sp-3)}
+  .block{padding:var(--sp-3)}
+  .editor{padding:var(--sp-3)}
+  .tab-wrap.alto{max-height:60vh}
+  .escada{margin-top:12px}
+  .tab-fat.quadro,.tab-fat.edicao{min-width:640px}
+  /* o quadro em edição leva seletores de competência e status: precisa de mais pista */
+  .tab-fat.quadro.edicao{min-width:780px}
+  .tx{padding:10px 4px}
+  body::before{height:30vh;opacity:.12}
+}
+@media(max-width:760px){
+  .kpis .kpi:nth-child(2n) .info::after{left:auto;right:-10px;transform:none}
+}
+@media(max-width:620px){
+  .despesa .cabec .efield.f-txt{flex:1 1 100%}
+  .erow.entrada .efield.f-num{width:calc(50% - 5px)}
+}
+@media(max-width:520px){
+  .tab-fat .col-op{display:none}
+  .tab-fat td,.tab-fat th{padding-left:10px}
+  .temas{gap:4px;padding:3px}
+  .temas button{width:19px;height:19px}
+  .total{font-size:clamp(50px,15vw,64px)}
+}
+@media(max-width:380px){
+  .tab-wrap .resumo-pes td.n{font-size:10.5px}
+  .resumo-pes .sep{margin:0 2px}
+  .resumo-pes .badge{font-size:9px;padding:2px 6px;gap:4px}
+  .resumo-pes .badge::before{width:4px;height:4px}
+  .resumo-pes .cur{display:none}
+}
+@media(max-width:340px){
+  .resumo-pes .badge{padding:2px 4px}
+  .resumo-pes .badge::before{display:none}
+}
+@media(max-width:360px){
+  .tabbar .tb-lbl{font-size:8px}
+  .tabbar .tb-ic{width:38px}
+}
+@media(max-width:400px){
+  .kpi .vl{font-size:min(23px,22cqi)}
+  .efield.f-dt{width:144px}
+  .efield.f-parc{width:126px}
+}
+
+/* ═══ movimento reduzido: sem animação, glow vira borda estática ═══ */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none !important;animation:none !important;scroll-behavior:auto !important}
+  .kpi.clicavel:hover{transform:none}
+  .btn:hover,.link-btn:hover,.burger:hover,.info:hover,.info:focus{box-shadow:none}
+  .btn:hover{outline:1px solid #FFFFFF99;outline-offset:1px}
+  .link-btn:hover{border-color:var(--rt-blue)}
+}

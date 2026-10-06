@@ -1,0 +1,181 @@
+/* ═══ casca ═══ */
+.app{display:flex;min-height:100vh;position:relative;z-index:1}
+
+.rail{width:var(--rail-w);flex:0 0 var(--rail-w);
+  background:linear-gradient(180deg, var(--rt-rail) 0%, color-mix(in srgb, var(--rt-rail) 70%, var(--rt-bg)) 100%);
+  border-right:1px solid var(--rt-border);display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;transition:width .2s var(--ease),flex-basis .2s var(--ease)}
+/* fio de neon na borda do menu */
+.rail::after{content:"";position:absolute;top:0;right:-1px;width:1px;height:100%;pointer-events:none;
+  background:linear-gradient(180deg, transparent, color-mix(in srgb, var(--rt-pink) 55%, transparent) 30%,
+    color-mix(in srgb, var(--rt-purple) 55%, transparent) 70%, transparent)}
+body.rail-min .rail{width:var(--rail-min);flex-basis:var(--rail-min)}
+.rail-top{display:flex;align-items:center;justify-content:space-between;
+  gap:var(--sp-2);padding:var(--sp-4) var(--sp-4) var(--sp-4)}
+.brand{font-family:var(--disp);font-weight:400;font-size:36px;line-height:.9;letter-spacing:.09em;
+  text-transform:uppercase;white-space:nowrap;
+  background:linear-gradient(180deg,#FFFFFF 10%, color-mix(in srgb, var(--rt-pink) 55%, #FFFFFF) 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 10px color-mix(in srgb, var(--rt-pink) 45%, transparent))}
+.brand span{-webkit-text-fill-color:var(--rt-pink);color:var(--rt-pink)}
+.rail-toggle{color:var(--rt-text-muted);padding:var(--sp-1);border-radius:var(--rt-radius-md);display:flex;
+  transition:color .15s,background-color .15s}
+.rail-toggle:hover{color:var(--rt-pink);background:var(--rt-hover)}
+body.rail-min .brand{display:none}
+body.rail-min .rail-top{justify-content:center;padding:var(--sp-4) 0}
+
+.menu{display:flex;flex-direction:column;gap:var(--sp-1);padding:var(--sp-2) var(--sp-3);flex:1}
+.menu button{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;
+  border-radius:var(--rt-radius-md);color:var(--rt-text-secondary);font-size:14px;font-weight:500;
+  text-align:left;position:relative;white-space:nowrap;
+  transition:background-color .15s var(--ease),color .15s var(--ease),box-shadow .2s var(--ease)}
+.menu button svg.ic{color:var(--rt-text-muted);transition:color .15s var(--ease)}
+.menu button:hover{background:var(--rt-hover);color:var(--rt-text)}
+.menu button:hover svg.ic{color:var(--rt-blue)}
+.menu button[aria-current="true"]{background:var(--rt-grad);color:#FFFFFF;font-weight:600;
+  box-shadow:0 0 18px -2px color-mix(in srgb, var(--rt-pink) 55%, transparent)}
+.menu button[aria-current="true"] svg.ic{color:#FFFFFF}
+body.rail-min .menu{padding:var(--sp-2) 10px}
+body.rail-min .menu button{justify-content:center;padding:11px 0}
+body.rail-min .menu .lbl{display:none}
+/* tooltip do menu recolhido */
+body.rail-min .menu button::after{content:attr(data-tip);position:absolute;left:calc(100% + 12px);
+  top:50%;transform:translateY(-50%);background:var(--rt-surface-2);color:var(--rt-text);
+  border:1px solid var(--rt-border);box-shadow:var(--glow-purple-sm);
+  font-size:12px;font-weight:500;padding:6px 12px;border-radius:var(--rt-radius-sm);white-space:nowrap;
+  opacity:0;pointer-events:none;transition:opacity .12s;z-index:60}
+body.rail-min .menu button:hover::after{opacity:1}
+.rail-foot{padding:var(--sp-3) var(--sp-4) var(--sp-4);border-top:1px solid var(--rt-border)}
+.rail-foot .eyebrow{display:block;line-height:1.7;overflow:hidden;text-overflow:ellipsis}
+body.rail-min .rail-foot{display:none}
+
+.main{flex:1;min-width:0;padding:var(--sp-5) clamp(16px,3vw,40px) var(--sp-8)}
+.main-in{max-width:1200px;margin:0 auto;container-type:inline-size;container-name:conteudo}
+
+.topbar{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-4);flex-wrap:wrap}
+.topbar .ttl{font-family:var(--disp);font-weight:400;font-size:clamp(34px,4vw,48px);line-height:.95;
+  letter-spacing:.05em;margin-right:auto;color:#FFFFFF;
+  text-shadow:0 0 22px color-mix(in srgb, var(--rt-purple) 55%, transparent)}
+/* situação dos dados ao lado do título: duas linhas na altura do título */
+.topbar .ttl{margin-right:0}
+.sync{margin-right:auto;height:calc(clamp(34px,4vw,48px) * .95);display:flex;flex-direction:column;
+  justify-content:space-between;padding-left:var(--sp-3);border-left:1px solid var(--rt-border);
+  font-size:11px;line-height:1.2;color:var(--rt-text);white-space:nowrap}
+.sync > div{display:flex;align-items:center;gap:5px}
+.sync-k{color:var(--rt-text-secondary)}
+.sync-k::after{content:":"}
+.sync-ic{width:12px;height:12px;flex:none}
+.sync-ic.ok,.sync-ic.err{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.sync-ic.ok{stroke:var(--rt-success)}
+.sync-ic.err{stroke:var(--rt-error)}
+.sync-ic.off{width:8px;height:8px;margin:0 2px;border-radius:50%;background:var(--rt-text-secondary)}
+.sync-ic.spin{border-radius:50%;border:2px solid color-mix(in srgb, var(--rt-text) 25%, transparent);
+  border-top-color:var(--rt-text);animation:sync-gira .8s linear infinite}
+@keyframes sync-gira{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.sync-ic.spin{animation-duration:2.4s}}
+.burger{display:none;color:var(--rt-text);padding:var(--sp-2);border-radius:var(--rt-radius-md);
+  border:1px solid var(--rt-border);background:var(--rt-surface)}
+.burger:hover{border-color:var(--rt-pink);box-shadow:var(--glow-pink-sm)}
+.scrim{display:none}
+
+/* ═══ filtros ═══ */
+/* Mês no centro e um funil redondo na ponta, com o número de filtros
+   ligados. Tocar no funil desce os chips numa grade de 3 por linha. Vale
+   para computador e celular, presa ou não. */
+.filters{position:relative;margin-bottom:var(--sp-4)}
+.f-topo{position:relative;display:flex;align-items:center;justify-content:center;min-height:40px}
+.f-mes-seta{width:28px;height:28px;margin:0 4px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;
+  color:var(--rt-text-muted);opacity:.7;transition:opacity .15s,color .15s,background-color .15s}
+.f-mes-seta svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+.f-mes-seta:hover:not(:disabled){opacity:1;color:var(--rt-text);background:var(--rt-hover)}
+.f-mes-seta:disabled{opacity:.2;cursor:default}
+.filters .sel-month{padding:8px 32px 8px 12px;font-size:13px;text-align:center;text-align-last:center}
+.f-funil{position:absolute;right:0;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:#FFFFFF;background:var(--rt-grad);
+  box-shadow:0 0 14px -3px color-mix(in srgb, var(--rt-pink) 60%, transparent);transition:transform .15s}
+.f-funil:active{transform:translateY(-50%) scale(.92)}
+.f-funil svg.ic{width:17px;height:17px}
+.f-funil b{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;
+  font-family:var(--mono);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;
+  color:#FFFFFF;background:var(--rt-grad);box-shadow:0 0 0 2px var(--rt-bg)}
+.f-gaveta{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s var(--ease)}
+.filters.abertos .f-gaveta{grid-template-rows:1fr}
+.f-gaveta>.chips{overflow:hidden;min-height:0}
+.filters .chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;
+  max-width:572px;margin:0 auto;padding:0 6px;visibility:hidden;transition:visibility 0s .3s}
+/* respiro em volta: o quique da Mola passa um pouco do tamanho e não pode ser cortado */
+.filters.abertos .chips{padding:12px 6px 6px;visibility:visible;transition:none}
+/* botões da grade: chave liga/desliga, como nas configurações do celular */
+.filters .chip{position:relative;justify-content:space-between;min-width:0;gap:6px;padding:6px 7px 6px 10px;
+  border-radius:12px;border:1px solid var(--rt-border-strong);box-shadow:none;font-size:12px;
+  background:color-mix(in srgb, var(--bg-raise) 45%, var(--rt-bg));color:var(--rt-text-secondary)}
+.filters .chip:not(.off){color:var(--rt-text);border-color:color-mix(in srgb, var(--rt-purple) 45%, var(--rt-border))}
+.filters .chip.off:hover{border-color:color-mix(in srgb, var(--rt-pink) 55%, var(--rt-border))}
+.filters .chip input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
+.filters .chip:has(input:focus-visible){outline:2px solid var(--rt-pink);outline-offset:2px}
+.filters .chip .cnt{display:none}
+.filters .chip>span:not(.cnt):not(.chip-marca){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:auto}
+.filters .chip .chip-marca{flex:0 0 auto}
+.filters .chip .sw{flex:0 0 auto;position:relative;width:22px;height:13px;border-radius:9px;background:#FFFFFF1F;transition:background .2s,box-shadow .2s}
+.filters .chip .sw::after{content:"";position:absolute;top:2px;left:2px;width:9px;height:9px;border-radius:50%;
+  background:var(--rt-text-muted);transition:transform .2s var(--ease),background .2s}
+.filters .chip:not(.off) .sw{background:var(--rt-grad);box-shadow:0 0 8px color-mix(in srgb, var(--rt-pink) 60%, transparent)}
+.filters .chip:not(.off) .sw::after{transform:translateX(9px);background:#FFFFFF}
+/* ao abrir (Mola): o funil afunda e volta com um quique, e os chips crescem
+   a partir do canto do funil, passando um pouco do ponto antes de assentar */
+.filters .chip{opacity:0;transform:scale(.3);transform-origin:100% 0;
+  transition:opacity .18s,transform .18s,background .2s var(--ease),color .15s,border-color .15s}
+.filters.abertos .chip{opacity:1;transform:none;
+  transition:opacity .45s cubic-bezier(.3,1.6,.5,1) var(--atraso,0s),transform .45s cubic-bezier(.3,1.6,.5,1) var(--atraso,0s),
+    background .2s var(--ease),color .15s,border-color .15s}
+.f-funil.mola{animation:rt-mola .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes rt-mola{0%{transform:translateY(-50%) scale(1)}30%{transform:translateY(-50%) scale(.82)}100%{transform:translateY(-50%) scale(1)}}
+.chip-marca{display:inline-flex}
+.chip-marca .marca{width:16px;height:16px;font-size:8.5px;border-radius:4px}
+#filtros-sentinela{height:1px;margin-bottom:-1px}
+#filtros-lugar{height:0}
+/* o navegador não pode usar a barra (que sai do fluxo ao prender) como
+   âncora de rolagem — senão ele "corrige" a posição e a página pula */
+#filtros-sentinela,#filtros-lugar,#barra-filtros{overflow-anchor:none}
+/* barra presa no desktop: faixa translúcida no topo da área de conteúdo */
+.filters.presa{position:fixed;top:0;z-index:60;margin:0;
+  padding:10px clamp(16px,3vw,40px);
+  background:color-mix(in srgb, var(--rt-bg) 86%, transparent);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--rt-border);box-shadow:0 8px 24px #00000066}
+.sel-month{font-family:var(--body);font-weight:500;font-size:13.5px;
+  padding:9px 36px 9px 16px;letter-spacing:0;
+  background-position:calc(100% - 18px) 52%,calc(100% - 13px) 52%}
+.chip{display:inline-flex;align-items:center;gap:var(--sp-2);padding:8px 16px 8px 12px;
+  border-radius:var(--rt-radius-pill);border:1px solid transparent;
+  background:var(--rt-grad);cursor:pointer;user-select:none;
+  font-size:13px;font-weight:500;color:#FFFFFF;
+  box-shadow:0 0 14px -2px color-mix(in srgb, var(--rt-pink) 50%, transparent);
+  transition:background .2s var(--ease),color .15s,border-color .15s,box-shadow .2s var(--ease)}
+.chip input{margin:0;width:15px;height:15px;cursor:pointer}
+.chip:not(.off) input{border-color:#FFFFFFB3}
+.chip:not(.off) input:checked{background-color:#FFFFFF33;background-image:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.4 6.6 11.3 12.5 4.9' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  border-color:#FFFFFF}
+.chip.off{color:var(--rt-text-secondary);background:transparent;border-color:var(--rt-border-strong);box-shadow:none}
+.chip.off:hover{color:var(--rt-text);border-color:color-mix(in srgb, var(--rt-pink) 55%, var(--rt-border))}
+.chip .cnt{font-family:var(--mono);font-size:10.5px;color:inherit;opacity:.7}
+.chip .cnt:empty{display:none}
+
+/* ═══ blocos ═══ */
+.grid{display:grid;gap:var(--gap)}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.block{background:var(--rt-surface);border:1px solid var(--rt-border);border-radius:var(--rt-radius-lg);
+  padding:var(--sp-4);min-width:0}
+.block-head{display:flex;align-items:baseline;justify-content:space-between;
+  gap:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-3);flex-wrap:wrap}
+.block-head .r{margin-left:auto}
+/* ação de bloco = botão secundário do DS (contorno electric blue), versão pequena */
+.link-btn{font-family:var(--body);font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--rt-blue);border:1px solid color-mix(in srgb, var(--rt-blue) 65%, transparent);
+  border-radius:var(--rt-radius-md);padding:6px 12px;align-self:center;
+  transition:background-color .15s var(--ease),box-shadow .15s var(--ease),color .15s}
+.link-btn:hover{background:color-mix(in srgb, var(--rt-blue) 12%, transparent);box-shadow:var(--glow-blue-sm);color:#FFFFFF}
+.blank{color:var(--rt-text-muted);font-size:13.5px;padding:var(--sp-3) 0;text-align:center}
+
