@@ -199,19 +199,19 @@
 
       <div class="block" style="margin-top:16px">
         <div class="block-head dia-cab"><h2>Ritmo do mês</h2>
-          <span class="dia-total" id="m-dia-total"></span>
+          <div class="dia-total" id="m-dia-total"><small>total</small><b id="m-dia-total-v"></b></div>
           <span class="eyebrow r" id="m-dia-nota"></span>
             <div class="vis-sel" role="group" aria-label="Tipo de visualização" data-vis="dia">
               <button data-v="linha" title="Linha" aria-label="Linha" aria-pressed="true"><svg class="ic" viewBox="0 0 24 24"><use href="#i-vis-linha"/></svg></button>
               <button data-v="barras" title="Barras" aria-label="Barras" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24"><use href="#i-vis-barras"/></svg></button>
               <button data-v="tabela" title="Tabela" aria-label="Tabela" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24"><use href="#i-vis-tabela"/></svg></button>
-            </div>
-            <button type="button" class="dia-expandir" id="dia-expandir" aria-pressed="false" hidden
-              title="Alargar o gráfico" aria-label="Alargar o gráfico e rolar para o lado">
-              <svg class="ic abre" viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-6.5 6.5M4 20l6.5-6.5"/></svg>
-              <svg class="ic fecha" viewBox="0 0 24 24"><path d="M4 14h6v6M20 10h-6V4M14 10l6.5-6.5M10 14l-6.5 6.5"/></svg></button></div>
+            </div></div>
         <div class="dia-caixa" id="m-dia-caixa">
           <div class="dia-rolo" id="m-dia-rolo"><div class="chart" id="m-dia"></div></div>
+          <button type="button" class="dia-expandir" id="dia-expandir" aria-pressed="false" hidden
+            title="Alargar o gráfico" aria-label="Alargar o gráfico e rolar para o lado">
+            <svg class="ic abre" viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-6.5 6.5M4 20l6.5-6.5"/></svg>
+            <svg class="ic fecha" viewBox="0 0 24 24"><path d="M4 14h6v6M20 10h-6V4M14 10l6.5-6.5M10 14l-6.5 6.5"/></svg></button>
         </div>
       </div>
 

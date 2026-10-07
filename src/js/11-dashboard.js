@@ -213,17 +213,17 @@ function renderDia(){
   // rolar fecha o balão: ele não acompanha o ponto
   rolo.onscroll = expandido ? () => caixa.querySelectorAll(":scope > .chart-tip").forEach(t=>{ t.style.opacity="0"; }) : null;
 
-  /* Total do período: só o número, entre o título e os ícones, igual em
-     todas as visões. Se não couber, vira "7,4k"; se nem assim, some
-     (o detalhe fica no title). */
+  /* Total do período: logo depois do título, separado por um fio, igual
+     em todas as visões. Se o número não couber, vira "7,4k"; se nem
+     assim, some (o detalhe fica no title). */
   const totalDias = valores.reduce((a,v)=>a+v,0);
   const comGasto = valores.filter(v=>v>0).length;
-  const elTot = $("m-dia-total");
+  const elTot = $("m-dia-total"), elTotV = $("m-dia-total-v");
   elTot.style.visibility = "";
-  elTot.textContent = NUM2.format(totalDias);
+  elTotV.textContent = NUM2.format(totalDias);
   elTot.title = `Total ${RS2(totalDias)} · ${comGasto} ${comGasto===1?"dia":"dias"} com gasto`;
-  if(elTot.scrollWidth > elTot.clientWidth) elTot.textContent = RSk(totalDias).replace(/^R\$\s*/, "");
-  if(elTot.scrollWidth > elTot.clientWidth) elTot.style.visibility = "hidden";
+  if(elTotV.scrollWidth > elTotV.clientWidth) elTotV.textContent = RSk(totalDias).replace(/^R\$\s*/, "");
+  if(elTotV.scrollWidth > elTotV.clientWidth) elTot.style.visibility = "hidden";
 
   /* Tabela: no máximo a altura que a linha e as barras ocupam; o resto
      rola dentro dela. Mesma conta de altura do grafico(). */
