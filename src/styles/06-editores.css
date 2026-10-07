@@ -384,6 +384,8 @@ input.num.cp-pes-v:focus{outline:none;border-color:var(--rt-pink)}
 .lst-barra{position:relative;height:8px;border-radius:4px;background:var(--rt-surface-2)}
 .lst-barra i{position:absolute;inset:0 auto 0 0;border-radius:inherit;background:var(--lst)}
 .lst-barra.estourou i{background:var(--rt-error)}
+.lst-vale.estourou .lst-barra{background:color-mix(in srgb, var(--rt-error) 35%, var(--rt-surface-2))}
+.lst-vale.estourou .lst-leg span:first-child{color:var(--rt-error)}
 .lst-traco{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;border-radius:1px;background:var(--rt-text);
   box-shadow:0 0 6px color-mix(in srgb, var(--rt-text) 60%, transparent)}
 .lst-leg{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--rt-text-muted)}
@@ -474,3 +476,25 @@ button.lst-it:focus-visible{outline:2px solid var(--rt-pink);outline-offset:-2px
 .dois-lados .rs-tab{flex:1}
 .dois-lados .rs-tot{margin-top:auto}
 @container conteudo (max-width:760px){ .dois-lados,.dois-lados.largo{grid-template-columns:minmax(0,1fr)} }
+
+/* Me devem / Eu devo em colunas: ícone · pessoa · gasto · valor */
+.dv-cab,.dv-ln{display:grid;grid-template-columns:32px minmax(0,.75fr) minmax(0,1.5fr) 96px;align-items:center;column-gap:12px}
+.dv-cab{padding:0 2px 8px;border-bottom:1px solid var(--rt-border);font-size:9.5px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--rt-text-muted)}
+.dv-cab>span{white-space:nowrap}
+.dv-cab>span:last-child{text-align:right}
+.dv-cab .cab-c{display:none}
+.dv-p,.dv-g{min-width:0;display:flex;flex-direction:column;gap:2px}
+.dv-p b,.dv-g b{font-weight:500;font-size:14px;color:var(--rt-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dv-g b{font-weight:400;color:var(--rt-text-secondary)}
+.dv-p b.vazio,.dv-g b.vazio{color:var(--rt-text-muted)}
+.dv-g small{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;font-family:var(--mono);font-size:11px;color:var(--rt-text-muted)}
+@media (max-width:640px){
+  .dv-cab,.dv-ln{grid-template-columns:28px minmax(0,.8fr) minmax(0,1.3fr) 90px;column-gap:8px}
+  .dv-ln .lst-ic{width:28px;height:28px;font-size:14px}
+  .dv-cab .cab-l{display:none}
+  .dv-cab .cab-c{display:inline}
+  .dv-p b{font-size:13px}
+  .dv-g b{font-size:12.5px}
+  .dv-ln .lst-v{font-size:13px}
+}

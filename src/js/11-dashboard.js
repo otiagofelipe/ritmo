@@ -78,13 +78,20 @@ function renderResumo(){
     const prev = c.id==="picpay" ? previstoFixas : 0;   // os fixos debitam no PicPay
     const editavel = GRUPOS.find(g=>g.grupoPlanilha===c.id);
     /* Itaú e PicPay se abrem no próprio card. O total se divide em
+       Me devem (a parte das compras divididas que os outros devolvem),
        parcelas, fixos (cobranças de conta fixa já na fatura + os que
-       ainda vão cair) e o resto, as compras avulsas do mês. */
+       ainda vão cair) e o resto, as compras avulsas do mês. A parte
+       dividida sai do grupo da compra, para a soma fechar com o total. */
     let abre = null;
     if(c.id==="itau" || c.id==="picpay"){
-      const parc = soma(desta.filter(x=>x.parcela));
-      const fixo = soma(desta.filter(x=>!x.parcela && (x.fixa || idsFixas.has(x.id)))) + prev;
-      abre = { id:c.id, linhas:[["Avulsos", v + prev - parc - fixo], ["Fixos", fixo], ["Parcelas", parc]] };
+      const deles = x => Math.min(Math.max(x.valor, 0),
+        divisoesDe(x).reduce((a,r)=>a+(Number(r.valor)||0), 0));
+      const ehFixo = x => !x.parcela && (x.fixa || idsFixas.has(x.id));
+      const medev = desta.reduce((a,x)=>a+deles(x), 0);
+      const parc = desta.filter(x=>x.parcela).reduce((a,x)=>a+x.valor-deles(x), 0);
+      const fixo = desta.filter(ehFixo).reduce((a,x)=>a+x.valor-deles(x), 0) + prev;
+      const cent = n => Math.round(n*100)/100 || 0;   // sem "-0,00" de arredondamento
+      abre = { id:c.id, linhas:[["Avulsos", cent(v + prev - medev - parc - fixo)], ["Me devem", cent(medev)], ["Fixos", cent(fixo)], ["Parcelas", cent(parc)]] };
     }
     return kpi({
       nome:c.titulo, selo:marca(c), valor:v+prev, tom: TOM_CARD[c.id] || c.cor, abre,
@@ -119,8 +126,7 @@ function renderResumo(){
      teto); benefícios (vales, com a barra do teto); outros (Eu devo e
      Me devem). */
   $("m-saldo").innerHTML = kpi({nome:"saldo do mês", valor:posso, destaque:true, acao:"holerite:mes",
-           sinal: posso<0 ? " neg" : "",
-           sub: `Salário ${BRL.format(salarioDe(S.mesSel))}`,
+           sinal: posso<0 ? " neg" : ""
            });
 
   /* Cartões e benefícios: os ligados na aba Cartões. Quem tem conta
@@ -133,8 +139,9 @@ function renderResumo(){
   $("m-beneficios").closest(".grupo-cards").hidden = !beneficio.length;
   $("m-cartoes-tot").textContent = BRL.format(faturas);
 
+  // a cor é o que ainda tem no vale; o vazio, o que já foi gasto
   const barra = (gasto, teto) => `<div class="barra" aria-hidden="true"><i style="width:${
-    teto>0 ? Math.min(100, gasto/teto*100).toFixed(1) : 0}%"></i></div>`;
+    teto>0 ? Math.max(0, Math.min(100, (teto-gasto)/teto*100)).toFixed(1) : 0}%"></i></div>`;
   const cardBeneficio = b => {
     const conta = CONTAS.find(c=>c.id===b.id && c.temTeto) || null;
     const gasto = conta ? gastoCaju : 0;

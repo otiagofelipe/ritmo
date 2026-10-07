@@ -104,7 +104,9 @@ function renderBarraCel(){
   const valor = v => `<i class="r-vl${v<0?" neg":""}">${esc(BRL.format(v))}</i>`;
   fx.innerHTML = `<div class="r-tot"><b>total</b>${valor(total)}<small>${quando}</small></div>
     <div class="r-sem">${semanaHTML}</div>
-    <div class="r-saldo"><b>saldo do mês</b>${valor(c.posso)}</div>`;
+    <button type="button" class="r-saldo" title="Abrir o holerite"><b>saldo do mês</b>${valor(c.posso)}<small>holerite<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-right"/></svg></small></button>`;
+  // atalho: o saldo abre o holerite, como o card de saldo do computador
+  fx.querySelector(".r-saldo").onclick = () => abrirHolerite();
 
   // selos: pessoas que me devem e coisas que eu devo, ainda pendentes no mês
   const pendente = i => !i.pago && (Number(i.valor)||0) > 0;
