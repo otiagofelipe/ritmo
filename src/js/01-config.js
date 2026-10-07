@@ -171,14 +171,61 @@ const CONTAS = [
 ];
 
 /**
- * Benefícios (vales) do Dashboard, no grupo "Benefícios". O VR é o vale
- * do Caju (o que já existia). O VA ainda não tem lançamentos nem teto:
- * aparece zerado, com o fornecedor (Ticket), até ganhar dados próprios.
+ * Catálogo da aba Cartões: as opções que dá para ligar e desligar.
+ *
+ *   id ....... chave estável (vai para bronze.ritmo.tb_cards.id_card e
+ *              casa com CONTAS e LOGOS quando existe)
+ *   tipo ..... "credito" ou "beneficio"
+ *   bank ..... a instituição como vem na coluna bank da gold
+ *   rotulo ... nome curto no Dashboard (VR, VA); sem rótulo vale o titulo
+ *   padrao ... ligado quando ainda não há escolha gravada
+ *
+ * Quem não tem logo em LOGOS fica com o selo da inicial, na cor.
  */
-const BENEFICIOS = [
-  { id:"vr", titulo:"VR", fornecedor:"Caju",   logo:"caju",   cor:"#E0A94A", conta:"caju" },
-  { id:"va", titulo:"VA", fornecedor:"Ticket", logo:"ticket", cor:"#E3171B", conta:null }
+const CATALOGO_CARTOES = [
+  // crédito
+  { id:"itau",         titulo:"Itaú",            tipo:"credito",   bank:"Itaú",            cor:"#EC7000", padrao:true },
+  { id:"picpay",       titulo:"PicPay",          tipo:"credito",   bank:"PicPay",          cor:"#11C76F", padrao:true },
+  { id:"nubank",       titulo:"Nubank",          tipo:"credito",   bank:"Nubank",          cor:"#820AD1" },
+  { id:"bradesco",     titulo:"Bradesco",        tipo:"credito",   bank:"Bradesco",        cor:"#CC092F" },
+  { id:"santander",    titulo:"Santander",       tipo:"credito",   bank:"Santander",       cor:"#EC0000" },
+  { id:"bb",           titulo:"Banco do Brasil", tipo:"credito",   bank:"Banco do Brasil", cor:"#F2C500" },
+  { id:"caixa",        titulo:"Caixa",           tipo:"credito",   bank:"Caixa",           cor:"#1C6FC9" },
+  { id:"inter",        titulo:"Inter",           tipo:"credito",   bank:"Inter",           cor:"#FF7A00" },
+  { id:"c6",           titulo:"C6 Bank",         tipo:"credito",   bank:"C6 Bank",         cor:"#9A9A9A" },
+  { id:"mercadopago",  titulo:"Mercado Pago",    tipo:"credito",   bank:"Mercado Pago",    cor:"#00B1EA" },
+  { id:"xp",           titulo:"XP",              tipo:"credito",   bank:"XP",              cor:"#E8C33A" },
+  { id:"btg",          titulo:"BTG Pactual",     tipo:"credito",   bank:"BTG Pactual",     cor:"#4A78C2" },
+  { id:"porto",        titulo:"Porto Bank",      tipo:"credito",   bank:"Porto Bank",      cor:"#0A6DD9" },
+  { id:"neon",         titulo:"Neon",            tipo:"credito",   bank:"Neon",            cor:"#0EC5EC" },
+  { id:"pagbank",      titulo:"PagBank",         tipo:"credito",   bank:"PagBank",         cor:"#00A868" },
+  { id:"will",         titulo:"Will Bank",       tipo:"credito",   bank:"Will Bank",       cor:"#E8C400" },
+  // benefícios
+  { id:"caju",         titulo:"Caju",            tipo:"beneficio", bank:"Caju",            cor:"#E0A94A", rotulo:"VR", padrao:true },
+  { id:"ticket",       titulo:"Ticket",          tipo:"beneficio", bank:"Ticket",          cor:"#E3171B", rotulo:"VA", padrao:true },
+  { id:"vr",           titulo:"VR",              tipo:"beneficio", bank:"VR",              cor:"#00A859" },
+  { id:"alelo",        titulo:"Alelo",           tipo:"beneficio", bank:"Alelo",           cor:"#1F9D55" },
+  { id:"pluxee",       titulo:"Pluxee",          tipo:"beneficio", bank:"Pluxee",          cor:"#3D5AFE" },
+  { id:"flash",        titulo:"Flash",           tipo:"beneficio", bank:"Flash",           cor:"#FF1E56" },
+  { id:"ifood",        titulo:"iFood Benefícios",tipo:"beneficio", bank:"iFood Benefícios",cor:"#EA1D2C" },
+  { id:"swile",        titulo:"Swile",           tipo:"beneficio", bank:"Swile",           cor:"#7D5CFF" }
 ];
+
+/** O tipo como a bronze guarda (credit/benefit) e de volta. */
+const TIPO_BRONZE = { credito:"credit", beneficio:"benefit" };
+
+/** Cartão ligado: a última escolha gravada; sem escolha, o padrão do catálogo. */
+function cartaoLigado(c){
+  const g = (S.reg.cartoes || []).find(x => x.id === c.id);
+  return g ? g.ligado : !!c.padrao;
+}
+
+/** Cartões de um tipo em ordem alfabética (sem diferença por acento ou maiúscula). */
+const cartoesDoTipo = tipo => CATALOGO_CARTOES.filter(c => c.tipo === tipo)
+  .sort((a,b) => a.titulo.localeCompare(b.titulo, "pt-BR", { sensitivity:"base" }));
+
+/** Cartões ligados de um tipo, em ordem alfabética. */
+const cartoesLigados = tipo => cartoesDoTipo(tipo).filter(cartaoLigado);
 
 /**
  * Contas correntes não têm fatura: entram no extrato pela data, mas
