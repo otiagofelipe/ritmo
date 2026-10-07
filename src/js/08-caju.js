@@ -15,8 +15,9 @@ function pgCaju(){
            sub: ls.length ? `maior: ${BRL.format(Math.max(...ls.map(l=>Number(l.valor)||0)))}` : "—"});
 
   $("cj-lista").innerHTML = ls.length
-    ? `<div class="cd-lista">${ls.map(l=>cartaoCaju(l)).join("")}</div>`
-      + caixasTotais([["gasto no mês", gasto], ...(teto ? [["disponível", sobra, sobra<0 ? "neg" : "livre"]] : [])])
+    ? barraCaju(mes, gasto, teto)
+      + `<div class="lst-lista">${ls.map(linhaCaju).join("")}</div>`
+      + rodapeLista([["gasto no mês", gasto], ...(teto ? [["disponível", sobra, sobra<0 ? "neg" : "livre"]] : [])])
     : `<div class="blank">Nada gasto no Caju nesta competência. Use “adicionar”.</div>`;
 
   // gasto x vale nas últimas 12 faturas até a selecionada

@@ -54,19 +54,61 @@ function renderResumoPessoas(id, pre, itens){
   }
   const linhas = [...por.entries()].sort((a,b)=>b[1].falta-a[1].falta || a[0].localeCompare(b[0]));
   const tp = linhas.reduce((a,[,r])=>a+r.pago,0), tf = linhas.reduce((a,[,r])=>a+r.falta,0);
-  // um cartão por pessoa: o que falta em destaque; embaixo quanto já foi pago
-  box.innerHTML = `<div class="cd-lista">${linhas.map(([p,r])=>{ const ok = r.falta<=0.004;
-      return cartao({ cls: ok ? "pago" : "pend", titulo:p, valor: ok ? r.pago : r.falta,
-        det: esc(ok ? `${id==="devem"?"pagou":"paguei"} tudo` : `${id==="devem"?"pagou":"paguei"} ${RS2(r.pago)} de ${RS2(r.pago+r.falta)}`),
-        dir: selo(ok ? "pago" : "pendente") }); }).join("")}</div>`
-    + caixasTotais([[id==="devem"?"pagou":"paguei", tp, "pago"], ["falta", tf, "aberto"]]);
+  // uma linha por pessoa: o que falta em destaque; embaixo quanto já foi pago
+  const verbo = id==="devem" ? "pagou" : "paguei";
+  box.innerHTML = `<div class="lst-lista">${linhas.map(([p,r])=>{ const ok = r.falta<=0.004;
+      return linhaLista({ ic: inicial(p), icCls: "av " + (ok ? "pago" : "pend"), titulo:p,
+        sub: esc(ok ? `${verbo} tudo` : `${verbo} ${RS2(r.pago)} de ${RS2(r.pago+r.falta)}`),
+        valor: ok ? r.pago : r.falta, status: statusLinha(ok) }); }).join("")}</div>`
+    + rodapeLista([[verbo, tp, "pago"], ["falta", tf, "aberto"]]);
 }
 
-/* ═══ cartõezinhos: Eu devo, Me devem e Caju (card e aba) ═══
-   Cada registro é um cartão com uma faixa na lateral (pendente ou pago),
-   valor à direita e, embaixo, as parcelas em bolinhas (cheia = paga,
-   acesa = a deste mês) ou o status em palavra. */
-function cartaoDivida(id, i, tag="div"){
+/* ═══ listas em linhas: Eu devo, Me devem e Caju (card e aba) ═══
+   Cada registro é uma linha: ícone (a inicial da pessoa, ou o tipo do
+   lugar no Caju), nome com o detalhe embaixo e o valor à direita, com o
+   status (pago / pendente) logo abaixo dele. Em cima, uma barra; embaixo,
+   os totais. Dentro do card flutuante os totais ficam presos no pé. */
+
+/** Valor sem o "R$": a coluna da direita já é toda em reais. */
+const valorCurto = v => BRL.format(Number(v)||0).replace("R$", "").replace(/\s+/g, "");
+const inicial = t => esc((String(t||"").trim().charAt(0) || "?").toUpperCase());
+const statusLinha = pago => `<small class="lst-st ${pago ? "pago" : "pend"}">${pago ? "pago" : "pendente"}</small>`;
+
+/** Molde da linha. `ic`, `sub` e `status` já vêm em HTML. */
+function linhaLista({ tag="div", cls="", ic, icCls="", titulo, sub="", valor, status="" }){
+  return `<${tag}${tag==="button"?' type="button"':""} class="lst-it${cls?" "+cls:""}">
+    <span class="lst-ic${icCls?" "+icCls:""}" aria-hidden="true">${ic}</span>
+    <span class="lst-n"><b>${esc(titulo)}</b>${sub?`<small>${sub}</small>`:""}</span>
+    <span class="lst-v">${esc(valorCurto(valor))}${status}</span></${tag}>`;
+}
+
+/** Barra de cima: quanto já foi (gasto do vale, ou pago), com um traço opcional. */
+function barraLista({ pct, cls="", esq="", dir="", traco=null, tracoTit="" }){
+  return `<div class="lst-vale ${cls}">
+    <div class="lst-barra${pct > 100 ? " estourou" : ""}"><i style="width:${Math.min(100, Math.max(0, pct)).toFixed(1)}%"></i>${
+      traco != null ? `<span class="lst-traco" style="left:${traco.toFixed(1)}%" title="${esc(tracoTit)}"></span>` : ""}</div>
+    <div class="lst-leg"><span>${esc(esq)}</span>${dir?`<span>${esc(dir)}</span>`:""}</div></div>`;
+}
+
+/** Totais de baixo; `mais` põe o botão de lançar à direita. */
+function rodapeLista(pares, mais=""){
+  return `<div class="lst-rodape">${pares.map(([n,v,cls])=>
+    `<div${cls?` class="${cls}"`:""}><small>${esc(n)}</small><b>${esc(BRL.format(v))}</b></div>`).join("")}${mais
+    ? `<button type="button" class="lst-mais" title="${esc(mais)}" aria-label="${esc(mais)}"><svg class="ic" viewBox="0 0 24 24"><use href="#i-plus"/></svg></button>` : ""}</div>`;
+}
+
+/** Barra do Me devem / Eu devo: quanto do mês já foi pago. */
+function barraPago(id, itens){
+  const total = itens.reduce((a,i)=>a+(Number(i.valor)||0), 0);
+  if(total <= 0) return "";
+  const pago = itens.filter(i=>i.pago).reduce((a,i)=>a+(Number(i.valor)||0), 0);
+  const pessoas = new Set(itens.filter(i=>!i.fixaPix).map(i=>rotuloPessoa(i)).filter(Boolean)).size;
+  return barraLista({ pct: pago/total*100, cls: "pago",
+    esq: `${Math.round(pago/total*100)}% pago de ${BRL.format(total)}`,
+    dir: pessoas ? `${pessoas} pessoa${pessoas===1?"":"s"}` : "" });
+}
+
+function linhaDivida(id, i, tag="div"){
   const pessoa = String(i.pessoa||"").trim(), desc = String(i.nome||"").trim();
   const temDesc = desc && desc !== pessoa;
   // Me devem: "quem deve - descrição"; Eu devo: a pessoa, e a descrição embaixo
@@ -81,15 +123,52 @@ function cartaoDivida(id, i, tag="div"){
     const pagas = new Set(numerosPagos(i));
     pts = `<span class="cd-pts" title="parcela ${i.parcela.i} de ${i.parcela.n}">${
       Array.from({length:i.parcela.n}, (_,k)=>`<i class="${pagas.has(k+1) ? "ok" : ""}${k+1===i.parcela.i ? " at" : ""}"></i>`).join("")}</span>`;
-  } else if(i.parcela) pts = `<small class="cd-d">${i.parcela.i}/${i.parcela.n}</small>`;
-  return cartao({ tag, cls: i.pago ? "pago" : "pend", titulo, valor: Number(i.valor)||0,
-    det: esc(det) + pts, dir: selo(i.pago ? "pago" : "pendente") });
+  } else if(i.parcela) pts = ` · ${i.parcela.i}/${i.parcela.n}`;
+  return linhaLista({ tag, cls: i.pago ? "pago" : "pend",
+    ic: i.fixaPix ? "📌" : inicial(pessoa || desc), icCls: i.fixaPix ? "" : "av " + (i.pago ? "pago" : "pend"),
+    titulo, sub: `<span>${esc(det)}</span>${pts}`, valor: Number(i.valor)||0, status: statusLinha(i.pago) });
 }
-function cartaoCaju(l, tag="div"){
+
+const SEMANA_CURTA = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+/** Ícone do lugar pelo nome; o que não reconhece fica com o prato (é vale-refeição). */
+const ICONES_CAJU = [
+  [/posto|gasolina|combustivel|shell|ipiranga|petrobras|\bbr\b/, "⛽"],
+  [/padaria|panificadora|\bpao\b|confeitaria/, "🥐"],
+  [/\bmc\b|mcdonald|burger|\bbk\b|lanche|hamburg/, "🍔"],
+  [/pizza/, "🍕"],
+  [/sushi|japones|temaki/, "🍣"],
+  [/cafe|coffee|starbucks|cafeteria/, "☕"],
+  [/sorvete|acai|gelato|doce/, "🍨"],
+  [/ifood|rappi|delivery|99food/, "🛵"],
+  [/mercado|supermerc|carrefour|pao de acucar|extra|assai|atacad|hortifruti|sacolao/, "🛒"],
+  [/bar\b|boteco|cervej|chopp/, "🍺"]
+];
+function iconeCaju(nome){
+  const n = semAcento(nome);
+  const achou = ICONES_CAJU.find(([re]) => re.test(n));
+  return achou ? achou[1] : "🍽️";
+}
+/** Uma linha do Caju: ícone do lugar, nome com dia da semana e data embaixo, valor à direita. */
+function linhaCaju(l){
   const pend = String(l.id).startsWith("caju-pendente:");
-  return cartao({ tag, cls:"caju", titulo: l.desc || "—", valor: Number(l.valor)||0, det: esc(diaBR(l.data)),
-    dir: pend ? `<span class="tag" title="Lançado aqui, ainda não chegou na base">a sincronizar</span>` : "" });
+  const quando = l.data ? `${SEMANA_CURTA[l.data.getDay()]} ${diaBR(l.data)}` : "—";
+  return linhaLista({ ic: iconeCaju(l.desc), icCls: "lugar", titulo: l.desc || "—", valor: Number(l.valor)||0,
+    sub: esc(quando) + (pend ? ` · <span class="lst-pend" title="Lançado aqui, ainda não chegou na base">a sincronizar</span>` : "") });
 }
+
+/** Barra do vale do Caju; o traço de hoje só aparece no mês corrente. */
+function barraCaju(mes, gasto, teto){
+  if(!(teto > 0)) return "";
+  const [a, m] = String(mes).split("-").map(Number);
+  const nDias = new Date(a, m, 0).getDate();
+  const noMes = TODAY.getFullYear() === a && TODAY.getMonth()+1 === m;
+  const pct = gasto / teto * 100;
+  return barraLista({ pct, cls: "caju", esq: `${Math.round(pct)}% do vale de ${BRL.format(teto)}`,
+    dir: noMes ? `dia ${TODAY.getDate()}` : "",
+    traco: noMes ? TODAY.getDate() / nDias * 100 : null,
+    tracoTit: `Gastando o vale por igual, hoje seriam ${BRL.format(teto * TODAY.getDate() / nDias)}` });
+}
+
 /** Molde do cartãozinho: título e valor em cima; detalhe e status embaixo. `det` e `dir` já vêm em HTML. */
 function cartao({ tag="div", cls="", titulo, tags="", valor, sub="", det="", dir="" }){
   return `<${tag}${tag==="button"?' type="button"':""} class="cd-it ${cls}">
@@ -117,8 +196,9 @@ function montarLista(id, pre, itens, total, pago){
     return;
   }
 
-  $(pre+"-lista").innerHTML = `<div class="cd-lista">${itens.map(i=>cartaoDivida(id, i)).join("")}</div>`
-    + caixasTotais([["neste mês", total], ["em aberto", total-pago, "aberto"], ["já pago", pago, "pago"]]);
+  $(pre+"-lista").innerHTML = barraPago(id, itens)
+    + `<div class="lst-lista">${itens.map(i=>linhaDivida(id, i)).join("")}</div>`
+    + rodapeLista([["neste mês", total], ["em aberto", total-pago, "aberto"], ["já pago", pago, "pago"]]);
 
 }
 
