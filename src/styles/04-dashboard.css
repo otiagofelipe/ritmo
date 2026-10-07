@@ -237,16 +237,12 @@
    esquerda e o gráfico semanal à direita, do topo dos cartões ao fim dos
    "outros". O gráfico não empurra a altura das linhas (contain:size):
    quem manda são os cards, e ele estica para caber (renderSemanas
-   desenha nessa altura). Total e saldo, conforme data-topo:
-     cima .... numa linha própria acima dos grupos
-     lado .... numa terceira coluna, um sobre o outro, ao lado do gráfico */
+   desenha nessa altura). Embaixo, total e saldo viram duas barras
+   baixas, lado a lado, na largura toda. */
 @container conteudo (min-width:900px){
-  .painel{--esq:calc(var(--cols,3)*var(--card) + (var(--cols,3) - 1)*var(--sp-3));
-    grid-template-columns:var(--esq) minmax(0,1fr);
-    grid-template-areas:"tp ." "rc ." "kc sem" "rb sem" "kb sem" "ro sem" "ko sem";
+  .painel{grid-template-columns:calc(var(--cols,3)*var(--card) + (var(--cols,3) - 1)*var(--sp-3)) minmax(0,1fr);
+    grid-template-areas:"rc ." "kc sem" "rb sem" "kb sem" "ro sem" "ko sem" "tp tp";
     column-gap:var(--sp-5);row-gap:0}
-  .painel[data-topo=lado]{grid-template-columns:var(--esq) minmax(0,1fr) var(--card);column-gap:var(--sp-4);
-    grid-template-areas:"rc . ." "kc sem tp" "rb sem tp" "kb sem tp" "ro sem tp" "ko sem tp"}
   .painel-cards,.painel .grupo-cards{display:contents}
   .grupo-cards[data-g=c]>.grupo-rot{grid-area:rc}
   .grupo-cards[data-g=c]>.kpis{grid-area:kc}
@@ -254,13 +250,17 @@
   .grupo-cards[data-g=b]>.kpis{grid-area:kb}
   .grupo-cards[data-g=o]>.grupo-rot{grid-area:ro}
   .grupo-cards[data-g=o]>.kpis{grid-area:ko}
-  .painel .grupo-rot{margin-top:var(--sp-3)}
-  .painel[data-topo=lado] .grupo-cards[data-g=c]>.grupo-rot{margin-top:0}
+  .grupo-cards:not([data-g=c])>.grupo-rot{margin-top:var(--sp-3)}
   .painel .semana-bloco{grid-area:sem;align-self:stretch;contain:size;min-height:240px;
     display:flex;flex-direction:column}
   .painel .semana-bloco>.chart{flex:1;min-height:0;overflow:auto}
-  .painel .topo2{grid-area:tp;align-self:start}
-  .painel[data-topo=lado] .kpis.topo2{grid-template-columns:minmax(0,1fr)}
+
+  /* as barras: nome e detalhe à esquerda, valor à direita */
+  .painel .kpis.topo2{grid-area:tp;margin-top:var(--sp-4);grid-template-columns:1fr 1fr}
+  .topo2 .kpi{flex-direction:row;align-items:center;gap:var(--sp-3);padding:10px var(--sp-4);min-height:0}
+  .topo2 .kpi .nm{margin:0;flex:0 0 auto}
+  .topo2 .kpi .sb{margin:0;padding:0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .topo2 .kpi .vl{order:3;margin:0 0 0 auto;font-size:26px;line-height:1}
 }
 .topo2-saldo{display:flex;min-width:0}
 .topo2-saldo>.kpi{flex:1}
