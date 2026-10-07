@@ -237,8 +237,8 @@
    esquerda e o gráfico semanal à direita, do topo dos cartões ao fim dos
    "outros". O gráfico não empurra a altura das linhas (contain:size):
    quem manda são os cards, e ele estica para caber (renderSemanas
-   desenha nessa altura). Embaixo, total e saldo viram duas barras
-   baixas, lado a lado, na largura toda. */
+   desenha nessa altura). Total e saldo viram duas barras baixas, lado
+   a lado, no pé da coluna do gráfico. */
 @container conteudo (min-width:900px){
   .painel{grid-template-columns:calc(var(--cols,3)*var(--card) + (var(--cols,3) - 1)*var(--sp-3)) minmax(0,1fr);
     grid-template-areas:"rc ." "kc sem" "rb sem" "kb sem" "ro sem" "ko sem";
@@ -254,30 +254,28 @@
   /* as barras ficam no pé da coluna do gráfico, terminando com os
      "outros"; o gráfico encolhe para dar lugar a elas (--barras) */
   .painel{--barra:48px;--barras:calc(var(--barra) + var(--sp-3))}
-  .painel[data-barras=pilha]{--barras:calc(2*var(--barra) + var(--sp-2) + var(--sp-3))}
   .painel .semana-bloco{grid-area:sem;align-self:stretch;contain:size;min-height:240px;
     margin-bottom:var(--barras);display:flex;flex-direction:column}
   .painel .semana-bloco>.chart{flex:1;min-height:0;overflow:auto}
 
   /* as barras: nome e detalhe à esquerda, valor à direita */
   .painel .kpis.topo2{grid-area:ko;grid-column:2;align-self:end;grid-template-columns:1fr 1fr}
-  .painel[data-barras=pilha] .kpis.topo2{grid-template-columns:1fr;gap:var(--sp-2)}
   .topo2 .kpi{flex-direction:row;align-items:center;gap:var(--sp-3);padding:0 var(--sp-4);height:var(--barra);min-height:0}
   .topo2 .kpi .nm{margin:0;flex:0 0 auto}
   .topo2 .kpi .sb{margin:0;padding:0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .topo2 .kpi .vl{order:3;margin:0 0 0 auto;font-size:26px;line-height:1}
-  /* degradê das barras: do roxo ao azul do tema, um brilho suave atrás
-     de cada valor e a borda no mesmo degradê */
-  .topo2 .kpi.destaque{--g1:var(--rt-purple);--g2:var(--rt-blue);
+  /* degradê das barras: as cores do tema (as mesmas do --rt-grad dos
+     botões), da primeira à segunda, com a borda no mesmo degradê. Sem
+     brilho por fora: só um realce suave atrás do valor */
+  .topo2 .kpi.destaque{--g1:var(--rt-pink);--g2:var(--rt-purple);
     background:
-      radial-gradient(60% 160% at 100% 50%, color-mix(in srgb, var(--g2) 38%, transparent), transparent 70%) padding-box,
+      radial-gradient(60% 160% at 100% 50%, color-mix(in srgb, var(--g2) 30%, transparent), transparent 70%) padding-box,
       linear-gradient(90deg,
         color-mix(in srgb, var(--g1) 30%, var(--rt-surface)) 0%,
-        color-mix(in srgb, var(--g1) 14%, var(--rt-surface)) 45%,
+        color-mix(in srgb, var(--g1) 12%, var(--rt-surface)) 45%,
         color-mix(in srgb, var(--g2) 32%, var(--rt-surface)) 100%) padding-box,
       linear-gradient(90deg, var(--g1), var(--g2)) border-box;
-    box-shadow:0 6px 26px -10px color-mix(in srgb, var(--g1) 70%, transparent),
-      0 6px 26px -10px color-mix(in srgb, var(--g2) 70%, transparent)}
+    box-shadow:none}
   .topo2 .kpi.destaque .vl{text-shadow:0 0 16px color-mix(in srgb, var(--g2) 75%, transparent)}
 }
 .topo2-saldo{display:flex;min-width:0}
