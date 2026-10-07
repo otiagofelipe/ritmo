@@ -121,7 +121,10 @@ function grafico(alvoId, cfg){
   // largura real da caixa em qualquer tela: o texto sai no tamanho do CSS
   // e o gráfico acompanha a página ao estreitar ou alargar a janela
   const W = Math.max(280, Math.round(box.clientWidth || (estreito ? 340 : 720)));
-  const H = estreito ? Math.round((cfg.altura || 190) * 1.3) : (cfg.altura || 190);
+  /* topoExtra: faixa livre no alto do gráfico, para o balão do toque
+     caber dentro da caixa quando ela rola de lado (e corta o que vaza). */
+  const topoExtra = cfg.topoExtra || 0;
+  const H = (estreito ? Math.round((cfg.altura || 190) * 1.3) : (cfg.altura || 190)) + topoExtra;
   // largura média de um caractere dos rótulos (fonte mono do CSS)
   const CW = 6.1;
   /* O brilho neon é um filtro SVG com região fixa em px. Com o gráfico
@@ -137,7 +140,7 @@ function grafico(alvoId, cfg){
   // compacto: eixo e rótulos em "R$ 3,3k"; o tooltip segue completo.
   // No celular o eixo é sempre compacto: sobra largura para o gráfico.
   const fmtEixo   = (cfg.compacto || estreito) ? RSk : RS;
-  const fmtRotulo = cfg.compacto ? RSk : RS2;
+  const fmtRotulo = cfg.fmtRotulo || (cfg.compacto ? RSk : RS2);
   // com faixas nomeadas, sobra um respiro no topo para elas
   /* Rótulo de referência mora numa faixa própria à direita. Desenhado
      por cima da área do gráfico, ele brigava com o valor das barras. */
@@ -150,7 +153,7 @@ function grafico(alvoId, cfg){
     : 0;
   let pl = estreito ? 40 : 46;
   const pr = estreito ? 8 : Math.max(10, larguraRef),
-        pt = (cfg.faixas && cfg.faixas.length) ? 24 : 12, pb = estreito ? 26 : 24;
+        pt = ((cfg.faixas && cfg.faixas.length) ? 24 : 12) + topoExtra, pb = estreito ? 26 : 24;
   let largura = W - pl - pr;
   const altura = H - pt - pb;
 
@@ -183,7 +186,7 @@ function grafico(alvoId, cfg){
   for(let v=vMin; v<=vMax+esc.passo/2; v+=esc.passo){
     const yy = y(v);
     g += `<line class="ggrid" x1="${pl}" y1="${yy.toFixed(1)}" x2="${W-pr}" y2="${yy.toFixed(1)}"/>`;
-    g += `<text class="gaxis" x="${pl-7}" y="${(yy+3).toFixed(1)}" text-anchor="end">${escHtml(fmtEixo(v))}</text>`;
+    g += `<text class="gaxis gy" x="${pl-7}" y="${(yy+3).toFixed(1)}" text-anchor="end">${escHtml(fmtEixo(v))}</text>`;
   }
 
   // ── eixo X: no máximo 7 rótulos para não embolar no celular
