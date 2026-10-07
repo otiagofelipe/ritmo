@@ -283,11 +283,6 @@ input.fx-fatura{cursor:pointer}
   border:1px solid var(--rt-border-strong);transition:border-color .12s,color .12s,background-color .12s}
 .cp-cat:hover{color:var(--rt-text);border-color:color-mix(in srgb, var(--rt-pink) 45%, var(--rt-border-strong))}
 .cp-cat.on{color:#FFFFFF;background:var(--rt-grad);border-color:transparent}
-.cp-nova-campo{display:inline-flex;gap:4px;align-items:center}
-.cp-nova-campo input{width:170px;padding:6px 10px;font-size:12.5px;border-radius:var(--rt-radius-pill);
-  background:var(--rt-sunken);border:1px solid var(--rt-border-strong);color:var(--rt-text)}
-.cp-nova-campo input:focus{outline:none;border-color:var(--rt-pink)}
-.cp-ok{padding:6px 12px;border-radius:var(--rt-radius-pill);font-size:12px;font-weight:600;color:#FFFFFF;background:var(--rt-grad)}
 .cp-tg{display:flex;align-items:center;gap:12px;width:100%;padding:10px 4px;text-align:left;color:var(--rt-text);
   border-top:1px solid color-mix(in srgb, var(--rt-border) 70%, transparent)}
 .cp-tg:first-of-type{border-top:none}

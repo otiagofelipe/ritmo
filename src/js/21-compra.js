@@ -1,8 +1,7 @@
 /* ═══════════ Card da compra ═══════════
 
    Tocar numa compra da lista abre o gerenciamento dela:
-   - categoria: as fixas (CATEGORIAS_BASE) + as criadas aqui
-     (bronze.ritmo.tb_categories)
+   - categoria: a lista fixa (CATEGORIAS_BASE)
    - marcações: rolê (bronze.ritmo.tb_entertainment, como antes) e gasto
      fixo (automático, sim ou não)
    - divisão: cada pessoa vira um Me devem (bronze.ritmo.tb_receivables)
@@ -11,9 +10,6 @@
    Categoria e gasto fixo vão para bronze.ritmo.tb_transaction_details.
    Tudo é cruzado pelo id_transaction, com descrição + valor + dia de
    reserva para quando o Open Finance trocar o id. Salvar é otimista. */
-
-/** Id da categoria a partir do nome: "Pet shop" → "pet-shop". */
-const idCategoria = nome => semAcento(nome).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
 
 function abrirCompra(l){
   if(!l || l.pendente) return;
@@ -27,13 +23,14 @@ function abrirCompra(l){
   };
   // estado do card (cópia): só vai para a tela e para o Databricks no Salvar
   const st = { categoria: antes.categoria, fixa: antes.fixa, role: antes.role,
-               divisoes: antes.divisoes.map(d => ({...d})), comigo: true, novaCat: null };
+               divisoes: antes.divisoes.map(d => ({...d})), comigo: true };
 
   const box = abrirModal(() => fecharModal());
   const dia = `${p2(l.data.getDate())}/${p2(l.data.getMonth()+1)}`;
 
   function desenhar(){
     const cats = todasCategorias();
+    // categoria antiga que saiu da lista continua visível enquanto estiver escolhida
     if(st.categoria && !cats.includes(st.categoria)) cats.splice(cats.length-1, 0, st.categoria);
     const fixaEfetiva = st.fixa == null ? fixaAuto : st.fixa;
     const somaDiv = st.divisoes.reduce((a,d)=>a+(Number(d.valor)||0), 0);
@@ -50,9 +47,6 @@ function abrirCompra(l){
       <div class="fx-secao">Categoria</div>
       <div class="cp-cats" role="radiogroup" aria-label="Categoria">
         ${cats.map(c=>`<button type="button" class="cp-cat${c===st.categoria?" on":""}" role="radio" aria-checked="${c===st.categoria}" data-cat="${esc(c)}">${esc(c)}</button>`).join("")}
-        ${st.novaCat==null
-          ? `<button type="button" class="fx-add cp-nova"><svg class="ic" viewBox="0 0 24 24"><use href="#i-plus"/></svg>nova categoria</button>`
-          : `<span class="cp-nova-campo"><input type="text" maxlength="40" placeholder="Nome da categoria" aria-label="Nome da nova categoria"><button type="button" class="cp-ok">ok</button></span>`}
       </div>
       ${l.categoriaOrig?`<div class="fx-dica">No banco: ${esc(l.categoriaOrig)}${autoCat?` → ${esc(autoCat)}`:""}</div>`:""}
 
@@ -89,22 +83,6 @@ function abrirCompra(l){
     box.querySelector("#cp-salvar").onclick = salvar;
 
     box.querySelectorAll(".cp-cat").forEach(b => b.onclick = () => { st.categoria = b.dataset.cat; desenhar(); });
-    const nova = box.querySelector(".cp-nova");
-    if(nova) nova.onclick = () => { st.novaCat = ""; desenhar(); box.querySelector(".cp-nova-campo input").focus(); };
-    const campo = box.querySelector(".cp-nova-campo input");
-    if(campo){
-      const criar = () => {
-        const nome = campo.value.trim().replace(/\s+/g, " ");
-        st.novaCat = null;
-        if(nome && idCategoria(nome)){
-          const igual = todasCategorias().find(c => c.toLowerCase() === nome.toLowerCase());
-          st.categoria = igual || nome.charAt(0).toUpperCase() + nome.slice(1);
-        }
-        desenhar();
-      };
-      box.querySelector(".cp-ok").onclick = criar;
-      campo.onkeydown = e => { if(e.key === "Enter"){ e.preventDefault(); criar(); } if(e.key === "Escape"){ e.stopPropagation(); st.novaCat = null; desenhar(); } };
-    }
 
     box.querySelector('[data-tg="role"]').onclick = () => { st.role = !st.role; desenhar(); };
     box.querySelector('[data-tg="fixa"]').onclick = () => { st.fixa = !fixaEfetiva; desenhar(); };
@@ -163,15 +141,8 @@ function abrirCompra(l){
     const base = { id_transaction: l.id || null, nm_merchant: l.desc, vl_amount: l.valor, dt_transaction: diaISO(l.data) };
     const chamadas = [];
 
-    // 1. categoria nova
+    // 1. categoria / gasto fixo da compra
     const cat = st.categoria;
-    if(cat && !todasCategorias().includes(cat)){
-      const c = { id: idCategoria(cat), nome: cat };
-      S.reg.categorias = (S.reg.categorias || []).concat(c);
-      chamadas.push(["categorias", [{ id_category: c.id, nm_category: c.nome }]]);
-    }
-
-    // 2. categoria / gasto fixo da compra
     if(cat !== antes.categoria || st.fixa !== antes.fixa){
       const det = { id: l.id || "", chave: chaveRole(l), categoria: cat === autoCat ? "" : cat,
                     fixa: st.fixa, ts: new Date().toISOString() };
@@ -179,7 +150,7 @@ function abrirCompra(l){
       chamadas.push(["detalhes", [{ ...base, nm_category: det.categoria || null, fl_fixed_expense: st.fixa }]]);
     }
 
-    // 3. rolê: mesmo caminho do extrato (tb_entertainment)
+    // 2. rolê: mesmo caminho do extrato (tb_entertainment)
     if(st.role !== antes.role){
       const k = chaveRole(l);
       if(st.role){ S.roles.add(k); S.rolesFora.delete(k); } else { S.roles.delete(k); S.rolesFora.add(k); }
@@ -188,7 +159,7 @@ function abrirCompra(l){
       S.rolesSujo = S.rolesMudados.size > 0;
     }
 
-    // 4. divisão: cria, altera e desfaz Me devem
+    // 3. divisão: cria, altera e desfaz Me devem
     const devem = S.reg.devem = (S.reg.devem || []);
     const linhasDevem = [];
     const ficam = new Set();

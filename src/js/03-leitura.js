@@ -135,7 +135,7 @@ function ingerirRegistros(d){
       acrescimos: num(r.vl_additions),
       descontos: -Math.abs(num(r.vl_deductions))
     })),
-    // card da compra: categoria e gasto fixo escolhidos e categorias novas
+    // card da compra: categoria e gasto fixo escolhidos
     detalhes: (d.detalhes||[]).map(r => {
       const f = txt(r.fl_fixed_expense);
       return {
@@ -146,8 +146,6 @@ function ingerirRegistros(d){
         ts: txt(r.ts_inserted)
       };
     }),
-    categorias: (d.categorias||[]).map(r => ({ id: txt(r.id_category), nome: txt(r.nm_category) }))
-      .filter(c => c.id && c.nome),
     // aba Cartões: a última escolha de cada cartão
     cartoes: (d.cartoes||[]).map(r => ({
       id: txt(r.id_card), ligado: ehVerdade(r.fl_enabled)
@@ -313,9 +311,7 @@ function divisoesDe(l){
   return (S.reg.devem || []).filter(r => r.transacao && r.transacao === l.id);
 }
 
-/** Todas as categorias: as fixas e as criadas, sem repetir. */
+/** Categorias que o card oferece, com "Outros" por último. */
 function todasCategorias(){
-  const extra = (S.reg.categorias || []).map(c => c.nome)
-    .filter(n => !CATEGORIAS_BASE.some(b => b.toLowerCase() === n.toLowerCase()));
-  return CATEGORIAS_BASE.filter(c => c !== "Outros").concat(extra.sort((a,b)=>a.localeCompare(b,"pt-BR")), ["Outros"]);
+  return CATEGORIAS_BASE.filter(c => c !== "Outros").concat(["Outros"]);
 }

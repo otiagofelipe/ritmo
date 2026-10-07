@@ -157,16 +157,12 @@ Select id_fixed_expense, nm_invoice, nm_alias, vl_amount, nr_day, fl_third_party
 From silver.ritmo.vw_fixed_expenses
 Order By nm_alias, dt_start_month`,
 
-  // card da compra: categoria/gasto fixo e categorias criadas
+  // card da compra: categoria e gasto fixo
   detalhes: `
 Select id_transaction, nm_merchant, vl_amount, dt_transaction, nm_category, fl_fixed_expense,
     Date_Format(ts_inserted, 'yyyy-MM-dd HH:mm:ss') As ts_inserted
 From silver.ritmo.vw_transaction_details`,
 
-  categorias: `
-Select id_category, nm_category
-From silver.ritmo.vw_categories
-Order By nm_category`,
 
   // cartões ligados/desligados na aba Cartões (última escolha de cada um)
   cartoes: `
@@ -367,14 +363,6 @@ const OPS = {
       ["dt_transaction",   "data",  true],
       ["nm_category",      "texto"],
       ["fl_fixed_expense", "flagOuNulo"],
-    ],
-  },
-  categorias: {
-    tabela: "bronze.ritmo.tb_categories",
-    colunas: [
-      ["id_category", "slug",  true],
-      ["nm_category", "texto", true],
-      ["fl_deleted",  "flag"],
     ],
   },
   cartoes: {

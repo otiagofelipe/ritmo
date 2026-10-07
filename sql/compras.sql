@@ -2,7 +2,7 @@
    RITMO · Gerenciamento de cada compra (card da compra)
 
    Ao tocar numa compra da lista, abre um card com:
-   - categoria (lista fixa da página + as que você criar)
+   - categoria (lista fixa da página)
    - marcações extras: gasto fixo (aqui) e rolê (continua na
      bronze.ritmo.tb_entertainment)
    - divisão: cada pessoa vira um Me devem na bronze.ritmo.tb_receivables
@@ -65,23 +65,6 @@ Tblproperties (
 Alter Table bronze.ritmo.tb_receivables Add Column id_transaction String After ls_paid_installments;
 
 Comment On Column bronze.ritmo.tb_receivables.id_transaction Is 'id_transaction da compra dividida que gerou este Me devem (gold.prod.vw_ritmo). Vazio para registro anotado à mão.';
-
--- ─── Categorias criadas na página (as fixas moram no código) ───
-Create Table If Not Exists bronze.ritmo.tb_categories (
-    id_category String,
-    nm_category String,
-    fl_deleted  Boolean   Default False,
-    ts_inserted Timestamp Default Current_Timestamp()
-)
-Tblproperties (
-    'delta.feature.allowColumnDefaults' = 'supported',
-    'delta.columnMapping.mode' = 'name'
-);
-
-Comment On Column bronze.ritmo.tb_categories.id_category Is 'Identificador estável da categoria (nome sem acento, minúsculo, com hífen).';
-Comment On Column bronze.ritmo.tb_categories.nm_category Is 'Nome da categoria como aparece na página.';
-Comment On Column bronze.ritmo.tb_categories.fl_deleted  Is 'Indica que esta versão remove a categoria.';
-Comment On Column bronze.ritmo.tb_categories.ts_inserted Is 'Data e hora (UTC) em que o registro foi inserido na plataforma.';
 
 
 /* ═══════════════ 2. SILVER ═══════════════ */
@@ -166,24 +149,6 @@ Comment On Column silver.ritmo.vw_receivables.fl_paid              Is 'Indica se
 Comment On Column silver.ritmo.vw_receivables.id_transaction       Is 'Compra dividida que gerou o registro (vazio = anotado à mão).';
 Comment On Column silver.ritmo.vw_receivables.ts_inserted          Is 'Data e hora (UTC) da versão atual do lançamento.';
 
--- ─── Categorias criadas na página ───
-Create Or Replace View silver.ritmo.vw_categories As
-With atual As (
-    Select *
-    From bronze.ritmo.tb_categories
-    Qualify Row_Number() Over (Partition By id_category Order By ts_inserted Desc) = 1
-)
-Select
-    id_category,
-    nm_category,
-    ts_inserted
-From atual
-Where Not Coalesce(fl_deleted, False);
-
-Comment On Column silver.ritmo.vw_categories.id_category Is 'Identificador estável da categoria.';
-Comment On Column silver.ritmo.vw_categories.nm_category Is 'Nome da categoria como aparece na página.';
-Comment On Column silver.ritmo.vw_categories.ts_inserted Is 'Data e hora (UTC) da versão atual.';
-
 
 /* ═══════════════ 3. CONFERÊNCIA ═══════════════ */
 
@@ -196,15 +161,19 @@ From silver.ritmo.vw_receivables r
 Where r.id_transaction Is Not Null
 Order By r.dt_start_month Desc;
 
-Select * From silver.ritmo.vw_categories;
 
 
-/* ═══════════════ 4. MIGRAÇÃO (só se a divisão já foi usada) ═══════════════
+/* ═══════════════ 4. LIMPEZA DA PRIMEIRA VERSÃO — rodar DEPOIS do merge ═══════════════
 
-   A primeira versão do card guardava o vínculo em tb_transaction_splits.
-   Isto grava uma versão nova de cada Me devem dividido, agora com o
-   id_transaction, e depois apaga a tabela e a view antigas. Se nunca
-   dividiu nenhuma compra, pode pular direto para os Drop. */
+   Até o merge, o site no ar ainda lê vw_transaction_splits e
+   vw_categories: apagá-las antes faz aparecer o aviso de "parte dos
+   dados não carregou".
+
+   A primeira versão do card guardava o vínculo em tb_transaction_splits
+   e as categorias criadas em tb_categories; as duas saem.
+   - O Insert grava uma versão nova de cada Me devem dividido, agora com
+     o id_transaction. Se nunca dividiu nenhuma compra, pode pular.
+   - Os Drop apagam as tabelas e views que não são mais usadas. */
 
 Insert Into bronze.ritmo.tb_receivables
     (id_receivable, dt_start_month, nm_person, nm_item, vl_amount, qt_installments, ls_paid_installments, id_transaction, fl_deleted)
@@ -221,3 +190,5 @@ Where r.id_transaction Is Null;
 
 Drop View If Exists silver.ritmo.vw_transaction_splits;
 Drop Table If Exists bronze.ritmo.tb_transaction_splits;
+Drop View If Exists silver.ritmo.vw_categories;
+Drop Table If Exists bronze.ritmo.tb_categories;

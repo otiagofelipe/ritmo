@@ -228,8 +228,7 @@ const cartoesDoTipo = tipo => CATALOGO_CARTOES.filter(c => c.tipo === tipo)
 const cartoesLigados = tipo => cartoesDoTipo(tipo).filter(cartaoLigado);
 
 /**
- * Categorias de compra. As fixas ficam aqui; as que você cria no card da
- * compra vão para bronze.ritmo.tb_categories e entram depois destas.
+ * Categorias de compra: a lista fixa que o card da compra oferece.
  */
 const CATEGORIAS_BASE = ["Mercado","Restaurante","Delivery","Transporte","Casa",
   "Saúde","Lazer","Assinaturas","Compras","Outros"];
