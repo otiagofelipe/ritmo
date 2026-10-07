@@ -173,18 +173,19 @@
     <!-- ─────── Dashboard ─────── -->
     <section id="pg-dash">
       <!-- Topo do Dashboard: cards em grupos (total e saldo, cartões,
-           benefícios, outros); no computador o "Gastos por semana" fica ao lado -->
+           benefícios, outros). No computador os grupos ficam à esquerda e,
+           à direita, o "Gastos por semana" com total e saldo embaixo -->
       <div class="painel">
-        <div class="painel-cards">
-          <div class="kpis topo2">
-            <div class="kpi destaque tot-card">
-              <div class="nm">total <span class="tot-quando" id="m-progresso"></span></div>
-              <div class="vl" id="m-total">—</div>
-              <div class="tot-linhas" id="m-split"></div>
-              <span id="m-titulo" hidden></span><div id="m-escada" hidden></div>
-            </div>
-            <div class="topo2-saldo" id="m-saldo"></div>
+        <div class="kpis topo2">
+          <div class="kpi destaque tot-card">
+            <div class="nm">total <span class="tot-quando" id="m-progresso"></span></div>
+            <div class="vl" id="m-total">—</div>
+            <div id="m-split" hidden></div>
+            <span id="m-titulo" hidden></span><div id="m-escada" hidden></div>
           </div>
+          <div class="topo2-saldo" id="m-saldo"></div>
+        </div>
+        <div class="painel-cards">
           <section class="grupo-cards" aria-labelledby="g-cartoes">
             <div class="grupo-rot"><span class="eyebrow" id="g-cartoes">cartões</span><b class="grupo-tot" id="m-cartoes-tot"></b></div>
             <div class="kpis" id="m-cartoes"></div>

@@ -218,33 +218,41 @@
 
 /* ═══ topo do Dashboard: cards em grupos ═══
    Celular: total e saldo lado a lado, depois Cartões, Benefícios e
-   Outros, e o "Gastos por semana" embaixo. Computador: o mesmo numa
-   coluna, com o gráfico semanal na coluna ao lado. */
+   Outros, e o "Gastos por semana" embaixo. Computador: os grupos numa
+   coluna e, na outra, o gráfico semanal com total e saldo embaixo. */
 .painel{display:grid;gap:var(--sp-3);grid-template-columns:minmax(0,1fr);align-items:start}
-@media(min-width:900px){
-  .painel{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-4)}
-  .painel .semana-bloco{position:sticky;top:var(--sp-3)}
-}
 .painel-cards{min-width:0}
+.painel-cards>.grupo-cards:first-child{margin-top:0}
 .kpis.topo2{grid-template-columns:1fr 1fr}
+
+/* fora do celular, cada card tem a largura de hoje (uns 170 px) e o
+   grupo cabe até 3 por linha; o quarto desce */
+@media(min-width:761px){
+  .painel .kpis{grid-template-columns:repeat(3,minmax(0,170px))}
+  .painel .kpis.topo2{grid-template-columns:repeat(2,minmax(0,170px))}
+}
+/* com espaço para as duas colunas: grupos à esquerda; à direita o
+   gráfico semanal e, embaixo dele, total e saldo */
+@container conteudo (min-width:980px){
+  .painel{grid-template-columns:calc(3*170px + 2*var(--sp-3)) minmax(0,1fr);
+    grid-template-rows:auto 1fr;column-gap:var(--sp-5);row-gap:var(--sp-3);
+    grid-template-areas:"cards semana" "cards topo"}
+  .painel-cards{grid-area:cards}
+  .painel .semana-bloco{grid-area:semana}
+  .painel .topo2{grid-area:topo;align-self:start}
+}
 .topo2-saldo{display:flex;min-width:0}
 .topo2-saldo>.kpi{flex:1}
 
-/* card do total: mesmo desenho do saldo, com as três leituras embaixo */
+/* card do total: mesmo desenho do saldo */
 .tot-card .nm{gap:5px}
 .tot-quando{color:var(--rt-text-muted);letter-spacing:.06em;text-transform:none;font-weight:400}
 .tot-card .vl .cents{font-size:.6em;opacity:.75}
-.tot-linhas{display:grid;gap:3px;padding-top:8px;border-top:1px solid #FFFFFF1F;
-  font-size:11px;color:var(--rt-text-secondary)}
-/* o #m-split herdou do herói antigo largura máxima e centralização */
-.tot-card #m-split{max-width:none;margin:10px 0 0}
-.tot-linhas .tl{display:flex;justify-content:space-between;align-items:center;gap:8px;white-space:nowrap}
-.tot-linhas .tl span{min-width:0;overflow:hidden;text-overflow:ellipsis}
-.tot-linhas .tl b{font-family:var(--mono);font-weight:500;color:var(--rt-text);font-variant-numeric:tabular-nums}
 
 /* rótulo de cada grupo */
 .grupo-cards{margin-top:var(--sp-3)}
-.grupo-rot{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 2px 8px}
+/* o total do grupo fica colado ao nome: a linha pode ser mais larga que os cards */
+.grupo-rot{display:flex;align-items:baseline;gap:10px;margin:0 2px 8px}
 .grupo-tot{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--rt-text);font-variant-numeric:tabular-nums}
 .grupo-tot:empty{display:none}
 
