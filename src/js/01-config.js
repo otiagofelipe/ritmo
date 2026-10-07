@@ -220,8 +220,12 @@ function cartaoLigado(c){
   return g ? g.ligado : !!c.padrao;
 }
 
-/** Cartões ligados de um tipo, na ordem do catálogo. */
-const cartoesLigados = tipo => CATALOGO_CARTOES.filter(c => c.tipo === tipo && cartaoLigado(c));
+/** Cartões de um tipo em ordem alfabética (sem diferença por acento ou maiúscula). */
+const cartoesDoTipo = tipo => CATALOGO_CARTOES.filter(c => c.tipo === tipo)
+  .sort((a,b) => a.titulo.localeCompare(b.titulo, "pt-BR", { sensitivity:"base" }));
+
+/** Cartões ligados de um tipo, em ordem alfabética. */
+const cartoesLigados = tipo => cartoesDoTipo(tipo).filter(cartaoLigado);
 
 /**
  * Contas correntes não têm fatura: entram no extrato pela data, mas

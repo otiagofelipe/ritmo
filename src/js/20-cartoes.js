@@ -19,7 +19,7 @@ function lancamentosDoBanco(c){
 
 function pgCartoes(){
   for(const tipo of ["credito","beneficio"]){
-    const lista = CATALOGO_CARTOES.filter(c => c.tipo === tipo);
+    const lista = cartoesDoTipo(tipo);
     const ligados = lista.filter(cartaoLigado).length;
     $("ct-n-"+tipo).textContent = `${ligados} de ${lista.length} ligado${ligados===1?"":"s"}`;
     $("ct-"+tipo).innerHTML = lista.map(c => {
