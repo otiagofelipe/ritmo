@@ -253,8 +253,10 @@
 @media(max-width:520px){
   .tab-fat .col-op{display:none}
   .tab-fat td,.tab-fat th{padding-left:10px}
-  .temas{gap:4px;padding:3px}
-  .temas button{width:19px;height:19px}
+  /* seletor de tema em 2×2, na linha do título (sem descer para baixo dele) */
+  .topbar{flex-wrap:nowrap}
+  .temas{display:grid;grid-template-columns:repeat(2,17px);gap:5px;padding:5px;border-radius:12px;margin-left:auto}
+  .temas button{width:17px;height:17px}
   .total{font-size:clamp(50px,15vw,64px)}
 }
 @media(max-width:380px){
@@ -263,6 +265,12 @@
   .resumo-pes .badge{font-size:9px;padding:2px 6px;gap:4px}
   .resumo-pes .badge::before{width:4px;height:4px}
   .resumo-pes .cur{display:none}
+  /* telas estreitas: título, situação e temas ainda numa linha só */
+  .topbar{gap:8px}
+  .sync{min-width:0;padding-left:8px}
+  .sync > div{min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .temas{grid-template-columns:repeat(2,15px);gap:4px;padding:4px}
+  .temas button{width:15px;height:15px}
 }
 @media(max-width:340px){
   .resumo-pes .badge{padding:2px 4px}
