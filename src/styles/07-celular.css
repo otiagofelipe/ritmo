@@ -398,19 +398,25 @@ table.tab-fat.resumo-pes :is(th,td){text-align:center}
 
 
 /* ═══ Ritmo do mês: total, caixa do gráfico e eixo Y parado ═══ */
-/* total do período: só o número, entre o título e os ícones */
-.dia-cab{flex-wrap:nowrap;gap:8px}
+/* total do período: logo depois do título, separado por um fio, com
+   rótulo pequeno em cima — o mesmo desenho do "atualizado em" do topo */
+.dia-cab{flex-wrap:nowrap;gap:12px}
 .dia-cab h2{flex:0 0 auto}
-.dia-total{flex:1 1 auto;min-width:0;align-self:center;text-align:right;white-space:nowrap;overflow:hidden;
-  font-family:var(--mono);font-size:12px;font-weight:500;color:var(--rt-text-secondary);font-variant-numeric:tabular-nums;
-  padding-right:2px}
+.dia-total{flex:0 1 auto;min-width:0;margin-right:auto;align-self:center;display:flex;flex-direction:column;gap:3px;
+  padding-left:12px;border-left:1px solid var(--rt-border);line-height:1;white-space:nowrap}
+.dia-total small{font-family:var(--body);font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--rt-text-muted)}
+.dia-total b{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--rt-text);
+  font-variant-numeric:tabular-nums;overflow:hidden}
 .dia-cab .vis-sel{margin-left:0;flex:0 0 auto}
-/* alargar: botão redondo no mesmo estilo do seletor, ao lado dele */
-.dia-expandir{flex:0 0 auto;align-self:center;width:36px;height:36px;border-radius:var(--rt-radius-pill);
-  display:flex;align-items:center;justify-content:center;color:var(--rt-text-muted);
-  border:1px solid var(--rt-border);background:var(--rt-inset);transition:color .15s,border-color .15s,background .15s}
+/* alargar: botão pequeno por cima do canto superior direito do gráfico */
+.dia-expandir{position:absolute;top:2px;right:2px;z-index:6;width:32px;height:32px;border-radius:var(--rt-radius-pill);
+  display:flex;align-items:center;justify-content:center;color:var(--rt-text-secondary);
+  border:1px solid var(--rt-border-strong);background:color-mix(in srgb, var(--rt-surface) 82%, transparent);
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  transition:color .15s,border-color .15s,background .15s}
 .dia-expandir[hidden]{display:none}
-.dia-expandir svg.ic{width:16px;height:16px;stroke-width:2}
+.dia-expandir svg.ic{width:15px;height:15px;stroke-width:2}
 .dia-expandir .fecha,.dia-expandir[aria-pressed="true"] .abre{display:none}
 .dia-expandir[aria-pressed="true"] .fecha{display:block}
 .dia-expandir:hover{color:var(--rt-text)}
