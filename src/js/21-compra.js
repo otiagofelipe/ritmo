@@ -1,16 +1,15 @@
 /* ═══════════ Card da compra ═══════════
 
    Tocar numa compra da lista abre o gerenciamento dela:
-   - no topo, a compra (valor grande) e três botões de um toque:
-     categoria (abre a lista com busca, das mais usadas para as menos),
-     rolê e gasto fixo
-   - rolê grava na bronze.ritmo.tb_entertainment, como antes; gasto fixo
-     é automático, sim ou não
+   - no topo, a compra (valor grande) e dois botões de um toque:
+     categoria (abre a lista com busca, das mais usadas para as menos)
+     e rolê (apagado = "Não é rolê")
+   - rolê grava na bronze.ritmo.tb_entertainment, como antes
    - divisão: cada pessoa vira um Me devem (bronze.ritmo.tb_receivables)
      com o id_transaction da compra; o card mostra o que já voltou e o
      que falta, e “em aberto”/“pago” marca a parcela do Me devem
 
-   Categoria e gasto fixo vão para bronze.ritmo.tb_transaction_details.
+   A categoria vai para bronze.ritmo.tb_transaction_details.
    Tudo é cruzado pelo id_transaction, com descrição + valor + dia de
    reserva para quando o Open Finance trocar o id. Salvar é otimista. */
 
@@ -23,7 +22,6 @@ function partesCategoria(c){
 function abrirCompra(l){
   if(!l || l.pendente) return;
   const autoCat = traduzirCategoria(l.categoriaOrig);
-  const fixaAuto = (() => { const s = new Set(); for(const f of fixasVigentes(l.competencia)){ const c = cobrancaDaFixa(f, l.competencia); if(c) s.add(c.id); } return s.has(l.id); })();
   const antes = {
     categoria: l.categoria || autoCat,
     fixa: l.fixaManual,                       // null = automático
@@ -42,7 +40,6 @@ function abrirCompra(l){
     const cats = categoriasPorUso();
     // categoria escolhida antes e que não está mais na lista continua aparecendo
     if(st.categoria && !cats.some(([c]) => c === st.categoria)) cats.push([st.categoria, 0]);
-    const fixaEfetiva = st.fixa == null ? fixaAuto : st.fixa;
     const [catEmoji, catNome] = partesCategoria(st.categoria || SEM_CATEGORIA);
     const [reais, cents] = BRL.format(l.valor).split(",");
     const temDiv = st.divisoes.length > 0;
@@ -60,12 +57,8 @@ function abrirCompra(l){
         <button type="button" class="cp-ac cp-ac-cat${st.abrirCat?" aberto":""}" aria-haspopup="listbox" aria-expanded="${st.abrirCat}"
           title="Trocar a categoria"><em></em><span class="cp-ac-lin"><span class="cp-ac-t"></span><svg class="cp-ac-seta" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg></span></button>
         <button type="button" class="cp-ac${st.role?" on":""}" data-tg="role" role="switch" aria-checked="${st.role}"
-          title="Conta no total do rolê"><em>🎉</em><span class="cp-ac-t">Rolê</span></button>
-        <button type="button" class="cp-ac${fixaEfetiva?" on":""}" data-tg="fixa" role="switch" aria-checked="${fixaEfetiva}"
-          title="${st.fixa==null ? (fixaAuto ? "Automático: casou com o cadastro de Gastos fixos" : "Automático: não casou com nenhuma conta fixa") : "Marcado à mão"}">
-          <em>📌</em><span class="cp-ac-t">Gasto fixo</span><small>${st.fixa==null ? "automático" : "à mão"}</small></button>
+          title="${st.role?"Conta no total do rolê. Toque para tirar":"Toque para contar no total do rolê"}"><em>🎉</em><span class="cp-ac-t">${st.role?"É rolê":"Não é rolê"}</span></button>
       </div>
-      ${st.fixa!=null?`<button type="button" class="link-btn cp-auto">gasto fixo: voltar ao automático</button>`:""}
       ${st.abrirCat?`<div class="cp-sel-pn">
           <input type="search" class="cp-busca" placeholder="Buscar categoria" aria-label="Buscar categoria" autocomplete="off">
           <div class="cp-sel-lista" role="listbox" aria-label="Categorias"></div></div>
@@ -135,9 +128,6 @@ function abrirCompra(l){
     }
 
     box.querySelector('[data-tg="role"]').onclick = () => { st.role = !st.role; desenhar(); };
-    box.querySelector('[data-tg="fixa"]').onclick = () => { st.fixa = !fixaEfetiva; desenhar(); };
-    const auto = box.querySelector(".cp-auto");
-    if(auto) auto.onclick = () => { st.fixa = null; desenhar(); };
 
     // ── divisão: você + uma linha por pessoa, com o que já voltou
     const caixa = box.querySelector(".cp-pess");

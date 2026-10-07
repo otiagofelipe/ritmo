@@ -291,11 +291,11 @@ input.fx-fatura{cursor:pointer}
 .cp-valor small{font-size:.5em;opacity:.7}
 @media (max-width:640px){ .cp-hero{margin:calc(-1 * var(--sp-3)) calc(-1 * var(--sp-4)) var(--sp-3);padding:var(--sp-3) var(--sp-4)} }
 
-/* três ações de um toque: categoria, rolê, gasto fixo */
-.cp-acoes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:var(--sp-2)}
+/* duas ações de um toque: categoria e rolê */
+.cp-acoes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:var(--sp-2)}
 .cp-ac{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:78px;padding:10px 6px;
   border-radius:var(--rt-radius-md);border:1px solid var(--rt-border-strong);background:var(--rt-sunken);
-  color:var(--rt-text-secondary);font-size:12px;text-align:center;transition:border-color .15s,background-color .15s,color .15s}
+  color:var(--rt-text-secondary);font-size:12px;text-align:center;transition:border-color .15s,background-color .15s,color .15s,opacity .15s}
 .cp-ac em{font-style:normal;font-size:22px;line-height:1}
 .cp-ac .cp-ac-t{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cp-ac small{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--rt-text-muted)}
@@ -309,9 +309,9 @@ input.fx-fatura{cursor:pointer}
 .cp-ac-seta{flex:none;width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;
   opacity:.75;transition:transform .18s}
 .cp-ac-cat.aberto .cp-ac-seta{transform:rotate(180deg)}
-.link-btn.cp-auto{display:inline-block;margin:0 0 var(--sp-2) 2px;padding:2px 0;border:none;background:none;font-size:11.5px;
-  font-weight:500;letter-spacing:0;text-transform:none;color:var(--rt-blue)}
-.link-btn.cp-auto:hover{text-decoration:underline}
+/* rolê desligado: apagado, "Não é rolê" */
+.cp-ac[data-tg="role"]:not(.on){opacity:.45}
+.cp-ac[data-tg="role"]:not(.on):hover{opacity:.75}
 
 /* divisão: já voltou / falta, a barra das partes e uma linha por pessoa */
 .cp-div-tit{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:var(--sp-2)}
