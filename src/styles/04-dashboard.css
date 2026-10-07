@@ -234,14 +234,19 @@
   .painel .kpis.topo2{grid-template-columns:repeat(2,minmax(0,var(--card)))}
 }
 /* Com espaço para as duas colunas, tudo vira uma grade só: os grupos à
-   esquerda; à direita o gráfico semanal, do topo dos cartões ao fim dos
-   benefícios, e total e saldo na linha dos "outros". O gráfico não
-   empurra a altura das linhas (contain:size): quem manda são os cards,
-   e ele estica para caber (renderSemanas desenha nessa altura). */
+   esquerda e o gráfico semanal à direita, do topo dos cartões ao fim dos
+   "outros". O gráfico não empurra a altura das linhas (contain:size):
+   quem manda são os cards, e ele estica para caber (renderSemanas
+   desenha nessa altura). Total e saldo, conforme data-topo:
+     cima .... numa linha própria acima dos grupos
+     lado .... numa terceira coluna, um sobre o outro, ao lado do gráfico */
 @container conteudo (min-width:900px){
-  .painel{grid-template-columns:calc(var(--cols,3)*var(--card) + (var(--cols,3) - 1)*var(--sp-3)) minmax(0,1fr);
-    grid-template-areas:"rc ." "kc sem" "rb sem" "kb sem" "ro ." "ko topo";
+  .painel{--esq:calc(var(--cols,3)*var(--card) + (var(--cols,3) - 1)*var(--sp-3));
+    grid-template-columns:var(--esq) minmax(0,1fr);
+    grid-template-areas:"tp ." "rc ." "kc sem" "rb sem" "kb sem" "ro sem" "ko sem";
     column-gap:var(--sp-5);row-gap:0}
+  .painel[data-topo=lado]{grid-template-columns:var(--esq) minmax(0,1fr) var(--card);column-gap:var(--sp-4);
+    grid-template-areas:"rc . ." "kc sem tp" "rb sem tp" "kb sem tp" "ro sem tp" "ko sem tp"}
   .painel-cards,.painel .grupo-cards{display:contents}
   .grupo-cards[data-g=c]>.grupo-rot{grid-area:rc}
   .grupo-cards[data-g=c]>.kpis{grid-area:kc}
@@ -249,11 +254,13 @@
   .grupo-cards[data-g=b]>.kpis{grid-area:kb}
   .grupo-cards[data-g=o]>.grupo-rot{grid-area:ro}
   .grupo-cards[data-g=o]>.kpis{grid-area:ko}
-  .grupo-cards:not([data-g=c])>.grupo-rot{margin-top:var(--sp-3)}
+  .painel .grupo-rot{margin-top:var(--sp-3)}
+  .painel[data-topo=lado] .grupo-cards[data-g=c]>.grupo-rot{margin-top:0}
   .painel .semana-bloco{grid-area:sem;align-self:stretch;contain:size;min-height:240px;
     display:flex;flex-direction:column}
   .painel .semana-bloco>.chart{flex:1;min-height:0;overflow:auto}
-  .painel .topo2{grid-area:topo;align-self:start}
+  .painel .topo2{grid-area:tp;align-self:start}
+  .painel[data-topo=lado] .kpis.topo2{grid-template-columns:minmax(0,1fr)}
 }
 .topo2-saldo{display:flex;min-width:0}
 .topo2-saldo>.kpi{flex:1}
