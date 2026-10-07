@@ -197,3 +197,27 @@ Where r.id_transaction Is Not Null
 Order By r.dt_start_month Desc;
 
 Select * From silver.ritmo.vw_categories;
+
+
+/* ═══════════════ 4. MIGRAÇÃO (só se a divisão já foi usada) ═══════════════
+
+   A primeira versão do card guardava o vínculo em tb_transaction_splits.
+   Isto grava uma versão nova de cada Me devem dividido, agora com o
+   id_transaction, e depois apaga a tabela e a view antigas. Se nunca
+   dividiu nenhuma compra, pode pular direto para os Drop. */
+
+Insert Into bronze.ritmo.tb_receivables
+    (id_receivable, dt_start_month, nm_person, nm_item, vl_amount, qt_installments, ls_paid_installments, id_transaction, fl_deleted)
+Select
+    r.id_receivable, r.dt_start_month, r.nm_person, r.nm_item, r.vl_amount, r.qt_installments,
+    r.ls_paid_installments, s.id_transaction, r.fl_deleted
+From (
+    Select *
+    From bronze.ritmo.tb_receivables
+    Qualify Row_Number() Over (Partition By id_receivable Order By ts_inserted Desc) = 1
+) r
+Join silver.ritmo.vw_transaction_splits s On s.id_receivable = r.id_receivable
+Where r.id_transaction Is Null;
+
+Drop View If Exists silver.ritmo.vw_transaction_splits;
+Drop Table If Exists bronze.ritmo.tb_transaction_splits;
