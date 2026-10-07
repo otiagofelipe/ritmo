@@ -302,4 +302,25 @@
   .bl-tela .bl-rolo{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin;
     margin-right:-6px;padding-right:6px}
   .bl-tela .bl-rolo + *{flex:0 0 auto}
+
+  /* Todos os gastos: a lista usa a mesma largura da busca e do botão de
+     filtros. A sobra que a tela larga reserva para a barra de rolagem
+     deixava as linhas 12px mais curtas; no celular a barra é fina e
+     fica por cima do conteúdo. */
+  .bl-tela > .scroller{margin:0;padding:0;scrollbar-gutter:auto}
+  /* data do dia alinhada com a caixinha das linhas */
+  .bl-tela .daymark{padding-left:4px;padding-right:4px}
+  /* etiquetas numa linha só: a categoria encolhe com reticências em vez
+     de empurrar a parcela para baixo */
+  .bl-tela .tx-meta{flex-wrap:nowrap;overflow:hidden}
+  .bl-tela .tx-meta > *{flex:0 0 auto}
+  .bl-tela .tx-meta > .pill:first-child{display:block;flex:0 1 auto;min-width:0;
+    overflow:hidden;text-overflow:ellipsis}
+  /* sem o botão de salvar rolês, o pé do bloco não ocupa espaço */
+  .bl-tela .actions:not(:has(.btn:not(.hidden))){display:none}
+}
+
+/* no toque não existe "tirar o mouse": a linha tocada não fica acesa */
+@media (hover:none){
+  .tx:hover{background:none}
 }
