@@ -278,11 +278,6 @@ input.fx-fatura{cursor:pointer}
 
 /* ═══ card da compra ═══ */
 .cp-meta{display:flex;align-items:center;gap:8px;margin:-4px 0 var(--sp-2);font-size:12px;color:var(--rt-text-secondary)}
-.cp-cats{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.cp-cat{padding:6px 12px;border-radius:var(--rt-radius-pill);font-size:12.5px;color:var(--rt-text-secondary);
-  border:1px solid var(--rt-border-strong);transition:border-color .12s,color .12s,background-color .12s}
-.cp-cat:hover{color:var(--rt-text);border-color:color-mix(in srgb, var(--rt-pink) 45%, var(--rt-border-strong))}
-.cp-cat.on{color:#FFFFFF;background:var(--rt-grad);border-color:transparent}
 .cp-tg{display:flex;align-items:center;gap:12px;width:100%;padding:10px 4px;text-align:left;color:var(--rt-text);
   border-top:1px solid color-mix(in srgb, var(--rt-border) 70%, transparent)}
 .cp-tg:first-of-type{border-top:none}
@@ -304,6 +299,27 @@ input.fx-fatura{cursor:pointer}
 .cp-comigo{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--rt-text-secondary);cursor:pointer}
 .cp-comigo input{width:16px;height:16px;margin:0}
 .esoma.sub .p.neg{color:var(--rt-error)}
+
+/* categoria: botão que abre a lista, com busca em cima */
+.cp-sel{position:relative}
+.cp-sel-bt{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;text-align:left;font-size:14px;color:var(--rt-text);
+  background:var(--rt-sunken);border:1px solid var(--rt-border-strong);border-radius:var(--rt-radius-md);transition:border-color .12s}
+.cp-sel-bt:hover,.cp-sel.aberto .cp-sel-bt{border-color:color-mix(in srgb, var(--rt-pink) 55%, var(--rt-border-strong))}
+.cp-sel-v{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cp-sel-bt svg.ic{width:16px;height:16px;color:var(--rt-text-muted);transition:transform .2s var(--ease)}
+.cp-sel.aberto .cp-sel-bt svg.ic{transform:rotate(180deg)}
+.cp-sel-pn{margin-top:6px;border:1px solid var(--rt-border-strong);border-radius:var(--rt-radius-md);background:var(--rt-surface);overflow:hidden}
+.cp-busca{width:100%;padding:10px 12px;font-size:13.5px;border:none;border-bottom:1px solid var(--rt-border);background:var(--rt-sunken);color:var(--rt-text)}
+.cp-busca:focus{outline:none;background:color-mix(in srgb, var(--rt-pink) 6%, var(--rt-sunken))}
+.cp-sel-lista{max-height:264px;overflow-y:auto;overscroll-behavior:contain;padding:4px;
+  scrollbar-width:thin;scrollbar-color:color-mix(in srgb, var(--rt-purple) 45%, var(--rt-border)) transparent}
+.cp-sel-lista .fx-dica{padding:8px}
+.cp-op{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;text-align:left;font-size:13.5px;color:var(--rt-text);border-radius:var(--rt-radius-sm)}
+.cp-op span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cp-op small{font-family:var(--mono);font-size:11px;color:var(--rt-text-muted)}
+.cp-op:hover,.cp-op:focus-visible{background:var(--rt-hover);outline:none}
+.cp-op.on{background:color-mix(in srgb, var(--rt-pink) 16%, transparent)}
+.cp-op.on span{font-weight:600}
 
 /* lista de gastos: a compra abre o card */
 .tx.abre{cursor:pointer}

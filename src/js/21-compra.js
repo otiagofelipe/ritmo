@@ -1,7 +1,8 @@
 /* ═══════════ Card da compra ═══════════
 
    Tocar numa compra da lista abre o gerenciamento dela:
-   - categoria: a lista fixa (CATEGORIAS_BASE)
+   - categoria: lista suspensa com as categorias traduzidas (CATEGORIAS),
+     das que mais aparecem para as que menos, com busca
    - marcações: rolê (bronze.ritmo.tb_entertainment, como antes) e gasto
      fixo (automático, sim ou não)
    - divisão: cada pessoa vira um Me devem (bronze.ritmo.tb_receivables)
@@ -16,22 +17,22 @@ function abrirCompra(l){
   const autoCat = traduzirCategoria(l.categoriaOrig);
   const fixaAuto = (() => { const s = new Set(); for(const f of fixasVigentes(l.competencia)){ const c = cobrancaDaFixa(f, l.competencia); if(c) s.add(c.id); } return s.has(l.id); })();
   const antes = {
-    categoria: l.categoria || autoCat || "Outros",
+    categoria: l.categoria || autoCat,
     fixa: l.fixaManual,                       // null = automático
     role: ehRole(l),
     divisoes: divisoesDe(l).map(r => ({ id:String(r.id), pessoa:r.pessoa||"", valor:Number(r.valor)||0, pagos:r.pagos||"" }))
   };
   // estado do card (cópia): só vai para a tela e para o Databricks no Salvar
   const st = { categoria: antes.categoria, fixa: antes.fixa, role: antes.role,
-               divisoes: antes.divisoes.map(d => ({...d})), comigo: true };
+               divisoes: antes.divisoes.map(d => ({...d})), comigo: true, abrirCat: false };
 
   const box = abrirModal(() => fecharModal());
   const dia = `${p2(l.data.getDate())}/${p2(l.data.getMonth()+1)}`;
 
   function desenhar(){
-    const cats = todasCategorias();
-    // categoria antiga que saiu da lista continua visível enquanto estiver escolhida
-    if(st.categoria && !cats.includes(st.categoria)) cats.splice(cats.length-1, 0, st.categoria);
+    const cats = categoriasPorUso();
+    // categoria escolhida antes e que não está mais na lista continua aparecendo
+    if(st.categoria && !cats.some(([c]) => c === st.categoria)) cats.push([st.categoria, 0]);
     const fixaEfetiva = st.fixa == null ? fixaAuto : st.fixa;
     const somaDiv = st.divisoes.reduce((a,d)=>a+(Number(d.valor)||0), 0);
     const minha = l.valor - somaDiv;
@@ -45,10 +46,14 @@ function abrirCompra(l){
         l.parcela?` · parcela ${l.parcela.i}/${l.parcela.n}`:""}${l.hora?` · ${esc(l.hora)}`:""}</span></div>
 
       <div class="fx-secao">Categoria</div>
-      <div class="cp-cats" role="radiogroup" aria-label="Categoria">
-        ${cats.map(c=>`<button type="button" class="cp-cat${c===st.categoria?" on":""}" role="radio" aria-checked="${c===st.categoria}" data-cat="${esc(c)}">${esc(c)}</button>`).join("")}
+      <div class="cp-sel${st.abrirCat?" aberto":""}">
+        <button type="button" class="cp-sel-bt" aria-haspopup="listbox" aria-expanded="${st.abrirCat}">
+          <span class="cp-sel-v"></span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg></button>
+        ${st.abrirCat?`<div class="cp-sel-pn">
+          <input type="search" class="cp-busca" placeholder="Buscar categoria" aria-label="Buscar categoria" autocomplete="off">
+          <div class="cp-sel-lista" role="listbox" aria-label="Categorias"></div></div>`:""}
       </div>
-      ${l.categoriaOrig?`<div class="fx-dica">No banco: ${esc(l.categoriaOrig)}${autoCat?` → ${esc(autoCat)}`:""}</div>`:""}
+      ${l.categoriaOrig && l.categoriaOrig !== autoCat?`<div class="fx-dica">No banco: ${esc(l.categoriaOrig)}</div>`:""}
 
       <div class="fx-secao">Marcações</div>
       <button type="button" class="cp-tg${st.role?" on":""}" data-tg="role" role="switch" aria-checked="${st.role}">
@@ -82,7 +87,41 @@ function abrirCompra(l){
     box.querySelector("#cp-cancelar").onclick = fecharModal;
     box.querySelector("#cp-salvar").onclick = salvar;
 
-    box.querySelectorAll(".cp-cat").forEach(b => b.onclick = () => { st.categoria = b.dataset.cat; desenhar(); });
+    // ── lista suspensa de categorias, com busca
+    box.querySelector(".cp-sel-v").textContent = st.categoria || SEM_CATEGORIA;
+    box.querySelector(".cp-sel-bt").onclick = () => { st.abrirCat = !st.abrirCat; desenhar(); if(st.abrirCat) box.querySelector(".cp-busca").focus(); };
+    const busca = box.querySelector(".cp-busca");
+    if(busca){
+      const lista = box.querySelector(".cp-sel-lista");
+      const escolher = c => { st.categoria = c; st.abrirCat = false; desenhar(); box.querySelector(".cp-sel-bt").focus(); };
+      const pintar = () => {
+        const termo = semAcento(busca.value);
+        const vis = cats.filter(([c]) => !termo || semAcento(c).includes(termo));
+        lista.innerHTML = vis.length ? vis.map(([c, n]) => `<button type="button" class="cp-op${c===st.categoria?" on":""}" role="option" aria-selected="${c===st.categoria}">
+            <span></span><small>${n ? n : ""}</small></button>`).join("")
+          : `<div class="fx-dica">Nenhuma categoria com “${esc(busca.value)}”.</div>`;
+        lista.querySelectorAll(".cp-op").forEach((b, k) => {
+          b.firstElementChild.textContent = vis[k][0];
+          b.title = vis[k][1] ? `${vis[k][1]} compra${vis[k][1]>1?"s":""}` : "nenhuma compra ainda";
+          b.onclick = () => escolher(vis[k][0]);
+          b.onkeydown = e => {
+            if(e.key === "ArrowDown"){ e.preventDefault(); (b.nextElementSibling || b).focus(); }
+            if(e.key === "ArrowUp"){ e.preventDefault(); (b.previousElementSibling || busca).focus(); }
+            if(e.key === "Escape"){ e.stopPropagation(); st.abrirCat = false; desenhar(); }
+          };
+        });
+        return vis;
+      };
+      pintar();
+      busca.oninput = pintar;
+      busca.onkeydown = e => {
+        if(e.key === "Enter"){ e.preventDefault(); const vis = pintar(); if(vis.length) escolher(vis[0][0]); }
+        if(e.key === "ArrowDown"){ e.preventDefault(); const p = lista.querySelector(".cp-op"); if(p) p.focus(); }
+        if(e.key === "Escape"){ e.stopPropagation(); st.abrirCat = false; desenhar(); }
+      };
+      const atual = lista.querySelector(".cp-op.on");
+      if(atual) atual.scrollIntoView({ block:"nearest" });
+    }
 
     box.querySelector('[data-tg="role"]').onclick = () => { st.role = !st.role; desenhar(); };
     box.querySelector('[data-tg="fixa"]').onclick = () => { st.fixa = !fixaEfetiva; desenhar(); };

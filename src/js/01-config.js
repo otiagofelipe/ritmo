@@ -228,35 +228,38 @@ const cartoesDoTipo = tipo => CATALOGO_CARTOES.filter(c => c.tipo === tipo)
 const cartoesLigados = tipo => cartoesDoTipo(tipo).filter(cartaoLigado);
 
 /**
- * Categorias de compra: a lista fixa que o card da compra oferece.
+ * Categorias de compra: a da Pluggy (em inglês) → a nossa, com emoji. É a
+ * mesma lista da silver.ritmo.vw_category_map (sql/categorias.sql): a gold
+ * pode mandar a categoria já traduzida ou ainda em inglês, as duas servem.
+ * Categoria que não estiver aqui passa como veio.
  */
-const CATEGORIAS_BASE = ["Mercado","Restaurante","Delivery","Transporte","Casa",
-  "Saúde","Lazer","Assinaturas","Compras","Outros"];
-
-/**
- * Tradução da categoria da Pluggy (em inglês) para as nossas. Vale a
- * primeira regra que casar; o que não casar com nenhuma vira "Outros".
- * Também casa nomes em português, que alguns bancos já mandam.
- */
-const MAPA_CATEGORIA = [
-  [/food delivery|\bdelivery\b|ifood|rappi/i,                                                  "Delivery"],
-  [/grocer|supermarket|supermerc|\bmercado\b|hortifruti|padaria|bakery/i,                    "Mercado"],
-  [/eating out|restaurant|food and drink|\bbars?\b|\bcaf[eé]|restaur|aliment|lanche/i,      "Restaurante"],
-  [/taxi|ride.?hail|transport|gas station|\bfuel|parking|\btolls?\b|automotive|vehicle|car rental|bicycle|\bbus\b|\buber\b|combust|estaciona|ped[aá]gio/i, "Transporte"],
-  [/streaming|digital service|subscription|assinatura|software/i,                           "Assinaturas"],
-  [/housing|\brent\b|utilit|\bwater\b|electric|^gas$|internet|mobile|telecom|aluguel|condom|energia|[aá]gua|telefon/i, "Casa"],
-  [/health|dentist|pharmac|optometr|hospital|clinic|laborat|wellness|\bgyms?\b|fitness|sport|farm[aá]c|sa[uú]de|academia/i, "Saúde"],
-  [/leisure|entertain|gaming|cinema|theater|concert|travel|accommodation|airline|airport|hotel|lazer|viagem/i, "Lazer"],
-  [/shopping|electronic|clothing|\bpets?\b|bookstore|\bstores?\b|compras|vestu|eletr[oô]n|livrar/i, "Compras"]
+const CATEGORIAS = [
+  ["Groceries","🛒 Mercado"], ["Food and drinks","🍽️ Alimentação e bebidas"], ["Eating out","🍴 Restaurantes"],
+  ["Food delivery","🛵 Delivery"], ["Digital services","💻 Serviços digitais"], ["Services","🛠️ Serviços"],
+  ["Shopping","🛍️ Compras"], ["Online shopping","📦 Compras online"], ["Clothing","👕 Roupas"],
+  ["Electronics","🔌 Eletrônicos"], ["Houseware","🛋️ Casa e decoração"], ["Bookstore","📚 Livraria"],
+  ["Sports goods","⚽ Artigos esportivos"], ["Leisure","🎉 Lazer"], ["Cinema, theater and concerts","🎬 Cinema, teatro e shows"],
+  ["Tickets","🎟️ Ingressos"], ["Landmarks and museums","🏛️ Museus e pontos turísticos"], ["Gaming","🎮 Games"],
+  ["Gambling","🎰 Apostas"], ["Lottery","🍀 Loteria"], ["Travel","✈️ Viagem"], ["Accomodation","🏨 Hospedagem"],
+  ["Transportation","🚌 Transporte"], ["Public transportation","🚇 Transporte público"],
+  ["Taxi and ride-hailing","🚕 Táxi e apps de corrida"], ["Car rental","🚙 Aluguel de carro"], ["Automotive","🚗 Automotivo"],
+  ["Gas stations","⛽ Combustível"], ["Parking","🅿️ Estacionamento"], ["Tolls and in vehicle payment","🛣️ Pedágio e tag"],
+  ["Vehicle maintenance","🔧 Manutenção do carro"], ["Housing","🏠 Moradia"], ["Rent","🔑 Aluguel"],
+  ["Electricity","💡 Energia"], ["Water","💧 Água"], ["Internet","🌐 Internet"], ["Telecommunications","📱 Telefonia"],
+  ["Healthcare","⚕️ Saúde"], ["Health insurance","🩺 Plano de saúde"], ["Hospital clinics and labs","🏥 Hospitais, clínicas e exames"],
+  ["Pharmacy","💊 Farmácia"], ["Optometry","👓 Ótica"], ["Wellness and fitness","🏋️ Bem-estar e academia"],
+  ["Insurance","🛡️ Seguros"], ["Credit card fees","💳 Tarifas do cartão"], ["Tax on financial operations","🧾 IOF"],
+  ["Donations","💝 Doações"], ["Transfers","🔁 Transferências"], ["Transfer - PIX","⚡ Pix"],
+  ["Third party transfer - PIX","💸 Pix para terceiros"], ["Transfer - Foreign Exchange","💱 Câmbio"]
 ];
+const SEM_CATEGORIA = "❔ Sem categoria";
+const CATEGORIA_PT = new Map(CATEGORIAS.map(([en, pt]) => [en.toLowerCase(), pt]));
 
-/** Categoria da Pluggy → a nossa (vazia continua vazia). */
+/** Categoria da gold → a exibida (com emoji). Vazia vira "Sem categoria". */
 function traduzirCategoria(c){
   const s = String(c||"").trim();
-  if(!s) return "";
-  if(CATEGORIAS_BASE.includes(s)) return s;
-  const r = MAPA_CATEGORIA.find(([re]) => re.test(s));
-  return r ? r[1] : "Outros";
+  if(!s || s.toLowerCase() === "null") return SEM_CATEGORIA;
+  return CATEGORIA_PT.get(s.toLowerCase()) || s;
 }
 
 /**

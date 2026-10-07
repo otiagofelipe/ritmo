@@ -311,7 +311,13 @@ function divisoesDe(l){
   return (S.reg.devem || []).filter(r => r.transacao && r.transacao === l.id);
 }
 
-/** Categorias que o card oferece, com "Outros" por último. */
-function todasCategorias(){
-  return CATEGORIAS_BASE.filter(c => c !== "Outros").concat(["Outros"]);
+/**
+ * Categorias que o card oferece, das que mais aparecem nas compras para
+ * as que menos (empate e as que nunca apareceram: em ordem alfabética).
+ * Devolve [nome, quantas compras].
+ */
+function categoriasPorUso(){
+  const n = new Map(CATEGORIAS.map(([,pt]) => [pt, 0]).concat([[SEM_CATEGORIA, 0]]));
+  for(const l of S.linhas) if(l.categoria) n.set(l.categoria, (n.get(l.categoria) || 0) + 1);
+  return [...n].sort((a,b) => b[1]-a[1] || semAcento(a[0].replace(/^\S+\s/, "")).localeCompare(semAcento(b[0].replace(/^\S+\s/, ""))));
 }
