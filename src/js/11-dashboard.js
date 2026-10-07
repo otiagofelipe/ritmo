@@ -815,22 +815,6 @@ function abrirFixa(chave){
  */
 const ordemDia = dia => { const n = Number(dia); return !n ? 99 : (n >= 27 ? n - 27 : n + 5); };
 
-/** Cartõezinhos das contas fixas (aba Gastos fixos). */
-function cartoesFixas(lista){
-  return `<div class="cd-lista">${lista.slice().sort((a,b)=>ordemDia(a.data)-ordemDia(b.data)).map(f=>{
-    const c = cobrancaDaFixa(f), st = statusFixa(f, c);
-    const valor = c ? Math.abs(c.valor) : (Number(f.valor)||0);
-    const dif = c && Math.abs(valor-(Number(f.valor)||0))>0.005;
-    const det = [f.data ? `todo dia ${f.data}` : "",
-      c ? `${ehFixaPix(f)?"pago":"cobrado"} ${p2(c.data.getDate())}/${p2(c.data.getMonth()+1)}` : (ehFixaPix(f) ? "via Pix" : "aguardando"),
-      vigenciaTexto(f)].filter(Boolean).join(" · ");
-    return cartao({ cls: `${st==="pago"?"pago":st}${f.terceiro?" de-outro":""}`, titulo: rotuloFixa(f),
-      tags: (f.terceiro?`<span class="tag" title="De terceiro: não é meu, só passa no meu cartão">3º</span>`:"") + (ehFixaPix(f)?`<span class="tag">Pix</span>`:""),
-      valor, sub: dif ? `<div class="dif">previsto ${esc(BRL.format(f.valor))}</div>` : "",
-      det: esc(det), dir: selo(st) });
-  }).join("")}</div>`;
-}
-
 function listaFixas(lista, comVigencia){
   let aCobrar = 0, meuTotal = 0, deOutros = 0;
   const html = lista.slice()
