@@ -244,7 +244,9 @@ const NUM2 = new Intl.NumberFormat("pt-BR", {minimumFractionDigits:2, maximumFra
    (Itaú laranja, PicPay verde) e as cores de sempre no resto. */
 const TOM_CARD = { itau:"#EC7000", picpay:"#11C76F", caju:"var(--c-caju)", devo:"var(--c-devo)", devem:"var(--c-devem)" };
 
-function kpi({nome, cor, valor, sub, extra, acao, destaque, sinal, selo, ajuda, fmt, tom, abre}){
+/* apos: HTML logo depois do nome (ex.: o fornecedor do benefício);
+   pe: HTML no fim do card (ex.: a barra de quanto do teto já foi) */
+function kpi({nome, cor, valor, sub, extra, acao, destaque, sinal, selo, ajuda, fmt, tom, abre, apos, pe}){
   const tag = acao ? "button" : "div";
   const cls = "kpi" + (acao?" clicavel":"") + (destaque?" destaque":"")
     + (!valor && !destaque ? " zero" : "") + (tom && !destaque ? " tom" : "")
@@ -252,12 +254,13 @@ function kpi({nome, cor, valor, sub, extra, acao, destaque, sinal, selo, ajuda, 
   // tom: a cor do ícone do card, que acende no canto de cima
   return `<${tag} class="${cls}"${acao?` data-acao="${esc(acao)}"`:""}${tom && !destaque ? ` style="--k:${tom}"` : ""}${
       abre ? ` aria-expanded="${KPI_ABERTO.has("bancos")}"` : ""}>
-    <div class="nm">${selo || (cor?`<i class="dot" style="background:${cor}"></i>`:"")}${esc(nome)}${
+    <div class="nm">${selo || (cor?`<i class="dot" style="background:${cor}"></i>`:"")}${esc(nome)}${apos||""}${
       ajuda?" "+dica(ajuda):""}${abre ? `<svg class="kx-seta" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>`
         : (acao && !String(acao).startsWith("pg:") ? `<svg class="kx-card" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-abre-card"/></svg>` : "")}</div>
     <div class="vl${sinal||""}">${fmt ? esc(fmt(valor||0)) : BRL.format(valor||0)}</div>
     ${extra?`<div class="plus">${extra}</div>`:""}
     ${sub?`<div class="sb">${sub}</div>`:""}
+    ${pe||""}
     ${abre ? `<div class="kx"><div class="kx-in">${abre.linhas.map(([n,v])=>
       `<div class="kx-l${v ? "" : " zero"}"><span>${esc(n)}</span><b>${esc(NUM2.format(v))}</b></div>`).join("")}</div></div>` : ""}
   </${tag}>`;

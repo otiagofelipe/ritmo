@@ -57,12 +57,13 @@ function renderResumo(){
 
   $("m-titulo").innerHTML = rotuloFaturaHTML(S.mesSel);
   // "aberta"/"fechada" sai da fatura, não do calendário
-  $("m-progresso").innerHTML = (S.mesSel===S.mesAberto ? `dia ${TODAY.getDate()}`
+  $("m-progresso").innerHTML = "· " + (S.mesSel===S.mesAberto ? `dia ${TODAY.getDate()}`
     : (S.mesSel>S.mesAberto ? "previsto" : "fechada"))
     + " " + dica("Itaú + PicPay (com fixos) + Eu devo - Me devem + Gasto no Caju");
   contarTotal(total);
+  // as três leituras do total, em linhas curtas dentro do card
   const linha = (v, nome, formula) =>
-    `<p class="split"><b>${BRL.format(v)}</b> ${esc(nome)} ${dica(formula)}</p>`;
+    `<div class="tl"><span>${esc(nome)} ${dica(formula)}</span><b>${BRL.format(v)}</b></div>`;
   $("m-split").innerHTML =
       linha(faturas,     "Faturas", "Itaú + PicPay (com fixos)")
     + linha(totalLimpo,  "Total limpo",
@@ -114,19 +115,39 @@ function renderResumo(){
   const soCaju    = proprio.filter(x=>x.conta && x.conta.id==="caju");
   const vItau     = soma(soCartoes.filter(x=>x.conta.id==="itau"));
   const vPicpay   = soma(soCartoes.filter(x=>x.conta.id==="picpay"));
-  $("m-kpis").innerHTML =
-    ORDEM_CARDS.map(id=>{
-        const c = CONTAS.find(x=>x.id===id);
-        if(c) return cardConta(c);
-        const g = GRUPOS.find(x=>x.id===id && !x.semCard);
-        return g ? cardGrupo(g) : "";
-      }).join("")
-    + kpi({nome:"saldo do mês", valor:posso, destaque:true, acao:"holerite:mes",
+  /* Cards em grupos: saldo ao lado do total; cartões (as contas sem
+     teto); benefícios (vales, com a barra do teto); outros (Eu devo e
+     Me devem). */
+  $("m-saldo").innerHTML = kpi({nome:"saldo do mês", valor:posso, destaque:true, acao:"holerite:mes",
            sinal: posso<0 ? " neg" : "",
            sub: `Salário ${BRL.format(salarioDe(S.mesSel))}`,
            });
 
-  ligarAcoes("m-kpis");
+  $("m-cartoes").innerHTML = CONTAS.filter(c=>!c.temTeto).map(cardConta).join("");
+  $("m-cartoes-tot").textContent = BRL.format(faturas);
+
+  const barra = (gasto, teto) => `<div class="barra" aria-hidden="true"><i style="width:${
+    teto>0 ? Math.min(100, gasto/teto*100).toFixed(1) : 0}%"></i></div>`;
+  const cardBeneficio = b => {
+    const conta = b.conta ? CONTAS.find(c=>c.id===b.conta) : null;
+    const gasto = conta ? gastoCaju : 0;
+    const teto  = conta ? tetoCaju(S.mesSel) : 0;
+    const editavel = conta ? GRUPOS.find(g=>g.grupoPlanilha===conta.id) : null;
+    return kpi({
+      nome:b.titulo, selo:marca({id:b.logo, titulo:b.fornecedor, cor:b.cor}),
+      apos:`<span class="forn">${esc(b.fornecedor)}</span>`,
+      valor:gasto, tom: conta ? TOM_CARD[conta.id] : b.cor,
+      sub: (S.soRole && conta) ? "gasto no rolê" : `${BRL.format(Math.max(teto-gasto,0))} disponível`,
+      pe: barra(gasto, teto),
+      acao: editavel ? "grupo:"+editavel.id : null
+    });
+  };
+  $("m-beneficios").innerHTML = BENEFICIOS.map(cardBeneficio).join("");
+
+  $("m-outros").innerHTML = ["devo","devem"]
+    .map(id=>GRUPOS.find(g=>g.id===id && !g.semCard)).filter(Boolean).map(cardGrupo).join("");
+
+  ["m-saldo","m-cartoes","m-beneficios","m-outros"].forEach(ligarAcoes);
 
   // os números do herói agora vivem todos em m-split, um sob o outro
   $("m-escada").innerHTML = "";

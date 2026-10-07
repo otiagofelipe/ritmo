@@ -215,3 +215,43 @@
 .cat-track{grid-column:1/-1;height:4px;border-radius:2px;background:var(--rt-surface-2);overflow:hidden}
 .cat-fill{display:block;height:100%;border-radius:2px}
 
+
+/* ═══ topo do Dashboard: cards em grupos ═══
+   Celular: total e saldo lado a lado, depois Cartões, Benefícios e
+   Outros, e o "Gastos por semana" embaixo. Computador: o mesmo numa
+   coluna, com o gráfico semanal na coluna ao lado. */
+.painel{display:grid;gap:var(--sp-3);grid-template-columns:minmax(0,1fr);align-items:start}
+@media(min-width:900px){
+  .painel{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-4)}
+  .painel .semana-bloco{position:sticky;top:var(--sp-3)}
+}
+.painel-cards{min-width:0}
+.kpis.topo2{grid-template-columns:1fr 1fr}
+.topo2-saldo{display:flex;min-width:0}
+.topo2-saldo>.kpi{flex:1}
+
+/* card do total: mesmo desenho do saldo, com as três leituras embaixo */
+.tot-card .nm{gap:5px}
+.tot-quando{color:var(--rt-text-muted);letter-spacing:.06em;text-transform:none;font-weight:400}
+.tot-card .vl .cents{font-size:.6em;opacity:.75}
+.tot-linhas{display:grid;gap:3px;padding-top:8px;border-top:1px solid #FFFFFF1F;
+  font-size:11px;color:var(--rt-text-secondary)}
+/* o #m-split herdou do herói antigo largura máxima e centralização */
+.tot-card #m-split{max-width:none;margin:10px 0 0}
+.tot-linhas .tl{display:flex;justify-content:space-between;align-items:center;gap:8px;white-space:nowrap}
+.tot-linhas .tl span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.tot-linhas .tl b{font-family:var(--mono);font-weight:500;color:var(--rt-text);font-variant-numeric:tabular-nums}
+
+/* rótulo de cada grupo */
+.grupo-cards{margin-top:var(--sp-3)}
+.grupo-rot{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 2px 8px}
+.grupo-tot{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--rt-text);font-variant-numeric:tabular-nums}
+.grupo-tot:empty{display:none}
+
+/* benefícios: fornecedor ao lado do nome e barra do quanto do teto já foi */
+.kpi .forn{margin-left:5px;font-size:.88em;letter-spacing:.08em;color:var(--rt-text-muted);font-weight:500}
+.kpi .barra{height:4px;border-radius:2px;background:var(--rt-surface-2);margin-top:8px;overflow:hidden}
+.kpi .barra i{display:block;height:100%;border-radius:inherit;background:var(--k,var(--rt-pink))}
+
+/* gráfico semanal num bloco próprio */
+.semana-bloco .block-head{margin-bottom:var(--sp-2)}

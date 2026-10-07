@@ -61,3 +61,6 @@
 /* sombras: o preto forte do tema escuro pesa no claro */
 :root[data-claro] .tb-veu,
 :root[data-claro] .modal-veu{background:color-mix(in srgb, var(--rt-text) 35%, transparent)}
+
+/* card do total no claro: o fio entre o número e as leituras */
+:root[data-claro] .tot-linhas{border-top-color:var(--rt-border)}
