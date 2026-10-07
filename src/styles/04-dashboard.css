@@ -261,6 +261,21 @@
   .topo2 .kpi .nm{margin:0;flex:0 0 auto}
   .topo2 .kpi .sb{margin:0;padding:0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .topo2 .kpi .vl{order:3;margin:0 0 0 auto;font-size:26px;line-height:1}
+  /* degradê das barras: as duas leem como uma faixa só, do acento do
+     tema (total) passando pelo roxo até o azul (saldo); um brilho
+     suave atrás de cada valor e a borda no mesmo degradê */
+  .topo2 .kpi.destaque{--g1:var(--rt-pink);--g2:var(--rt-purple);
+    background:
+      radial-gradient(60% 160% at 100% 50%, color-mix(in srgb, var(--g2) 38%, transparent), transparent 70%) padding-box,
+      linear-gradient(90deg,
+        color-mix(in srgb, var(--g1) 30%, var(--rt-surface)) 0%,
+        color-mix(in srgb, var(--g1) 14%, var(--rt-surface)) 45%,
+        color-mix(in srgb, var(--g2) 32%, var(--rt-surface)) 100%) padding-box,
+      linear-gradient(90deg, var(--g1), var(--g2)) border-box;
+    box-shadow:0 6px 26px -10px color-mix(in srgb, var(--g1) 70%, transparent),
+      0 6px 26px -10px color-mix(in srgb, var(--g2) 70%, transparent)}
+  .topo2 .topo2-saldo .kpi.destaque{--g1:var(--rt-purple);--g2:var(--rt-blue)}
+  .topo2 .kpi.destaque .vl{text-shadow:0 0 16px color-mix(in srgb, var(--g2) 75%, transparent)}
 }
 .topo2-saldo{display:flex;min-width:0}
 .topo2-saldo>.kpi{flex:1}

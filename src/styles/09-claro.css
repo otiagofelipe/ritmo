@@ -62,3 +62,9 @@
 :root[data-claro] .tb-veu,
 :root[data-claro] .modal-veu{background:color-mix(in srgb, var(--rt-text) 35%, transparent)}
 
+
+/* barras de total e saldo (computador): no claro o roxo de alguns temas
+   é quase preto (grafite); o degradê vai do acento direto ao azul,
+   passando pela mistura dos dois */
+:root[data-claro] .topo2 .kpi.destaque{--g2:color-mix(in srgb, var(--rt-pink) 50%, var(--rt-blue))}
+:root[data-claro] .topo2 .topo2-saldo .kpi.destaque{--g1:color-mix(in srgb, var(--rt-pink) 50%, var(--rt-blue));--g2:var(--rt-blue)}
