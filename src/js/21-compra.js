@@ -1,16 +1,24 @@
 /* ═══════════ Card da compra ═══════════
 
    Tocar numa compra da lista abre o gerenciamento dela:
-   - categoria: lista suspensa com as categorias traduzidas (CATEGORIAS),
-     das que mais aparecem para as que menos, com busca
-   - marcações: rolê (bronze.ritmo.tb_entertainment, como antes) e gasto
-     fixo (automático, sim ou não)
+   - no topo, a compra (valor grande) e três botões de um toque:
+     categoria (abre a lista com busca, das mais usadas para as menos),
+     rolê e gasto fixo
+   - rolê grava na bronze.ritmo.tb_entertainment, como antes; gasto fixo
+     é automático, sim ou não
    - divisão: cada pessoa vira um Me devem (bronze.ritmo.tb_receivables)
-     com o id_transaction da compra
+     com o id_transaction da compra; o card mostra o que já voltou e o
+     que falta, e “em aberto”/“pago” marca a parcela do Me devem
 
    Categoria e gasto fixo vão para bronze.ritmo.tb_transaction_details.
    Tudo é cruzado pelo id_transaction, com descrição + valor + dia de
    reserva para quando o Open Finance trocar o id. Salvar é otimista. */
+
+/** "🛒 Mercado" → ["🛒", "Mercado"]; sem emoji → ["", nome]. */
+function partesCategoria(c){
+  const m = String(c||"").match(/^(\S+)\s+(.+)$/);
+  return (m && !/[\p{L}\p{N}]/u.test(m[1])) ? [m[1], m[2]] : ["", String(c||"")];
+}
 
 function abrirCompra(l){
   if(!l || l.pendente) return;
@@ -20,7 +28,8 @@ function abrirCompra(l){
     categoria: l.categoria || autoCat,
     fixa: l.fixaManual,                       // null = automático
     role: ehRole(l),
-    divisoes: divisoesDe(l).map(r => ({ id:String(r.id), pessoa:r.pessoa||"", valor:Number(r.valor)||0, pagos:r.pagos||"" }))
+    divisoes: divisoesDe(l).map(r => ({ id:String(r.id), pessoa:r.pessoa||"", valor:Number(r.valor)||0,
+                                        pagos:r.pagos||"", pago: !!String(r.pagos||"").trim() }))
   };
   // estado do card (cópia): só vai para a tela e para o Databricks no Salvar
   const st = { categoria: antes.categoria, fixa: antes.fixa, role: antes.role,
@@ -34,47 +43,46 @@ function abrirCompra(l){
     // categoria escolhida antes e que não está mais na lista continua aparecendo
     if(st.categoria && !cats.some(([c]) => c === st.categoria)) cats.push([st.categoria, 0]);
     const fixaEfetiva = st.fixa == null ? fixaAuto : st.fixa;
-    const somaDiv = st.divisoes.reduce((a,d)=>a+(Number(d.valor)||0), 0);
-    const minha = l.valor - somaDiv;
+    const [catEmoji, catNome] = partesCategoria(st.categoria || SEM_CATEGORIA);
+    const [reais, cents] = BRL.format(l.valor).split(",");
+    const temDiv = st.divisoes.length > 0;
 
     box.innerHTML = `<div class="fx-ed cp-ed">
-      <div class="modal-topo">
-        <h3><span class="fx-titulo"></span> <span class="mes">${esc(dia)} · ${esc(BRL.format(l.valor))}</span></h3>
-        <button type="button" class="modal-ic fx-x" title="Fechar" aria-label="Fechar">×</button>
+      <div class="cp-hero">
+        <div class="cp-hero-l1">${marca(l.conta, true)}<span>${esc(l.metodo)} · ${esc(dia)}${l.hora?` · ${esc(l.hora)}`:""}${
+          l.parcela?` · parcela ${l.parcela.i}/${l.parcela.n}`:""}</span>
+          <button type="button" class="modal-ic fx-x" title="Fechar" aria-label="Fechar">×</button></div>
+        <h3 class="cp-nome"></h3>
+        <div class="cp-valor">${esc(reais)}<small>,${esc(cents||"00")}</small></div>
       </div>
-      <div class="cp-meta">${marca(l.conta, true)}<span>${esc(l.metodo)}${l.cartao?` · ${esc(l.cartao)}`:""}${
-        l.parcela?` · parcela ${l.parcela.i}/${l.parcela.n}`:""}${l.hora?` · ${esc(l.hora)}`:""}</span></div>
 
-      <div class="fx-secao">Categoria</div>
-      <div class="cp-sel${st.abrirCat?" aberto":""}">
-        <button type="button" class="cp-sel-bt" aria-haspopup="listbox" aria-expanded="${st.abrirCat}">
-          <span class="cp-sel-v"></span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg></button>
-        ${st.abrirCat?`<div class="cp-sel-pn">
+      <div class="cp-acoes">
+        <button type="button" class="cp-ac cp-ac-cat${st.abrirCat?" aberto":""}" aria-haspopup="listbox" aria-expanded="${st.abrirCat}"
+          title="Trocar a categoria"><em></em><span class="cp-ac-t"></span></button>
+        <button type="button" class="cp-ac${st.role?" on":""}" data-tg="role" role="switch" aria-checked="${st.role}"
+          title="Conta no total do rolê"><em>🎉</em><span class="cp-ac-t">Rolê</span></button>
+        <button type="button" class="cp-ac${fixaEfetiva?" on":""}" data-tg="fixa" role="switch" aria-checked="${fixaEfetiva}"
+          title="${st.fixa==null ? (fixaAuto ? "Automático: casou com o cadastro de Gastos fixos" : "Automático: não casou com nenhuma conta fixa") : "Marcado à mão"}">
+          <em>📌</em><span class="cp-ac-t">Gasto fixo</span><small>${st.fixa==null ? "automático" : "à mão"}</small></button>
+      </div>
+      ${st.fixa!=null?`<button type="button" class="link-btn cp-auto">gasto fixo: voltar ao automático</button>`:""}
+      ${st.abrirCat?`<div class="cp-sel-pn">
           <input type="search" class="cp-busca" placeholder="Buscar categoria" aria-label="Buscar categoria" autocomplete="off">
-          <div class="cp-sel-lista" role="listbox" aria-label="Categorias"></div></div>`:""}
-      </div>
-      ${l.categoriaOrig && l.categoriaOrig !== autoCat?`<div class="fx-dica">No banco: ${esc(l.categoriaOrig)}</div>`:""}
+          <div class="cp-sel-lista" role="listbox" aria-label="Categorias"></div></div>
+        ${l.categoriaOrig && l.categoriaOrig !== autoCat?`<div class="fx-dica">No banco: ${esc(l.categoriaOrig)}</div>`:""}`:""}
 
-      <div class="fx-secao">Marcações</div>
-      <button type="button" class="cp-tg${st.role?" on":""}" data-tg="role" role="switch" aria-checked="${st.role}">
-        <span class="cp-tg-t"><b>Rolê</b><small>conta no total do rolê</small></span>
-        <span class="ct-chave" aria-hidden="true"><i></i></span></button>
-      <button type="button" class="cp-tg${fixaEfetiva?" on":""}" data-tg="fixa" role="switch" aria-checked="${fixaEfetiva}">
-        <span class="cp-tg-t"><b>Gasto fixo</b><small>${st.fixa==null
-          ? (fixaAuto ? "automático: casou com o cadastro de Gastos fixos" : "automático: não casou com nenhuma conta fixa")
-          : "marcado à mão"}</small></span>
-        <span class="ct-chave" aria-hidden="true"><i></i></span></button>
-      ${st.fixa!=null?`<button type="button" class="link-btn cp-auto">voltar ao automático</button>`:""}
-
-      <div class="fx-secao">Divisão</div>
-      <div class="cp-divs"></div>
-      <div class="cp-div-acoes">
-        <button type="button" class="fx-add cp-pessoa"><svg class="ic" viewBox="0 0 24 24"><use href="#i-plus"/></svg>pessoa</button>
-        ${st.divisoes.length?`<button type="button" class="fx-add cp-igual">dividir igual</button>
-        <label class="cp-comigo"><input type="checkbox"${st.comigo?" checked":""}> contar comigo</label>`:""}
-      </div>
-      ${st.divisoes.length?`<div class="esoma sub"><span>Sua parte</span><span class="p${minha<0?" neg":""}">${esc(BRL.format(minha))}</span></div>
-      <div class="fx-dica">Cada pessoa vira um registro em Me devem, na fatura de ${esc(rotuloFatura(l.competencia))}.</div>`:""}
+      <div class="fx-secao cp-div-tit"><span>Divisão${temDiv?` · ${st.divisoes.length+1} partes`:""}</span>${temDiv?`
+        <span class="cp-div-ops"><button type="button" class="link-btn cp-igual">dividir igual</button>
+        <label class="cp-comigo"><input type="checkbox"${st.comigo?" checked":""}> contar comigo</label></span>`:""}</div>
+      ${temDiv?`<div class="cp-voltou">
+          <div><span>Já voltou</span><b class="cp-ja"></b></div>
+          <div class="dir"><span>Falta</span><b class="cp-falta"></b></div>
+        </div>
+        <div class="cp-barra" aria-hidden="true"></div>
+        <div class="cp-leg"><span><i class="eu"></i>sua parte</span><span><i class="pg"></i>pago</span><span><i class="ab"></i>em aberto</span></div>`:""}
+      <div class="cp-pess"></div>
+      <button type="button" class="fx-add cp-pessoa"><svg class="ic" viewBox="0 0 24 24"><use href="#i-plus"/></svg>pessoa</button>
+      ${temDiv?`<div class="fx-dica">Cada pessoa vira um registro em Me devem, na fatura de ${esc(rotuloFatura(l.competencia))}. Toque em “em aberto” quando a pessoa pagar.</div>`:""}
 
       <div class="eacoes">
         <button class="btn" id="cp-salvar">Salvar</button>
@@ -82,18 +90,20 @@ function abrirCompra(l){
       </div>
     </div>`;
 
-    box.querySelector(".fx-titulo").textContent = l.desc || "Compra";
+    box.querySelector(".cp-nome").textContent = l.desc || "Compra";
     box.querySelector(".fx-x").onclick = fecharModal;
     box.querySelector("#cp-cancelar").onclick = fecharModal;
     box.querySelector("#cp-salvar").onclick = salvar;
 
-    // ── lista suspensa de categorias, com busca
-    box.querySelector(".cp-sel-v").textContent = st.categoria || SEM_CATEGORIA;
-    box.querySelector(".cp-sel-bt").onclick = () => { st.abrirCat = !st.abrirCat; desenhar(); if(st.abrirCat) box.querySelector(".cp-busca").focus(); };
+    // ── categoria: o botão abre a lista com busca logo abaixo das ações
+    const bCat = box.querySelector(".cp-ac-cat");
+    bCat.querySelector("em").textContent = catEmoji || "🏷️";
+    bCat.querySelector(".cp-ac-t").textContent = catNome;
+    bCat.onclick = () => { st.abrirCat = !st.abrirCat; desenhar(); if(st.abrirCat) box.querySelector(".cp-busca").focus(); };
     const busca = box.querySelector(".cp-busca");
     if(busca){
       const lista = box.querySelector(".cp-sel-lista");
-      const escolher = c => { st.categoria = c; st.abrirCat = false; desenhar(); box.querySelector(".cp-sel-bt").focus(); };
+      const escolher = c => { st.categoria = c; st.abrirCat = false; desenhar(); box.querySelector(".cp-ac-cat").focus(); };
       const pintar = () => {
         const termo = semAcento(busca.value);
         const vis = cats.filter(([c]) => !termo || semAcento(c).includes(termo));
@@ -128,39 +138,62 @@ function abrirCompra(l){
     const auto = box.querySelector(".cp-auto");
     if(auto) auto.onclick = () => { st.fixa = null; desenhar(); };
 
-    // ── divisão: uma linha por pessoa
-    const caixa = box.querySelector(".cp-divs");
+    // ── divisão: você + uma linha por pessoa, com o que já voltou
+    const caixa = box.querySelector(".cp-pess");
+    if(temDiv){
+      const eu = document.createElement("div");
+      eu.className = "cp-pes";
+      eu.innerHTML = `<span class="cp-av eu">EU</span><span class="cp-pes-n">Você</span><b class="cp-minha"></b>`;
+      caixa.appendChild(eu);
+    }
     st.divisoes.forEach((d, k) => {
       const row = document.createElement("div");
-      row.className = "erow cp-div";
+      row.className = "cp-pes";
+      const av = document.createElement("span");
+      av.className = "cp-av" + (d.pago ? " pg" : " ab");
+      av.textContent = (d.pessoa.trim().charAt(0) || "?").toUpperCase();
       const nome = document.createElement("input");
-      nome.placeholder = "Nome"; nome.value = d.pessoa; nome.maxLength = 60;
-      nome.addEventListener("input", () => { d.pessoa = nome.value; });
-      const valor = campoMoeda(d.valor, v => { d.valor = v; pintarParte(); });
+      nome.className = "cp-pes-n"; nome.placeholder = "Nome"; nome.value = d.pessoa; nome.maxLength = 60;
+      nome.setAttribute("aria-label", "Nome da pessoa");
+      nome.addEventListener("input", () => { d.pessoa = nome.value; av.textContent = (nome.value.trim().charAt(0) || "?").toUpperCase(); });
+      const tag = document.createElement("button");
+      tag.type = "button"; tag.className = "cp-tag" + (d.pago ? " pg" : "");
+      tag.textContent = d.pago ? "pago" : "em aberto";
+      tag.title = d.pago ? "Toque para marcar como em aberto" : "Toque quando a pessoa pagar";
+      tag.onclick = () => { d.pago = !d.pago; desenhar(); };
+      const valor = campoMoeda(d.valor, v => { d.valor = v; pintarNumeros(); });
+      valor.classList.add("cp-pes-v"); valor.setAttribute("aria-label", "Valor da pessoa");
       const rm = document.createElement("button");
       rm.type = "button"; rm.className = "modal-ic cp-rm"; rm.title = "Tirar da divisão"; rm.setAttribute("aria-label", "Tirar da divisão"); rm.textContent = "×";
       rm.onclick = () => { st.divisoes.splice(k, 1); desenhar(); };
-      row.append(envolver("pessoa", nome), envolver("valor", valor), rm);
-      if(d.pagos) { const tg = document.createElement("span"); tg.className = "tag cp-pago"; tg.textContent = "pago"; row.appendChild(tg); }
+      row.append(av, nome, tag, valor, rm);
       caixa.appendChild(row);
     });
-    if(!st.divisoes.length) caixa.innerHTML = `<div class="fx-dica">Ninguém na divisão. Use “pessoa” para dividir esta compra.</div>`;
+    if(!temDiv) caixa.innerHTML = `<div class="fx-dica">Ninguém na divisão. Use “pessoa” para dividir esta compra.</div>`;
+    pintarNumeros();
 
     box.querySelector(".cp-pessoa").onclick = () => {
-      st.divisoes.push({ id:"", pessoa:"", valor:0, pagos:"" });
+      st.divisoes.push({ id:"", pessoa:"", valor:0, pagos:"", pago:false });
       igual(); desenhar();
-      const ns = box.querySelectorAll(".cp-div input:not(.num)"); if(ns.length) ns[ns.length-1].focus();
+      const ns = box.querySelectorAll(".cp-pes input.cp-pes-n"); if(ns.length) ns[ns.length-1].focus();
     };
     const bIgual = box.querySelector(".cp-igual");
     if(bIgual) bIgual.onclick = () => { igual(); desenhar(); };
     const comigo = box.querySelector(".cp-comigo input");
     if(comigo) comigo.onchange = () => { st.comigo = comigo.checked; igual(); desenhar(); };
 
-    function pintarParte(){
-      const p = box.querySelector(".esoma.sub .p");
-      if(!p) return;
-      const m = l.valor - st.divisoes.reduce((a,d)=>a+(Number(d.valor)||0), 0);
-      p.textContent = BRL.format(m); p.classList.toggle("neg", m < 0);
+    /** Sua parte, o que já voltou, o que falta e a barra: muda a cada valor digitado. */
+    function pintarNumeros(){
+      if(!st.divisoes.length) return;
+      const v = d => Math.max(0, Number(d.valor)||0);
+      const minha = l.valor - st.divisoes.reduce((a,d)=>a+(Number(d.valor)||0), 0);
+      const ja = st.divisoes.filter(d=>d.pago).reduce((a,d)=>a+v(d), 0);
+      const falta = st.divisoes.filter(d=>!d.pago).reduce((a,d)=>a+v(d), 0);
+      const m = box.querySelector(".cp-minha"); m.textContent = BRL.format(minha); m.classList.toggle("neg", minha < -0.004);
+      box.querySelector(".cp-ja").textContent = BRL.format(ja);
+      const f = box.querySelector(".cp-falta"); f.textContent = BRL.format(falta); f.classList.toggle("zero", falta < 0.005);
+      box.querySelector(".cp-barra").innerHTML = `<i class="eu" style="flex:${Math.max(0, minha)}"></i>`
+        + st.divisoes.map(d => `<i class="${d.pago?"pg":"ab"}" style="flex:${v(d)}"></i>`).join("");
     }
   }
 
@@ -209,13 +242,15 @@ function abrirCompra(l){
         ficam.add(d.id);
         const r = devem.find(x => String(x.id) === d.id);
         const a = antes.divisoes.find(x => x.id === d.id);
-        if(r && a && (a.pessoa !== pessoa || a.valor !== valor)){
+        if(r && a && (a.pessoa !== pessoa || a.valor !== valor || a.pago !== d.pago)){
           r.pessoa = pessoa; r.valor = valor;
+          // uma parcela só: pago = a parcela do mês de início paga
+          if(a.pago !== d.pago) r.pagos = d.pago ? compDe(r.mesInicio || r.mes) : "";
           linhasDevem.push(paraBronze("devem", r));
         }
       } else {
         const r = { id: novoId(), mes: l.competencia, mesInicio: l.competencia, pessoa, nome: l.desc,
-                    valor, parcelas: 1, pagos: "", transacao: l.id, pago: false, terceiro: false, data: "" };
+                    valor, parcelas: 1, pagos: d.pago ? l.competencia : "", transacao: l.id, pago: false, terceiro: false, data: "" };
         devem.push(r);
         linhasDevem.push(paraBronze("devem", r));
       }
