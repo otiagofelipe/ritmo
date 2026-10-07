@@ -172,17 +172,34 @@
 
     <!-- ─────── Dashboard ─────── -->
     <section id="pg-dash">
-      <div class="hero">
-        <div class="hero-l">
-          <div class="hero-label">
-            <span class="eyebrow" id="m-titulo">—</span>
-            <span class="eyebrow" id="m-progresso"></span>
+      <!-- Topo do Dashboard: cards em grupos (total e saldo, cartões,
+           benefícios, outros). No computador os grupos ficam à esquerda e,
+           à direita, o "Gastos por semana" com total e saldo embaixo -->
+      <div class="painel" id="m-painel">
+        <div class="kpis topo2">
+          <div class="kpi destaque tot-card">
+            <div class="nm">total <span class="tot-quando" id="m-progresso"></span></div>
+            <div class="vl" id="m-total">—</div>
+            <div id="m-split" hidden></div>
+            <span id="m-titulo" hidden></span><div id="m-escada" hidden></div>
           </div>
-          <div class="total num" id="m-total">—</div>
-          <p class="split" id="m-split"></p>
-          <div class="escada" id="m-escada"></div>
+          <div class="topo2-saldo" id="m-saldo"></div>
         </div>
-        <div class="hero-r">
+        <div class="painel-cards">
+          <section class="grupo-cards" data-g="c" aria-labelledby="g-cartoes">
+            <div class="grupo-rot"><span class="eyebrow" id="g-cartoes">cartões</span><b class="grupo-tot" id="m-cartoes-tot"></b></div>
+            <div class="kpis" id="m-cartoes"></div>
+          </section>
+          <section class="grupo-cards" data-g="b" aria-labelledby="g-beneficios">
+            <div class="grupo-rot"><span class="eyebrow" id="g-beneficios">benefícios</span></div>
+            <div class="kpis" id="m-beneficios"></div>
+          </section>
+          <section class="grupo-cards" data-g="o" aria-labelledby="g-outros">
+            <div class="grupo-rot"><span class="eyebrow" id="g-outros">outros</span></div>
+            <div class="kpis" id="m-outros"></div>
+          </section>
+        </div>
+        <div class="block semana-bloco">
           <div class="block-head"><h2>Gastos por semana</h2>
             <span class="eyebrow r" id="m-semana-nota"></span>
             <div class="vis-sel" role="group" aria-label="Tipo de visualização" data-vis="semanas">
@@ -193,8 +210,6 @@
           <div class="chart" id="m-semanas"></div>
         </div>
       </div>
-
-      <div class="kpis" id="m-kpis" style="margin-top:16px"></div>
       <div id="m-editor"></div>
 
       <div class="block" style="margin-top:16px">

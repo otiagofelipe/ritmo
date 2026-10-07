@@ -170,8 +170,15 @@ const CONTAS = [
   { id:"caju",   titulo:"Caju",   cor:"#E0A94A", padrao:/^caju$/i,  temTeto:true }
 ];
 
-/** Ordem dos quadrados na tela. Mistura cartões e quadros anotados. */
-const ORDEM_CARDS = ["itau","picpay","devo","devem","caju"];
+/**
+ * Benefícios (vales) do Dashboard, no grupo "Benefícios". O VR é o vale
+ * do Caju (o que já existia). O VA ainda não tem lançamentos nem teto:
+ * aparece zerado, com o fornecedor (Ticket), até ganhar dados próprios.
+ */
+const BENEFICIOS = [
+  { id:"vr", titulo:"VR", fornecedor:"Caju",   logo:"caju",   cor:"#E0A94A", conta:"caju" },
+  { id:"va", titulo:"VA", fornecedor:"Ticket", logo:"ticket", cor:"#E3171B", conta:null }
+];
 
 /**
  * Contas correntes não têm fatura: entram no extrato pela data, mas

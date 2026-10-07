@@ -215,3 +215,85 @@
 .cat-track{grid-column:1/-1;height:4px;border-radius:2px;background:var(--rt-surface-2);overflow:hidden}
 .cat-fill{display:block;height:100%;border-radius:2px}
 
+
+/* ═══ topo do Dashboard: cards em grupos ═══
+   Celular: total e saldo lado a lado, depois Cartões, Benefícios e
+   Outros, e o "Gastos por semana" embaixo. Computador: os grupos numa
+   coluna e, na outra, o gráfico semanal com total e saldo embaixo. */
+.painel{display:grid;gap:var(--sp-3);grid-template-columns:minmax(0,1fr);align-items:start}
+.painel-cards{min-width:0}
+.painel-cards>.grupo-cards:first-child{margin-top:0}
+.kpis.topo2{grid-template-columns:1fr 1fr}
+
+/* fora do celular, cada card tem a largura de hoje (uns 170 px) e o
+   grupo cabe até 3 por linha; o quarto desce. --cols (posto pelo JS) é
+   o maior grupo, limitado a 3: a coluna dos cards tem essa largura. */
+@media(min-width:761px){
+  .painel{--card:170px}
+  .painel .kpis{grid-template-columns:repeat(var(--cols,3),minmax(0,var(--card)))}
+  .painel .kpis.topo2{grid-template-columns:repeat(2,minmax(0,var(--card)))}
+}
+/* Com espaço para as duas colunas, tudo vira uma grade só: os grupos à
+   esquerda e o gráfico semanal à direita, do topo dos cartões ao fim dos
+   "outros". O gráfico não empurra a altura das linhas (contain:size):
+   quem manda são os cards, e ele estica para caber (renderSemanas
+   desenha nessa altura). Embaixo, total e saldo viram duas barras
+   baixas, lado a lado, na largura toda. */
+@container conteudo (min-width:900px){
+  .painel{grid-template-columns:calc(var(--cols,3)*var(--card) + (var(--cols,3) - 1)*var(--sp-3)) minmax(0,1fr);
+    grid-template-areas:"rc ." "kc sem" "rb sem" "kb sem" "ro sem" "ko sem" "tp tp";
+    column-gap:var(--sp-5);row-gap:0}
+  .painel-cards,.painel .grupo-cards{display:contents}
+  .grupo-cards[data-g=c]>.grupo-rot{grid-area:rc}
+  .grupo-cards[data-g=c]>.kpis{grid-area:kc}
+  .grupo-cards[data-g=b]>.grupo-rot{grid-area:rb}
+  .grupo-cards[data-g=b]>.kpis{grid-area:kb}
+  .grupo-cards[data-g=o]>.grupo-rot{grid-area:ro}
+  .grupo-cards[data-g=o]>.kpis{grid-area:ko}
+  .grupo-cards:not([data-g=c])>.grupo-rot{margin-top:var(--sp-3)}
+  .painel .semana-bloco{grid-area:sem;align-self:stretch;contain:size;min-height:240px;
+    display:flex;flex-direction:column}
+  .painel .semana-bloco>.chart{flex:1;min-height:0;overflow:auto}
+
+  /* as barras: nome e detalhe à esquerda, valor à direita */
+  .painel .kpis.topo2{grid-area:tp;margin-top:var(--sp-4);grid-template-columns:1fr 1fr}
+  .topo2 .kpi{flex-direction:row;align-items:center;gap:var(--sp-3);padding:10px var(--sp-4);min-height:0}
+  .topo2 .kpi .nm{margin:0;flex:0 0 auto}
+  .topo2 .kpi .sb{margin:0;padding:0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .topo2 .kpi .vl{order:3;margin:0 0 0 auto;font-size:26px;line-height:1}
+  /* degradê das barras: do roxo ao azul do tema, um brilho suave atrás
+     de cada valor e a borda no mesmo degradê */
+  .topo2 .kpi.destaque{--g1:var(--rt-purple);--g2:var(--rt-blue);
+    background:
+      radial-gradient(60% 160% at 100% 50%, color-mix(in srgb, var(--g2) 38%, transparent), transparent 70%) padding-box,
+      linear-gradient(90deg,
+        color-mix(in srgb, var(--g1) 30%, var(--rt-surface)) 0%,
+        color-mix(in srgb, var(--g1) 14%, var(--rt-surface)) 45%,
+        color-mix(in srgb, var(--g2) 32%, var(--rt-surface)) 100%) padding-box,
+      linear-gradient(90deg, var(--g1), var(--g2)) border-box;
+    box-shadow:0 6px 26px -10px color-mix(in srgb, var(--g1) 70%, transparent),
+      0 6px 26px -10px color-mix(in srgb, var(--g2) 70%, transparent)}
+  .topo2 .kpi.destaque .vl{text-shadow:0 0 16px color-mix(in srgb, var(--g2) 75%, transparent)}
+}
+.topo2-saldo{display:flex;min-width:0}
+.topo2-saldo>.kpi{flex:1}
+
+/* card do total: mesmo desenho do saldo */
+.tot-card .nm{gap:5px}
+.tot-quando{color:var(--rt-text-muted);letter-spacing:.06em;text-transform:none;font-weight:400}
+.tot-card .vl .cents{font-size:.6em;opacity:.75}
+
+/* rótulo de cada grupo */
+.grupo-cards{margin-top:var(--sp-3)}
+/* o total do grupo fica colado ao nome: a linha pode ser mais larga que os cards */
+.grupo-rot{display:flex;align-items:baseline;gap:10px;margin:0 2px 8px}
+.grupo-tot{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--rt-text);font-variant-numeric:tabular-nums}
+.grupo-tot:empty{display:none}
+
+/* benefícios: fornecedor ao lado do nome e barra do quanto do teto já foi */
+.kpi .forn{margin-left:5px;font-size:.88em;letter-spacing:.08em;color:var(--rt-text-muted);font-weight:500}
+.kpi .barra{height:4px;border-radius:2px;background:var(--rt-surface-2);margin-top:8px;overflow:hidden}
+.kpi .barra i{display:block;height:100%;border-radius:inherit;background:var(--k,var(--rt-pink))}
+
+/* gráfico semanal num bloco próprio */
+.semana-bloco .block-head{margin-bottom:var(--sp-2)}
