@@ -79,11 +79,14 @@ function renderBarraCel(){
   const fx = $("tb-resumo");
   if(!fx) return;
   const c = contasDoMes();
-  const sobra = c.teto - c.gastoCaju;
-  const parte = c.teto ? Math.max(0, Math.min(1, sobra / c.teto)) : 0;
+  /* Total: a mesma conta do card de total do Dashboard (faturas + eu
+     devo − me devem + gasto no Caju). No celular ele e o saldo vivem só
+     aqui; os cards do topo ficam escondidos. */
+  const total = c.faturas + c.devo - c.devem + c.gastoCaju;
+  const quando = S.mesSel===S.mesAberto ? `dia ${TODAY.getDate()}` : "mês fechado";
   /* Semana: o que ainda cabe no target de R$ 600 da semana em curso. O
      gasto é a mesma soma do gráfico "Gastos por semana" (sem parcelas
-     nem fixos, com os botões do topo). */
+     nem fixos, com os botões do topo). Fica no meio, acima do "+". */
   const semanas = semanasDoMes(S.mesSel);
   const k = semanas.findIndex(w => TODAY>=w.ini && TODAY<=new Date(w.fim.getFullYear(),w.fim.getMonth(),w.fim.getDate(),23,59));
   let semanaHTML = `<b>semana</b><i>—</i>`;   // competência sem a semana de hoje
@@ -94,12 +97,10 @@ function renderBarraCel(){
     semanaHTML = `<b>semana</b><i class="${livre<0?"neg":""}">${esc(BRL.format(livre))}</i>
       <span class="r-trilho" title="gasto ${esc(BRL.format(gasto))} de ${esc(BRL.format(TARGET_SEMANA))}"><span style="width:${(pSem*100).toFixed(1)}%"></span></span>`;
   }
-  fx.innerHTML = `<div class="r-posso"><b>saldo do mês</b><i class="${c.posso<0?"neg":""}">${esc(BRL.format(c.posso))}</i></div>
-    <div class="r-dir">
-      <div class="r-linha">${semanaHTML}</div>
-      <div class="r-linha"><b>Caju</b><i class="${sobra<0?"neg":""}">${esc(BRL.format(sobra))}</i>
-        <span class="r-trilho"><span style="width:${(parte*100).toFixed(1)}%"></span></span></div>
-    </div>`;
+  const valor = v => `<i class="r-vl${v<0?" neg":""}">${esc(BRL.format(v))}</i>`;
+  fx.innerHTML = `<div class="r-tot"><b>total</b>${valor(total)}<small>${quando}</small></div>
+    <div class="r-sem">${semanaHTML}</div>
+    <div class="r-saldo"><b>saldo do mês</b>${valor(c.posso)}</div>`;
 
   // selos: pessoas que me devem e coisas que eu devo, ainda pendentes no mês
   const pendente = i => !i.pago && (Number(i.valor)||0) > 0;
