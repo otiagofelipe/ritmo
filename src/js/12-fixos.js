@@ -12,14 +12,16 @@ function pgFixos(){
     + kpi({nome:"ainda a cobrar", cor:CORES.aviso, valor:aCobrar});
 
   $("fx-lista").innerHTML = vigentes.length
-    ? cartoesFixas(vigentes)
-      + caixasTotais([["meu total", meuTotal], ...(deOutros ? [["de terceiros", deOutros]] : []), ["a cobrar", aCobrar, "aberto"]])
+    ? barraFixas(vigentes)
+      + `<div class="lst-lista">${vigentes.slice().sort((a,b)=>ordemDia(a.data)-ordemDia(b.data))
+          .map(f=>linhaFixa(f, { comVigencia:true })).join("")}</div>`
+      + rodapeLista([["meu total", meuTotal], ...(deOutros ? [["de terceiros", deOutros]] : []), ["a cobrar", aCobrar, "aberto"]])
       + (encerradas.length?`<details class="dobra">
            <summary><svg class="ic seta" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
              Fora de vigência nesta competência
              <span class="cnt">${encerradas.length}</span></summary>
-           <div class="cd-lista">${encerradas.map(f=>cartao({ cls:"de-outro", titulo: rotuloFixa(f), valor: Number(f.valor)||0,
-             det: esc(vigenciaTexto(f)) })).join("")}</div>
+           <div class="lst-lista">${encerradas.map(f=>linhaLista({ cls:"de-outro", ic: iconeFixa(rotuloFixa(f)), titulo: rotuloFixa(f),
+             valor: Number(f.valor)||0, sub: esc(vigenciaTexto(f)) })).join("")}</div>
          </details>`
         :"")
     : `<div class="blank">Nenhuma conta fixa vigente. Use “adicionar / editar”.</div>`;

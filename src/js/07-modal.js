@@ -149,19 +149,6 @@ function editorFixas(g, box){
     render();
   }
 
-  function itemLista(d, sub, valor){
-    const b = document.createElement("button");
-    b.type = "button"; b.className = "fx-item" + (d.terceiro ? " de-outro" : "");
-    b.innerHTML = `<span class="nm"><span class="t"></span>${d.terceiro?`<span class="tag" title="De terceiro: não é meu, só passa no meu cartão">3º</span>`:""}${
-      d.cobranca==="pix"?`<span class="tag">Pix</span>`:""}<span class="sub"></span></span>
-      <span class="vl">${valor==null?"":BRL.format(valor)}</span>
-      <svg class="ic" viewBox="0 0 24 24"><use href="#i-right"/></svg>`;
-    b.querySelector(".t").textContent = d.apelido || nomesFatura(d)[0] || "sem nome";
-    b.querySelector(".sub").textContent = sub;
-    b.onclick = () => { aberta = { orig:d, d:copia(d) }; desenhar(); };
-    return b;
-  }
-
   const topo = (titulo, mes, voltar) => `<div class="modal-topo">
       ${voltar?`<button type="button" class="modal-ic fx-voltar" title="Voltar para a lista" aria-label="Voltar">
         <svg class="ic" viewBox="0 0 24 24"><use href="#i-left"/></svg></button>`:""}
@@ -174,33 +161,46 @@ function editorFixas(g, box){
     const vig = despesas.filter(d=>despesaVigente(d, mes))
       .sort((a,b)=>ordemDia(faixaDaDespesa(a, mes).dia)-ordemDia(faixaDaDespesa(b, mes).dia));
     const fora = despesas.filter(d=>!despesaVigente(d, mes));
-    const total = vig.reduce((a,d)=>a+(Number(faixaDaDespesa(d, mes).valor)||0), 0);
+
+    // as contas vigentes como a aba mostra (com cobrança e status), ligadas à despesa pela chave
+    const fixas = fixasVigentes(mes);
+    const fixaDe = d => fixas.find(f => chaveFixa(f) === d.chave);
+    const { meuTotal, deOutros, aCobrar } = listaFixas(fixas);
 
     box.innerHTML = `<div class="fx-ed">
       ${topo(g.titulo, rotuloFatura(mes), false)}
-      <div class="fx-itens"></div>
-      <button type="button" class="fx-novo"><svg class="ic" viewBox="0 0 24 24"><use href="#i-plus"/></svg>Nova despesa</button>
-      <div class="esoma"><span>Vigente neste mês</span><span class="v">${esc(BRL.format(total))}</span></div>
+      ${barraFixas(fixas)}
+      <div class="lst-lista fx-itens"></div>
       ${fora.length?`<details class="dobra"${foraAberto?" open":""}>
         <summary><svg class="ic seta" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
           Fora de vigência nesta competência <span class="cnt">${fora.length}</span></summary>
-        <div class="fx-fora"></div></details>`:""}
+        <div class="lst-lista fx-fora"></div></details>`:""}
+      ${rodapeLista([["meu total", meuTotal], ...(deOutros ? [["de terceiros", deOutros]] : []), ["a cobrar", aCobrar, "aberto"]], "Nova despesa")}
     </div>`;
 
+    const linhaBotao = html => { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstElementChild; };
     const caixa = box.querySelector(".fx-itens");
     if(!vig.length) caixa.innerHTML = `<div class="blank">Nenhuma conta fixa vale nesta competência.</div>`;
     vig.forEach(d=>{
-      const f = faixaDaDespesa(d, mes);
-      caixa.appendChild(itemLista(d,
-        [f.dia ? `todo dia ${f.dia}` : "", d.cobranca==="pix" ? "Pix" : "PicPay"].filter(Boolean).join(" · "),
-        Number(f.valor)||0));
+      const f = fixaDe(d), fx = faixaDaDespesa(d, mes);
+      const b = linhaBotao(f ? linhaFixa(f, { tag:"button" })
+        : linhaLista({ tag:"button", ic: iconeFixa(d.apelido || nomesFatura(d)[0]), titulo: d.apelido || nomesFatura(d)[0] || "sem nome",
+            sub: esc([fx.dia ? `todo dia ${fx.dia}` : "", d.cobranca==="pix" ? "Pix" : "PicPay"].filter(Boolean).join(" · ")),
+            valor: Number(fx.valor)||0 }));
+      b.onclick = () => { aberta = { orig:d, d:copia(d) }; desenhar(); };
+      caixa.appendChild(b);
     });
     const cxFora = box.querySelector(".fx-fora");
-    if(cxFora) fora.forEach(d=>cxFora.appendChild(itemLista(d, foraDeVigencia(d, mes), null)));
+    if(cxFora) fora.forEach(d=>{
+      const b = linhaBotao(linhaLista({ tag:"button", cls:"de-outro", ic: iconeFixa(d.apelido || nomesFatura(d)[0]),
+        titulo: d.apelido || nomesFatura(d)[0] || "sem nome", sub: esc(foraDeVigencia(d, mes)), valor: null }));
+      b.onclick = () => { aberta = { orig:d, d:copia(d) }; desenhar(); };
+      cxFora.appendChild(b);
+    });
     const dobra = box.querySelector(".dobra");
     if(dobra) dobra.addEventListener("toggle", ()=>{ foraAberto = dobra.open; });
 
-    box.querySelector(".fx-novo").onclick = () => {
+    box.querySelector(".lst-mais").onclick = () => {
       aberta = { orig:null, d:{ apelido:"", nome:"", nomes:[], cobranca:"picpay", terceiro:false, faixas:[] } };
       desenhar();
     };

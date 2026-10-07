@@ -54,13 +54,17 @@ function renderResumoPessoas(id, pre, itens){
   }
   const linhas = [...por.entries()].sort((a,b)=>b[1].falta-a[1].falta || a[0].localeCompare(b[0]));
   const tp = linhas.reduce((a,[,r])=>a+r.pago,0), tf = linhas.reduce((a,[,r])=>a+r.falta,0);
-  // uma linha por pessoa: o que falta em destaque; embaixo quanto já foi pago
-  const verbo = id==="devem" ? "pagou" : "paguei";
-  box.innerHTML = `<div class="lst-lista">${linhas.map(([p,r])=>{ const ok = r.falta<=0.004;
-      return linhaLista({ ic: inicial(p), icCls: "av " + (ok ? "pago" : "pend"), titulo:p,
-        sub: esc(ok ? `${verbo} tudo` : `${verbo} ${RS2(r.pago)} de ${RS2(r.pago+r.falta)}`),
-        valor: ok ? r.pago : r.falta, status: statusLinha(ok) }); }).join("")}</div>`
-    + rodapeLista([[verbo, tp, "pago"], ["falta", tf, "aberto"]]);
+  // uma linha por pessoa: quem · pagou / falta pagar · status; no fim o total
+  const quem = id==="devem" ? "Quem me deve" : "A quem devo";
+  const verbo = id==="devem" ? "Pagou" : "Paguei";
+  const par = (pg, ft) => `<span class="rs-pg">${esc(BRL.format(pg))}</span><i>/</i><span class="rs-ft">${esc(BRL.format(ft))}</span>`;
+  box.innerHTML = `<div class="rs-tab">
+    <div class="rs-cab"><span>${quem}</span><span>${verbo} / falta pagar</span><span>Status</span></div>
+    <div class="rs-corpo">${linhas.map(([p,r])=>{ const ok = r.falta<=0.004;
+      return `<div class="rs-ln"><span class="rs-q"><span class="lst-ic av ${ok ? "pago" : "pend"}" aria-hidden="true">${inicial(p)}</span><b>${esc(p)}</b></span>
+        <span class="rs-v">${par(r.pago, r.falta)}</span><span class="rs-st">${statusLinha(ok)}</span></div>`; }).join("")}</div>
+    <div class="rs-ln rs-tot"><span class="rs-q"><b>Total</b></span><span class="rs-v">${par(tp, tf)}</span><span class="rs-st"></span></div>
+  </div>`;
 }
 
 /* ═══ listas em linhas: Eu devo, Me devem e Caju (card e aba) ═══
@@ -72,14 +76,14 @@ function renderResumoPessoas(id, pre, itens){
 /** Valor sem o "R$": a coluna da direita já é toda em reais. */
 const valorCurto = v => BRL.format(Number(v)||0).replace("R$", "").replace(/\s+/g, "");
 const inicial = t => esc((String(t||"").trim().charAt(0) || "?").toUpperCase());
-const statusLinha = pago => `<small class="lst-st ${pago ? "pago" : "pend"}">${pago ? "pago" : "pendente"}</small>`;
+const statusLinha = pago => selo(pago ? "pago" : "pendente");
 
 /** Molde da linha. `ic`, `sub` e `status` já vêm em HTML. */
 function linhaLista({ tag="div", cls="", ic, icCls="", titulo, sub="", valor, status="" }){
   return `<${tag}${tag==="button"?' type="button"':""} class="lst-it${cls?" "+cls:""}">
     <span class="lst-ic${icCls?" "+icCls:""}" aria-hidden="true">${ic}</span>
     <span class="lst-n"><b>${esc(titulo)}</b>${sub?`<small>${sub}</small>`:""}</span>
-    <span class="lst-v">${esc(valorCurto(valor))}${status}</span></${tag}>`;
+    <span class="lst-v">${valor == null ? "" : esc(valorCurto(valor))}${status}</span></${tag}>`;
 }
 
 /** Barra de cima: quanto já foi (gasto do vale, ou pago), com um traço opcional. */
@@ -154,6 +158,55 @@ function linhaCaju(l){
   const quando = l.data ? `${SEMANA_CURTA[l.data.getDay()]} ${diaBR(l.data)}` : "—";
   return linhaLista({ ic: iconeCaju(l.desc), icCls: "lugar", titulo: l.desc || "—", valor: Number(l.valor)||0,
     sub: esc(quando) + (pend ? ` · <span class="lst-pend" title="Lançado aqui, ainda não chegou na base">a sincronizar</span>` : "") });
+}
+
+/** Ícone da conta fixa pelo nome; o que não reconhece fica com o alfinete. */
+const ICONES_FIXA = [
+  [/internet|fibra|vivo|claro|\btim\b|\boi\b|net\b|wifi/, "🌐"],
+  [/celular|telefone|plano/, "📱"],
+  [/luz|energia|enel|eletro|cemig|light\b|cpfl/, "💡"],
+  [/agua|sabesp|saneamento/, "💧"],
+  [/\bgas\b|comgas|ultragaz/, "🔥"],
+  [/aluguel|condominio|iptu|imovel|casa/, "🏠"],
+  [/netflix|prime|disney|hbo|\bmax\b|globoplay|youtube|streaming|tv\b|paramount|crunchyroll/, "📺"],
+  [/spotify|deezer|musica|apple music/, "🎵"],
+  [/academia|smart ?fit|bluefit|gym|crossfit|wellhub|gympass|totalpass/, "🏋️"],
+  [/seguro|porto|azul seguros/, "🛡️"],
+  [/icloud|google one|dropbox|drive|nuvem|chatgpt|openai|claude|anthropic|software|adobe|microsoft|office/, "☁️"],
+  [/escola|faculdade|curso|ingles|idioma|mensalidade/, "🎓"],
+  [/carro|ipva|estacionamento|sem parar|veloe|tag/, "🚗"],
+  [/plano de saude|unimed|amil|sulamerica|bradesco saude|odonto/, "🩺"],
+  [/pet|racao|veterin/, "🐾"]
+];
+function iconeFixa(nome){
+  const n = semAcento(nome);
+  const achou = ICONES_FIXA.find(([re]) => re.test(n));
+  return achou ? achou[1] : "📌";
+}
+/** Barra dos Gastos fixos: quanto do mês já foi cobrado (ou pago por Pix). */
+function barraFixas(lista){
+  let total = 0, foi = 0;
+  for(const f of lista){
+    const c = cobrancaDaFixa(f);
+    const v = c ? Math.abs(c.valor) : (Number(f.valor)||0);
+    total += v; if(c) foi += v;
+  }
+  if(total <= 0) return "";
+  return barraLista({ pct: foi/total*100, cls: "pago", esq: `${Math.round(foi/total*100)}% já cobrado de ${BRL.format(total)}`,
+    dir: `${lista.length} conta${lista.length===1?"":"s"}` });
+}
+/** Uma conta fixa vigente: ícone, apelido com dia e cobrança embaixo, valor e status. */
+function linhaFixa(f, { tag="div", comVigencia=false }={}){
+  const c = cobrancaDaFixa(f), st = statusFixa(f, c);
+  const valor = c ? Math.abs(c.valor) : (Number(f.valor)||0);
+  const dif = c && Math.abs(valor-(Number(f.valor)||0))>0.005;
+  const det = [f.data ? `todo dia ${f.data}` : "",
+    c ? `${ehFixaPix(f)?"pago":"cobrado"} ${p2(c.data.getDate())}/${p2(c.data.getMonth()+1)}` : (ehFixaPix(f) ? "via Pix" : "aguardando"),
+    comVigencia ? vigenciaTexto(f) : "", dif ? `previsto ${BRL.format(f.valor)}` : ""].filter(Boolean).join(" · ");
+  const tags = (f.terceiro?`<span class="tag" title="De terceiro: não é meu, só passa no meu cartão">3º</span>`:"") + (ehFixaPix(f)?`<span class="tag">Pix</span>`:"");
+  return linhaLista({ tag, cls: f.terceiro ? "de-outro" : "", ic: iconeFixa(rotuloFixa(f)), titulo: rotuloFixa(f),
+    sub: (tags ? tags : "") + `<span>${esc(det)}</span>`, valor, status: selo(st) })
+    .replace('class="lst-it', `data-fixa="${esc(chaveFixa(f))}" class="lst-it`);
 }
 
 /** Barra do vale do Caju; o traço de hoje só aparece no mês corrente. */
