@@ -6,7 +6,7 @@ document.querySelectorAll("#menu button").forEach(b=>b.onclick=()=>irPara(b.data
 try{
   const v = JSON.parse(localStorage.getItem("ritmo:vis")||"{}");
   // cada gráfico tem as suas opções; escolha antiga que não existe mais volta ao padrão
-  const OPCOES_VIS = { semanas:["barras","faixas","pizza"], dia:["linha","barras","tabela","calendario"] };
+  const OPCOES_VIS = { semanas:["barras","faixas","pizza"], dia:["linha","barras","tabela"] };
   if(v.semanas==="linha") v.semanas = "faixas";      // a linha virou faixas
   ["semanas","dia"].forEach(k=>{ if(OPCOES_VIS[k].includes(v[k])) S.vis[k]=v[k]; });
 }catch(e){}

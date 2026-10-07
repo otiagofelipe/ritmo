@@ -194,33 +194,42 @@ function renderDia(){
 
   const vis = S.vis.dia;
 
-  /* Expandido (só no celular, em linha e barras): cada dia ganha 56px e
+  /* Expandido (só no celular, em linha e barras): cada dia ganha 64px e
      a caixa rola para o lado, com todos os dias no eixo e o valor de
-     cada dia escrito. O eixo Y fica parado na esquerda (ver eixoFixo). */
-  const PX_DIA = 56;
+     cada dia escrito. O eixo Y fica parado na esquerda (ver eixoFixo) e
+     o balão do toque abre por cima, como no gráfico normal. */
+  const PX_DIA = 64;
   const podeExpandir = window.innerWidth <= 760 && (vis==="linha" || vis==="barras");
   const expandido = podeExpandir && S.diaExpandido;
   const btExp = $("dia-expandir"), rolo = $("m-dia-rolo");
   btExp.hidden = !podeExpandir;
   btExp.setAttribute("aria-pressed", String(expandido));
-  btExp.title = expandido ? "Voltar ao tamanho da tela" : "Alargar o gráfico e rolar para o lado";
-  $("dia-expandir-txt").textContent = expandido ? "recolher" : "expandir";
+  btExp.title = expandido ? "Voltar ao tamanho da tela" : "Alargar o gráfico";
+  btExp.setAttribute("aria-label", expandido ? "Voltar o gráfico ao tamanho da tela" : "Alargar o gráfico e rolar para o lado");
   rolo.classList.toggle("largo", expandido);
   $("m-dia").style.width = expandido ? (dias.length*PX_DIA)+"px" : "";
-  $("m-dia-caixa").querySelectorAll(".dia-eixo").forEach(e=>e.remove());
+  const caixa = $("m-dia-caixa");
+  caixa.querySelectorAll(":scope > .dia-eixo, :scope > .chart-tip").forEach(e=>e.remove());
+  // rolar fecha o balão: ele não acompanha o ponto
+  rolo.onscroll = expandido ? () => caixa.querySelectorAll(":scope > .chart-tip").forEach(t=>{ t.style.opacity="0"; }) : null;
 
-  // total do período: mesmo lugar (logo abaixo do título) nas quatro visões
+  /* Total do período: só o número, entre o título e os ícones, igual em
+     todas as visões. Se não couber, vira "7,4k"; se nem assim, some
+     (o detalhe fica no title). */
   const totalDias = valores.reduce((a,v)=>a+v,0);
   const comGasto = valores.filter(v=>v>0).length;
-  $("m-dia-total").textContent =
-    `total ${RS2(totalDias)} · ${comGasto} ${comGasto===1?"dia":"dias"} com gasto`;
+  const elTot = $("m-dia-total");
+  elTot.style.visibility = "";
+  elTot.textContent = NUM2.format(totalDias);
+  elTot.title = `Total ${RS2(totalDias)} · ${comGasto} ${comGasto===1?"dia":"dias"} com gasto`;
+  if(elTot.scrollWidth > elTot.clientWidth) elTot.textContent = RSk(totalDias).replace(/^R\$\s*/, "");
+  if(elTot.scrollWidth > elTot.clientWidth) elTot.style.visibility = "hidden";
 
   /* Tabela: no máximo a altura que a linha e as barras ocupam; o resto
      rola dentro dela. Mesma conta de altura do grafico(). */
   const ALTURA_DIA = 200;
   const altGrafico = window.innerWidth <= 760 ? Math.round(ALTURA_DIA*1.3) : ALTURA_DIA;
 
-  if(vis==="calendario") return calendarioDia(dias, valores, linhas, chave, picos);
   if(vis==="tabela"){
     /* Dias com gasto sempre entram; dia zerado só entra se já passou
        (antes de hoje). Do mais recente para o mais antigo, agrupados
@@ -270,12 +279,9 @@ function renderDia(){
     // expandido: sem escolha por fora, o eixo mostra todos os dias que couberem
     eixoIndices: expandido ? undefined : dias.map((d,i)=>d.getDay()===1 ? i : -1).filter(i=>i>=0),
     pontos: true,             // um ponto por dia, mesmo com o mês cheio
-    // expandido: valor de todo dia com gasto, sem "R$" para caber no dia
+    // expandido: valor de todo dia com gasto
     rotulos:"picos",
     picosIndices: expandido ? valores.map((v,i)=>v>0 ? i : -1).filter(i=>i>=0) : picos,
-    fmtRotulo: expandido ? (v => NUM2.format(v)) : undefined,
-    // expandido: faixa livre no alto para o balão do toque não ser cortado
-    topoExtra: expandido ? 54 : 0,
     altura: ALTURA_DIA,
     vazio: "Nenhum gasto nesta fatura."
   });
@@ -298,7 +304,8 @@ function eixoFixo(box, caixa){
   if(!svg) return;
   const rot = [...svg.querySelectorAll("text.gy")];
   if(!rot.length) return;
-  const larg = Math.ceil(Math.max(...rot.map(t=>Number(t.getAttribute("x"))))) + 8;
+  // até o fim do texto do eixo: os pontos e rótulos do 1º dia ficam à vista
+  const larg = Math.ceil(Math.max(...rot.map(t=>Number(t.getAttribute("x"))))) + 4;
   const alt = svg.viewBox.baseVal.height;
   const fixo = document.createElement("div");
   fixo.className = "dia-eixo";
@@ -306,53 +313,6 @@ function eixoFixo(box, caixa){
   fixo.style.width = larg+"px";
   fixo.innerHTML = `<svg viewBox="0 0 ${larg} ${alt}" width="${larg}" height="${alt}">${rot.map(t=>t.outerHTML).join("")}</svg>`;
   caixa.appendChild(fixo);
-}
-
-/**
- * Ritmo do mês em calendário de calor: cada dia acende conforme o quanto
- * se gastou (mesma soma do gráfico, sem parcelas nem fixos). Tocar num
- * dia mostra as compras dele logo embaixo. Hoje fica contornado; dia que
- * ainda não chegou fica tracejado.
- */
-let calDia = null;   // dia escolhido no calendário (aaaa-mm-dd)
-function calendarioDia(dias, valores, linhas, chave, picos){
-  const box = $("m-dia");
-  const hojeK = chave(TODAY);
-  const max = Math.max(0, ...valores);
-  const nivel = v => v<=0 ? 0 : (v < max*.25 ? 1 : v < max*.5 ? 2 : v < max*.75 ? 3 : 4);
-  const chaves = dias.map(chave);
-  // dia escolhido: o que já estava, senão hoje (se tem gasto), senão o último com gasto
-  if(!calDia || !chaves.includes(calDia)){
-    const ultimo = [...chaves].reverse().find((k,j)=>valores[chaves.length-1-j]>0);
-    calDia = (chaves.includes(hojeK) && valores[chaves.indexOf(hojeK)]>0) ? hojeK : (ultimo || null);
-  }
-  const vazio = dias[0].getDay();         // semana começa no domingo
-  const cel = dias.map((d,i)=>{
-    const k = chaves[i], fut = k > hojeK;
-    const cls = ["cal-d", "n"+nivel(valores[i]), fut?"fut":"", k===hojeK?"hoje":"", k===calDia?"esc":"",
-                 picos.includes(i)?"pico":""].filter(Boolean).join(" ");
-    return `<button type="button" class="${cls}" data-k="${k}" title="${p2(d.getDate())}/${p2(d.getMonth()+1)} · ${esc(RS2(valores[i]))}">${
-      // a competência atravessa dois meses: o primeiro dia e o dia 1 levam o mês junto
-      (i===0 || d.getDate()===1) ? `${d.getDate()}<small>/${d.getMonth()+1}</small>` : d.getDate()}</button>`;
-  }).join("");
-  const sel = calDia ? linhas.filter(l=>chave(l.data)===calDia).sort((a,b)=>b.valor-a.valor) : [];
-  const dSel = calDia ? dias[chaves.indexOf(calDia)] : null;
-  const tot = sel.reduce((a,l)=>a+l.valor,0);
-  box.innerHTML = `<div class="cal-mes">
-      <div class="cal-sem">${["D","S","T","Q","Q","S","S"].map(x=>`<span>${x}</span>`).join("")}</div>
-      <div class="cal-grade">${"<span></span>".repeat(vazio)}${cel}</div>
-      <div class="cal-leg">menos<i class="n1"></i><i class="n2"></i><i class="n3"></i><i class="n4"></i>mais</div>
-    </div>
-    ${dSel ? `<div class="cal-dia">
-      <div class="cal-dia-cab"><span>${esc(diaCurto(dSel))}<small>${sel.length} ${sel.length===1?"compra":"compras"}</small></span><b>${esc(RS2(tot))}</b></div>
-      ${sel.length ? sel.map((l,k)=>`<button type="button" class="cal-it" data-ri="${k}">${l.conta?marca(l.conta,true):""}<span class="nm"></span><i class="tg-role">rolê</i><span class="vl">${esc(RS2(l.valor))}</span></button>`).join("")
-                   : `<div class="blank">Nenhum gasto neste dia.</div>`}
-      <div class="role-pe"><button type="button" class="btn role-salvar" hidden></button></div>
-    </div>` : ""}`;
-  // nomes por textContent (vêm do banco)
-  box.querySelectorAll(".cal-it .nm").forEach((el,i)=>{ el.textContent = sel[i].desc || "—"; });
-  if(dSel) ligarRolesToque(box.querySelector(".cal-dia"), sel);
-  box.querySelectorAll(".cal-d").forEach(b=>b.onclick = () => { calDia = b.dataset.k; calendarioDia(dias, valores, linhas, chave, picos); });
 }
 
 /* Rótulos de uma semana para os gráficos do celular. */

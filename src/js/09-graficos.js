@@ -436,8 +436,18 @@ function ligarTooltip(box, ctx){
     tip.innerHTML = `<div style="opacity:.7;margin-bottom:2px">${escHtml(ctx.labels[i])}</div>${linhas}${extra}`;
     // o SVG é esticado: converte a coordenada interna para % da caixa
     // presa entre 8% e 92% para não vazar da caixa nas pontas
-    const pc = Math.min(92, Math.max(8, ctx.x(i)/ctx.W*100));
-    tip.style.left = pc.toFixed(2)+"%";
+    const rolo = box.closest(".dia-rolo.largo");
+    if(rolo){
+      /* Gráfico alargado dentro de uma caixa que rola: o balão mora fora
+         dela (senão o alto é cortado) e segue o ponto descontando a rolagem. */
+      if(tip.parentNode !== rolo.parentNode) rolo.parentNode.appendChild(tip);
+      const meio = (tip.offsetWidth || 100) / 2;
+      const px = ctx.x(i) - rolo.scrollLeft;
+      tip.style.left = Math.min(rolo.clientWidth - meio, Math.max(meio, px)).toFixed(1)+"px";
+    } else {
+      const pc = Math.min(92, Math.max(8, ctx.x(i)/ctx.W*100));
+      tip.style.left = pc.toFixed(2)+"%";
+    }
     tip.style.top  = "6px";
     tip.style.opacity = "1";
   };
