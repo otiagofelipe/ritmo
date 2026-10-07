@@ -78,13 +78,20 @@ function renderResumo(){
     const prev = c.id==="picpay" ? previstoFixas : 0;   // os fixos debitam no PicPay
     const editavel = GRUPOS.find(g=>g.grupoPlanilha===c.id);
     /* Itaú e PicPay se abrem no próprio card. O total se divide em
+       Me devem (a parte das compras divididas que os outros devolvem),
        parcelas, fixos (cobranças de conta fixa já na fatura + os que
-       ainda vão cair) e o resto, as compras avulsas do mês. */
+       ainda vão cair) e o resto, as compras avulsas do mês. A parte
+       dividida sai do grupo da compra, para a soma fechar com o total. */
     let abre = null;
     if(c.id==="itau" || c.id==="picpay"){
-      const parc = soma(desta.filter(x=>x.parcela));
-      const fixo = soma(desta.filter(x=>!x.parcela && (x.fixa || idsFixas.has(x.id)))) + prev;
-      abre = { id:c.id, linhas:[["Avulsos", v + prev - parc - fixo], ["Fixos", fixo], ["Parcelas", parc]] };
+      const deles = x => Math.min(Math.max(x.valor, 0),
+        divisoesDe(x).reduce((a,r)=>a+(Number(r.valor)||0), 0));
+      const ehFixo = x => !x.parcela && (x.fixa || idsFixas.has(x.id));
+      const medev = desta.reduce((a,x)=>a+deles(x), 0);
+      const parc = desta.filter(x=>x.parcela).reduce((a,x)=>a+x.valor-deles(x), 0);
+      const fixo = desta.filter(ehFixo).reduce((a,x)=>a+x.valor-deles(x), 0) + prev;
+      const cent = n => Math.round(n*100)/100 || 0;   // sem "-0,00" de arredondamento
+      abre = { id:c.id, linhas:[["Avulsos", cent(v + prev - medev - parc - fixo)], ["Me devem", cent(medev)], ["Fixos", cent(fixo)], ["Parcelas", cent(parc)]] };
     }
     return kpi({
       nome:c.titulo, selo:marca(c), valor:v+prev, tom: TOM_CARD[c.id] || c.cor, abre,
