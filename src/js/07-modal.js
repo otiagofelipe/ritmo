@@ -114,6 +114,12 @@ function editorFixas(g, box){
   let foraAberto = false;
 
   const copia = d => ({ ...d, nomes: nomesFatura(d), faixas: d.faixas.map(f=>({...f})) });
+  // veio de uma linha de Contas fixas do Dashboard: abre direto nessa despesa
+  if(!aberta && fixaAlvo){
+    const alvo = despesas.find(d => d.chave === fixaAlvo);
+    if(alvo) aberta = { orig:alvo, d:copia(alvo) };
+  }
+  fixaAlvo = null;
   const desenhar = () => { box.scrollTop = 0; aberta ? cartao() : lista(); };
   const fechar = () => { grupoAberto = null; renderEditor(); };
 
