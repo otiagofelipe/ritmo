@@ -286,3 +286,20 @@
   .btn:hover{outline:1px solid #FFFFFF99;outline-offset:1px}
   .link-btn:hover{border-color:var(--rt-blue)}
 }
+
+/* ═══ celular: Todos os gastos, Contas fixas e Parcelas cabem na tela ═══
+   O bloco tem no máximo a altura visível, entre a barra do mês (presa no
+   topo ao rolar) e a barra de baixo. A lista rola por dentro; busca,
+   filtros e totais ficam parados nas pontas. Bloco curto continua com a
+   altura do próprio conteúdo. */
+@media(max-width:760px){
+  .bl-tela{display:flex;flex-direction:column;
+    max-height:calc(100dvh - var(--tb-h, 130px) - var(--topo-preso, 54px) - 16px - env(safe-area-inset-top,0px))}
+  .bl-tela > *{flex:0 0 auto}
+  .bl-tela > .scroller{flex:1 1 auto;min-height:160px;max-height:none}
+  .bl-tela > #m-fixas,
+  .bl-tela > #m-parcelas{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+  .bl-tela .bl-rolo{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin;
+    margin-right:-6px;padding-right:6px}
+  .bl-tela .bl-rolo + *{flex:0 0 auto}
+}

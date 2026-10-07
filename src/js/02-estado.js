@@ -21,6 +21,7 @@ const S = {
   editando: null,      // quadro em modo de edição ("devem" | "devo")
   tema: "retrowave",   // paleta escolhida no seletor do topo
   vis: { semanas:"barras", dia:"linha" },  // linha | barras | tabela, por gráfico
+  diaExpandido: false, // Ritmo do mês alargado, rolando para o lado (só no celular)
   busca: "",
   fonte: "",
   reg: {},          // anotações vindas das abas do app

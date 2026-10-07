@@ -17,6 +17,12 @@ document.querySelectorAll(".vis-sel button").forEach(b=>b.onclick=()=>{
   if(alvo==="semanas") protegido("semanas", renderSemanas);
   else protegido("dia", renderDia);
 });
+// Ritmo do mês: alarga o gráfico no celular para rolar para o lado
+$("dia-expandir").addEventListener("click", ()=>{
+  S.diaExpandido = !S.diaExpandido;
+  S.diaRolarHoje = S.diaExpandido;
+  protegido("dia", renderDia);
+});
 // barra inferior do celular: mesmos destinos, mesma função
 document.querySelectorAll("#tabbar button[data-pg], #tb-menu button").forEach(b=>b.onclick=()=>irPara(b.dataset.pg));
 
@@ -201,6 +207,12 @@ $("ev-ate").addEventListener("change", e=>{ S.evAte=e.target.value; render(); })
 $("en-de").addEventListener("change",  e=>{ S.evDe=e.target.value;  render(); });
 $("en-ate").addEventListener("change", e=>{ S.evAte=e.target.value; render(); });
 $("m-busca").addEventListener("input",  e=>{ S.busca=e.target.value; renderExtrato(); });
+// filtros da lista: recolhidos atrás do botão ao lado da busca
+$("lf-botao").addEventListener("click", ()=>{
+  const painel = $("lista-filtros"), abrir = painel.hidden;
+  painel.hidden = !abrir;
+  $("lf-botao").setAttribute("aria-expanded", String(abrir));
+});
 $("m-salvar-roles").onclick = () => salvarRoles();
 
 // atalhos para os formulários

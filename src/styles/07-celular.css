@@ -433,3 +433,19 @@ table.tab-fat.resumo-pes :is(th,td){text-align:center}
 .tab-vis tfoot td.tot{font-family:var(--disp);font-size:19px;letter-spacing:.04em;color:var(--rt-text)}
 .tab-vis tfoot tr:hover td{background:none}
 
+
+/* ═══ Ritmo do mês expandido: o gráfico alarga e a caixa rola para o lado ═══ */
+.dia-pe{display:flex;justify-content:flex-end;margin-top:6px}
+.dia-pe:has(.dia-expandir[hidden]){display:none}
+.dia-expandir{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--rt-radius-pill);
+  font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--rt-text-secondary);border:1px solid var(--rt-border-strong);background:var(--rt-inset);
+  transition:color .15s,border-color .15s,background .15s}
+.dia-expandir[hidden]{display:none}
+.dia-expandir svg.ic{width:15px;height:15px;stroke-width:2}
+.dia-expandir:hover{color:var(--rt-text);border-color:var(--rt-pink)}
+.dia-expandir:focus-visible{outline:2px solid var(--rt-pink);outline-offset:2px}
+.dia-expandir[aria-pressed="true"]{color:#FFFFFF;background:var(--rt-grad);border-color:transparent}
+.dia-rolo.largo{overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;padding-bottom:6px}
+.dia-rolo.largo .chart{max-width:none}
