@@ -116,25 +116,30 @@ function barraPago(id, itens){
     dir: pessoas ? `${pessoas} pessoa${pessoas===1?"":"s"}` : "" });
 }
 
+/* Me devem / Eu devo em colunas, quase uma tabela: ícone do gasto ·
+   pessoa · gasto (com o detalhe embaixo) · valor e status. */
+function cabDivida(id){
+  // no celular a coluna da pessoa é estreita: o rótulo encurta
+  const [longo, curto] = id==="devem" ? ["Quem me deve", "Quem"] : ["A quem devo", "Pra quem"];
+  return `<div class="dv-cab" aria-hidden="true"><span></span><span><span class="cab-l">${longo}</span><span class="cab-c">${curto}</span></span>
+    <span>Gasto</span><span>Valor</span></div>`;
+}
 function linhaDivida(id, i, tag="div"){
   const pessoa = String(i.pessoa||"").trim(), desc = String(i.nome||"").trim();
-  const temDesc = desc && desc !== pessoa;
-  // Me devem: "quem deve - descrição"; Eu devo: a pessoa, e a descrição embaixo
-  const titulo = i.fixaPix ? (desc || "Conta fixa")
-    : id==="devem" ? (pessoa && temDesc ? `${pessoa} - ${desc}` : (pessoa || desc || "sem nome"))
-    : (pessoa || desc || "sem nome");
+  const gasto = i.fixaPix ? (desc || "Conta fixa") : (desc && desc !== pessoa ? desc : "");
   const det = i.fixaPix ? "conta fixa · Pix"
-    : [id==="devo" && temDesc ? desc : "", i.parcela ? `de ${RS2(i.valorTotal||0)}` : (i.indeterminado ? "todo mês" : "única")]
-        .filter(Boolean).join(" · ");
+    : (i.parcela ? `de ${RS2(i.valorTotal||0)}` : (i.indeterminado ? "todo mês" : "única"));
   let pts = "";
   if(i.parcela && i.parcela.n <= 12){
     const pagas = new Set(numerosPagos(i));
     pts = `<span class="cd-pts" title="parcela ${i.parcela.i} de ${i.parcela.n}">${
       Array.from({length:i.parcela.n}, (_,k)=>`<i class="${pagas.has(k+1) ? "ok" : ""}${k+1===i.parcela.i ? " at" : ""}"></i>`).join("")}</span>`;
   } else if(i.parcela) pts = ` · ${i.parcela.i}/${i.parcela.n}`;
-  return linhaLista({ tag, cls: i.pago ? "pago" : "pend",
-    ic: iconeGasto(desc || pessoa, i.fixaPix ? "📌" : "🧾"),
-    titulo, sub: `<span>${esc(det)}</span>${pts}`, valor: Number(i.valor)||0, status: statusLinha(i.pago) });
+  return `<${tag}${tag==="button"?' type="button"':""} class="lst-it dv-ln ${i.pago ? "pago" : "pend"}">
+    <span class="lst-ic" aria-hidden="true">${iconeGasto(gasto || pessoa, i.fixaPix ? "📌" : "🧾")}</span>
+    <span class="dv-p">${pessoa ? `<b>${esc(pessoa)}</b>` : `<b class="vazio">—</b>`}</span>
+    <span class="dv-g"><b${gasto ? ` title="${esc(gasto)}"` : ` class="vazio"`}>${esc(gasto || "—")}</b><small><span>${esc(det)}</span>${pts}</small></span>
+    <span class="lst-v">${esc(valorCurto(Number(i.valor)||0))}${statusLinha(i.pago)}</span></${tag}>`;
 }
 
 const SEMANA_CURTA = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
@@ -228,11 +233,15 @@ function barraCaju(mes, gasto, teto){
   const [a, m] = String(mes).split("-").map(Number);
   const nDias = new Date(a, m, 0).getDate();
   const noMes = TODAY.getFullYear() === a && TODAY.getMonth()+1 === m;
-  const pct = gasto / teto * 100;
-  return barraLista({ pct, cls: "caju", esq: `${Math.round(pct)}% do vale de ${BRL.format(teto)}`,
+  // a cor é o que ainda tem no vale; o vazio, o que já foi gasto
+  const livre = teto - gasto, pct = livre / teto * 100;
+  const fim = 1 - TODAY.getDate() / nDias;    // quanto deveria sobrar hoje, gastando por igual
+  return barraLista({ pct, cls: "caju" + (livre < 0 ? " estourou" : ""),
+    esq: livre < 0 ? `${BRL.format(-livre)} acima do vale de ${BRL.format(teto)}`
+                   : `${Math.round(pct)}% disponível do vale de ${BRL.format(teto)}`,
     dir: noMes ? `dia ${TODAY.getDate()}` : "",
-    traco: noMes ? TODAY.getDate() / nDias * 100 : null,
-    tracoTit: `Gastando o vale por igual, hoje seriam ${BRL.format(teto * TODAY.getDate() / nDias)}` });
+    traco: noMes ? fim * 100 : null,
+    tracoTit: `Gastando o vale por igual, hoje sobrariam ${BRL.format(teto * fim)}` });
 }
 
 /** Molde do cartãozinho: título e valor em cima; detalhe e status embaixo. `det` e `dir` já vêm em HTML. */
@@ -263,6 +272,7 @@ function montarLista(id, pre, itens, total, pago){
   }
 
   $(pre+"-lista").innerHTML = barraPago(id, itens)
+    + cabDivida(id)
     + `<div class="lst-lista">${itens.map(i=>linhaDivida(id, i)).join("")}</div>`
     + rodapeLista([["neste mês", total], ["em aberto", total-pago, "aberto"], ["já pago", pago, "pago"]]);
 

@@ -448,6 +448,7 @@ function editorDividas(g, box){
     box.innerHTML = `<div class="fx-ed">
       ${topo(g.titulo, rotuloFatura(mes), false)}
       ${barraPago(id, todos)}
+      ${todos.length ? cabDivida(id) : ""}
       <div class="lst-lista"></div>
       ${rodapeLista([["neste mês", total], ["em aberto", aberto, "aberto"]], "Novo registro")}
     </div>`;

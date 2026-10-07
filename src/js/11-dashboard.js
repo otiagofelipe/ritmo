@@ -139,8 +139,9 @@ function renderResumo(){
   $("m-beneficios").closest(".grupo-cards").hidden = !beneficio.length;
   $("m-cartoes-tot").textContent = BRL.format(faturas);
 
+  // a cor é o que ainda tem no vale; o vazio, o que já foi gasto
   const barra = (gasto, teto) => `<div class="barra" aria-hidden="true"><i style="width:${
-    teto>0 ? Math.min(100, gasto/teto*100).toFixed(1) : 0}%"></i></div>`;
+    teto>0 ? Math.max(0, Math.min(100, (teto-gasto)/teto*100)).toFixed(1) : 0}%"></i></div>`;
   const cardBeneficio = b => {
     const conta = CONTAS.find(c=>c.id===b.id && c.temTeto) || null;
     const gasto = conta ? gastoCaju : 0;
