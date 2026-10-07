@@ -193,6 +193,20 @@ function renderDia(){
   const marca = d => `<span class="${fimDeSemana(d)?"mk-grande":"mk-cheia"}" aria-hidden="true"></span>`;
 
   const vis = S.vis.dia;
+
+  /* Expandido (só no celular, em linha e barras): cada dia ganha 50px e
+     a caixa rola para o lado, com todos os dias no eixo. */
+  const PX_DIA = 50;
+  const podeExpandir = window.innerWidth <= 760 && (vis==="linha" || vis==="barras");
+  const expandido = podeExpandir && S.diaExpandido;
+  const btExp = $("dia-expandir"), rolo = $("m-dia-rolo");
+  btExp.hidden = !podeExpandir;
+  btExp.setAttribute("aria-pressed", String(expandido));
+  btExp.title = expandido ? "Voltar ao tamanho da tela" : "Alargar o gráfico e rolar para o lado";
+  $("dia-expandir-txt").textContent = expandido ? "recolher" : "expandir";
+  rolo.classList.toggle("largo", expandido);
+  $("m-dia").style.width = expandido ? (dias.length*PX_DIA)+"px" : "";
+
   if(vis==="calendario") return calendarioDia(dias, valores, linhas, chave, picos);
   if(vis==="tabela"){
     /* Dias com gasto sempre entram; dia zerado só entra se já passou
@@ -239,12 +253,19 @@ function renderDia(){
     divisorias,
     // eixo X: só a segunda-feira de cada semana; se ela não está no
     // gráfico (semana que começou no mês anterior), fica sem rótulo
-    eixoIndices: dias.map((d,i)=>d.getDay()===1 ? i : -1).filter(i=>i>=0),
+    // expandido: sem escolha por fora, o eixo mostra todos os dias que couberem
+    eixoIndices: expandido ? undefined : dias.map((d,i)=>d.getDay()===1 ? i : -1).filter(i=>i>=0),
     pontos: true,             // um ponto por dia, mesmo com o mês cheio
     rotulos:"picos", picosIndices: picos,
     altura: 200,
     vazio: "Nenhum gasto nesta fatura."
   });
+  // ao expandir, a rolagem começa em hoje (ou no último dia)
+  if(expandido && S.diaRolarHoje){
+    S.diaRolarHoje = false;
+    const alvo = hoje>=0 ? hoje : dias.length-1;
+    rolo.scrollLeft = Math.max(0, (alvo+0.5)*PX_DIA - rolo.clientWidth/2);
+  }
 }
 
 /**
@@ -472,15 +493,17 @@ function renderFiltrosLista(){
     <label class="ff"><span class="tagx">semana</span>
       <select id="f-semana">
         <option value="">Todas</option>
-        ${semanas.map((w,i)=>`<option value="${i}">Semana ${i+1} · ${esc(w.rot)}</option>`).join("")}
+        ${semanas.map((w,i)=>`<option value="${i}">${esc(w.rot)}</option>`).join("")}
       </select></label>
-    <div class="ff faixa"><span class="tagx">valor <span class="faixa-val" id="f-faixa-val">R$ 0 — ${esc(RS(teto))}</span></span>
-      <div class="slider" id="f-slider">
-        <span class="trilho"></span><span class="ativo" id="f-ativo"></span>
-        <input type="range" id="f-min" min="0" max="${teto}" step="10" value="0" aria-label="Valor mínimo">
-        <input type="range" id="f-max" min="0" max="${teto}" step="10" value="${teto}" aria-label="Valor máximo">
-      </div></div>
-    <button class="btn-limpar" id="f-limpar">limpar</button>`;
+    <div class="lf-pe">
+      <div class="ff faixa"><span class="tagx">valor <span class="faixa-val" id="f-faixa-val">R$ 0 — ${esc(RS(teto))}</span></span>
+        <div class="slider" id="f-slider">
+          <span class="trilho"></span><span class="ativo" id="f-ativo"></span>
+          <input type="range" id="f-min" min="0" max="${teto}" step="10" value="0" aria-label="Valor mínimo">
+          <input type="range" id="f-max" min="0" max="${teto}" step="10" value="${teto}" aria-label="Valor máximo">
+        </div></div>
+      <button class="btn-limpar" id="f-limpar">limpar</button>
+    </div>`;
 
   const iMin=$("f-min"), iMax=$("f-max"), ativo=$("f-ativo"), rot=$("f-faixa-val");
   const pintar = () => {
@@ -504,7 +527,21 @@ function renderFiltrosLista(){
   };
 }
 
+/**
+ * Selo do botão de filtros da lista: quantos filtros estão ligados.
+ * A busca fica à vista ao lado do botão, então não entra na conta.
+ */
+function contarFiltrosLista(){
+  const n = (S.fCartao ? 1 : 0) + (S.fSemana !== "" && S.fSemana != null ? 1 : 0) + (S.faixa ? 1 : 0);
+  const selo = $("lf-n");
+  if(!selo) return;
+  selo.hidden = !n;
+  selo.textContent = n ? String(n) : "";
+  $("lf-botao").classList.toggle("ativo", n > 0);
+}
+
 function renderExtrato(){
+  contarFiltrosLista();
   /* Parcelas entram na lista, datadas pela transaction_date — o dia
      da compra original. Uma parcela 3/10 de um notebook comprado em
      junho aparece sob junho, com o selo dizendo qual parcela é. */
@@ -664,11 +701,11 @@ function renderParcelas(){
   }
   // o selo já diz o banco; no lugar do nome dele vai a data da compra
   const dia = d => `${p2(d.getDate())}/${p2(d.getMonth()+1)}/${String(d.getFullYear()).slice(2)}`;
-  $("m-parcelas").innerHTML = linhas.map(l=>
+  $("m-parcelas").innerHTML = `<div class="bl-rolo">` + linhas.map(l=>
     `<div class="lrow">${marca(l.conta, true)}
      <div class="nm">${esc(l.desc)}
        <div class="sub">parcela ${l.parcela.i} de ${l.parcela.n} · ${esc(dia(l.data))}</div></div>
-     <div class="vl">${BRL.format(l.valor)}</div></div>`).join("")
+     <div class="vl">${BRL.format(l.valor)}</div></div>`).join("") + `</div>`
     + `<div class="ltotal"><span class="nm">total</span>
        <span class="vl">${BRL.format(soma(linhas))}</span></div>`;
 }
@@ -681,13 +718,9 @@ function renderFixasResumo(){
     return;
   }
   const { html, meuTotal, deOutros, aCobrar } = listaFixas(vigentes);
-  $("m-fixas").innerHTML = html
-    + `<div class="ltotal"><span class="nm">meu total</span>
-       <span class="vl">${BRL.format(meuTotal)}</span></div>`
-    + (deOutros?`<div class="ltotal sub2"><span class="nm">de terceiros</span>
-       <span class="vl" style="color:var(--ink-soft)">${BRL.format(deOutros)}</span></div>`:"")
-    + (aCobrar?`<div class="ltotal sub2"><span class="nm">ainda a cobrar</span>
-       <span class="vl">${BRL.format(aCobrar)}</span></div>`:"");
+  // totais nas mesmas caixas dos Registros (Me devem / Eu devo) e da página de fixos
+  $("m-fixas").innerHTML = `<div class="bl-rolo">${html}</div>`
+    + caixasTotais([["meu total", meuTotal], ...(deOutros ? [["de terceiros", deOutros]] : []), ["a cobrar", aCobrar, "aberto"]]);
 }
 
 /** Linhas de conta fixa + os três totais, compartilhado entre Dashboard e página. */

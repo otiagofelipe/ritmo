@@ -155,7 +155,31 @@
 .badge.neutro::before{box-shadow:none}
 
 /* ═══ filtros da lista ═══ */
-.lista-filtros{display:flex;gap:var(--sp-2) 12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:var(--sp-3)}
+/* ═══ filtros da lista: recolhidos atrás do botão ao lado da busca ═══ */
+.busca-linha{display:flex;gap:var(--sp-2);align-items:center;margin-bottom:var(--sp-3)}
+.busca-linha .busca{flex:1;min-width:0;margin-bottom:0}
+.lf-botao{position:relative;flex:0 0 auto;width:42px;height:42px;border-radius:var(--rt-radius-md);
+  display:flex;align-items:center;justify-content:center;color:var(--rt-text-secondary);
+  border:1px solid var(--rt-border-strong);background:var(--rt-inset);
+  transition:color .15s,border-color .15s,box-shadow .15s}
+.lf-botao svg.ic{width:18px;height:18px;stroke-width:2}
+.lf-botao:hover,.lf-botao[aria-expanded="true"]{color:var(--rt-text);border-color:var(--rt-pink)}
+.lf-botao:focus-visible{outline:2px solid var(--rt-pink);outline-offset:2px}
+.lf-botao.ativo{color:var(--rt-pink);border-color:var(--rt-pink);box-shadow:var(--glow-pink-sm)}
+.lf-botao b{position:absolute;top:-6px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;
+  font-family:var(--mono);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;
+  color:#FFFFFF;background:var(--rt-grad);box-shadow:0 0 0 2px var(--rt-surface)}
+.lf-botao b[hidden]{display:none}
+.lista-filtros{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:end;
+  padding:12px;margin:0 0 var(--sp-3);border:1px solid var(--rt-border);border-radius:var(--rt-radius-md);
+  background:var(--rt-inset);animation:rt-fade .2s var(--ease)}
+.lista-filtros[hidden]{display:none}
+.lista-filtros .ff{gap:4px}
+.lista-filtros .ff select{width:100%;padding:7px 26px 7px 10px;font-size:12.5px;text-overflow:ellipsis}
+.lf-pe{grid-column:1/-1;display:flex;gap:12px;align-items:flex-end}
+.lf-pe .ff.faixa{flex:1;min-width:0}
+.lf-pe .slider{height:24px}
+.lf-pe .btn-limpar{padding:6px 12px;margin-bottom:2px}
 .ff{display:flex;flex-direction:column;gap:6px;min-width:0}
 .ff>.tagx{font-family:var(--body);font-size:9.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--rt-text-muted)}
 .ff select{padding:8px 30px 8px 12px;font-size:13px;

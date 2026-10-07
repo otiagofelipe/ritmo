@@ -205,25 +205,33 @@
               <button data-v="tabela" title="Tabela" aria-label="Tabela" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24"><use href="#i-vis-tabela"/></svg></button>
               <button data-v="calendario" title="Calendário" aria-label="Calendário" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24"><use href="#i-vis-cal"/></svg></button>
             </div></div>
-        <div class="chart" id="m-dia"></div>
+        <div class="dia-rolo" id="m-dia-rolo"><div class="chart" id="m-dia"></div></div>
+        <div class="dia-pe"><button type="button" class="dia-expandir" id="dia-expandir" aria-pressed="false" hidden
+          title="Alargar o gráfico e rolar para o lado">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/></svg><span id="dia-expandir-txt">expandir</span></button></div>
       </div>
 
-      <div class="block" style="margin-top:16px">
+      <div class="block bl-tela" style="margin-top:16px">
         <div class="block-head"><h2>Todos os gastos</h2></div>
         <p class="eyebrow" id="m-conta" style="margin:-6px 0 11px"></p>
-        <input type="search" id="m-busca" class="busca" placeholder="Buscar por nome, cartão, valor ou data…" spellcheck="false">
-        <div class="lista-filtros" id="lista-filtros"></div>
+        <div class="busca-linha">
+          <input type="search" id="m-busca" class="busca" placeholder="Buscar nome, cartão, valor, data…" spellcheck="false">
+          <button type="button" class="lf-botao" id="lf-botao" aria-expanded="false" aria-controls="lista-filtros"
+            title="Filtros da lista" aria-label="Filtros da lista">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg><b id="lf-n" hidden></b></button>
+        </div>
+        <div class="lista-filtros" id="lista-filtros" hidden></div>
         <div class="scroller" id="m-lista"></div>
         <div class="actions"><button class="btn hidden" id="m-salvar-roles">Salvar rolês</button></div>
       </div>
 
       <div class="grid g2" style="margin-top:16px">
-        <div class="block">
+        <div class="block bl-tela">
           <div class="block-head"><h2>Contas fixas</h2>
             <button class="link-btn r" data-ir="fixos">gerenciar</button></div>
           <div id="m-fixas"></div>
         </div>
-        <div class="block">
+        <div class="block bl-tela">
           <div class="block-head"><h2>Parcelas</h2>
             <span class="eyebrow r" id="m-parc-conta"></span></div>
           <div id="m-parcelas"></div>
