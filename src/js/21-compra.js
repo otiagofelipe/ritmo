@@ -6,7 +6,7 @@
    - marcações: rolê (bronze.ritmo.tb_entertainment, como antes) e gasto
      fixo (automático, sim ou não)
    - divisão: cada pessoa vira um Me devem (bronze.ritmo.tb_receivables)
-     ligado à compra em bronze.ritmo.tb_transaction_splits
+     com o id_transaction da compra
 
    Categoria e gasto fixo vão para bronze.ritmo.tb_transaction_details.
    Tudo é cruzado pelo id_transaction, com descrição + valor + dia de
@@ -190,7 +190,7 @@ function abrirCompra(l){
 
     // 4. divisão: cria, altera e desfaz Me devem
     const devem = S.reg.devem = (S.reg.devem || []);
-    const linhasDevem = [], linhasDiv = [];
+    const linhasDevem = [];
     const ficam = new Set();
     for(const d of st.divisoes){
       const pessoa = d.pessoa.trim(), valor = Math.round((Number(d.valor)||0)*100)/100;
@@ -205,22 +205,17 @@ function abrirCompra(l){
         }
       } else {
         const r = { id: novoId(), mes: l.competencia, mesInicio: l.competencia, pessoa, nome: l.desc,
-                    valor, parcelas: 1, pagos: "", pago: false, terceiro: false, data: "" };
+                    valor, parcelas: 1, pagos: "", transacao: l.id, pago: false, terceiro: false, data: "" };
         devem.push(r);
         linhasDevem.push(paraBronze("devem", r));
-        linhasDiv.push({ ...base, id_receivable: r.id, fl_deleted: false });
-        S.reg.divisoes = (S.reg.divisoes || []).concat({ id: l.id || "", chave: chaveRole(l), receivable: r.id });
       }
     }
     for(const a of antes.divisoes){
       if(ficam.has(a.id)) continue;
       const k = devem.findIndex(x => String(x.id) === a.id);
       if(k >= 0){ linhasDevem.push(paraBronze("devem", devem[k], true)); devem.splice(k, 1); }
-      linhasDiv.push({ ...base, id_receivable: a.id, fl_deleted: true });
-      S.reg.divisoes = (S.reg.divisoes || []).filter(x => x.receivable !== a.id);
     }
     if(linhasDevem.length) chamadas.push(["devem", linhasDevem]);
-    if(linhasDiv.length) chamadas.push(["divisoes", linhasDiv]);
 
     // otimista: a tela muda já; o Databricks grava em segundo plano
     fecharModal();

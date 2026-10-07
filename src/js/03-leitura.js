@@ -107,6 +107,7 @@ function ingerirRegistros(d){
       valor: num(r.vl_amount),
       parcelas: Math.max(0, Math.round(num(r.qt_installments))),
       pagos: pagos.join(";"),
+      transacao: txt(r.id_transaction),     // só Me devem: a compra dividida que gerou o registro
       pago: false,
       terceiro: false, data: ""
     };
@@ -134,7 +135,7 @@ function ingerirRegistros(d){
       acrescimos: num(r.vl_additions),
       descontos: -Math.abs(num(r.vl_deductions))
     })),
-    // card da compra: categoria e gasto fixo escolhidos, divisões e categorias novas
+    // card da compra: categoria e gasto fixo escolhidos e categorias novas
     detalhes: (d.detalhes||[]).map(r => {
       const f = txt(r.fl_fixed_expense);
       return {
@@ -145,11 +146,6 @@ function ingerirRegistros(d){
         ts: txt(r.ts_inserted)
       };
     }),
-    divisoes: (d.divisoes||[]).map(r => ({
-      id: txt(r.id_transaction),
-      chave: chaveRoleDe(r.nm_merchant, r.vl_amount, txt(r.dt_transaction).slice(0,10)),
-      receivable: txt(r.id_receivable)
-    })).filter(x => x.receivable),
     categorias: (d.categorias||[]).map(r => ({ id: txt(r.id_category), nome: txt(r.nm_category) }))
       .filter(c => c.id && c.nome),
     // aba Cartões: a última escolha de cada cartão
@@ -311,12 +307,10 @@ function aplicarDetalhes(){
   }
 }
 
-/** Divisões (Me devem) ligadas a uma compra. */
+/** Divisões de uma compra: os Me devem que guardam o id_transaction dela. */
 function divisoesDe(l){
-  const k = chaveRole(l);
-  const ids = new Set((S.reg.divisoes || [])
-    .filter(x => (x.id && x.id === l.id) || x.chave === k).map(x => x.receivable));
-  return (S.reg.devem || []).filter(r => ids.has(String(r.id)));
+  if(!l.id) return [];
+  return (S.reg.devem || []).filter(r => r.transacao && r.transacao === l.id);
 }
 
 /** Todas as categorias: as fixas e as criadas, sem repetir. */
