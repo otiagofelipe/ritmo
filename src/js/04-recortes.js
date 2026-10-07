@@ -99,6 +99,11 @@ function idsCobrancasFixas(mes){
     const c = cobrancaDaFixa(f, mes);
     if(c) set.add(c.id);
   }
+  // marcação feita no card da compra vence o casamento automático
+  for(const l of S.linhas){
+    if(l.fixaManual == null || !daCompetencia(l, mes)) continue;
+    if(l.fixaManual) set.add(l.id); else set.delete(l.id);
+  }
   return set;
 }
 

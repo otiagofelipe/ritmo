@@ -53,7 +53,10 @@ function ingerir(registros){
       // Pix é o que o tp_operation diz que é, e mais nada. Casar
       // "pix" na descrição pegava compra de loja com Pix no nome.
       pix: opTipo.toUpperCase() === "PIX",
-      categoria,
+      // a da gold (Pluggy, em inglês) fica guardada; a exibida é a nossa,
+      // trocada pela escolhida no card da compra (aplicarDetalhes)
+      categoriaOrig: categoria,
+      categoria: traduzirCategoria(categoria),
       status: String(r.status||"").trim(),
       // rolê vem da gold quando a coluna existir; até lá, só a marcação da tela
       role: ehVerdade(r.fl_entertainment),
@@ -131,6 +134,24 @@ function ingerirRegistros(d){
       acrescimos: num(r.vl_additions),
       descontos: -Math.abs(num(r.vl_deductions))
     })),
+    // card da compra: categoria e gasto fixo escolhidos, divisões e categorias novas
+    detalhes: (d.detalhes||[]).map(r => {
+      const f = txt(r.fl_fixed_expense);
+      return {
+        id: txt(r.id_transaction),
+        chave: chaveRoleDe(r.nm_merchant, r.vl_amount, txt(r.dt_transaction).slice(0,10)),
+        categoria: txt(r.nm_category),
+        fixa: f === "" ? null : ehVerdade(f),
+        ts: txt(r.ts_inserted)
+      };
+    }),
+    divisoes: (d.divisoes||[]).map(r => ({
+      id: txt(r.id_transaction),
+      chave: chaveRoleDe(r.nm_merchant, r.vl_amount, txt(r.dt_transaction).slice(0,10)),
+      receivable: txt(r.id_receivable)
+    })).filter(x => x.receivable),
+    categorias: (d.categorias||[]).map(r => ({ id: txt(r.id_category), nome: txt(r.nm_category) }))
+      .filter(c => c.id && c.nome),
     // aba Cartões: a última escolha de cada cartão
     cartoes: (d.cartoes||[]).map(r => ({
       id: txt(r.id_card), ligado: ehVerdade(r.fl_enabled)
@@ -150,6 +171,7 @@ function ingerirRegistros(d){
  */
 function recompor(){
   S.linhas = S.consolidado.concat(cajuPendentes());
+  aplicarDetalhes();
   S.faturas = [...new Set(S.linhas.map(l=>l.competencia).filter(Boolean))].sort();
   if(!S.faturas.includes(S.mesSel)) S.mesSel = escolherMesInicial();
 }
@@ -268,3 +290,38 @@ function escolherMesInicial(){
   return passadas.length ? passadas[passadas.length-1] : (S.faturas[0]||atual);
 }
 
+
+
+/**
+ * Categoria e gasto fixo escolhidos no card da compra. A compra casa
+ * pelo id_transaction; se o id mudou, pela descrição + valor + dia. Vale
+ * a escolha mais recente.
+ */
+function aplicarDetalhes(){
+  const porId = new Map(), porChave = new Map();
+  (S.reg.detalhes || []).slice().sort((a,b)=>String(a.ts).localeCompare(String(b.ts))).forEach(d=>{
+    if(d.id) porId.set(d.id, d);
+    porChave.set(d.chave, d);
+  });
+  for(const l of S.linhas){
+    const d = porId.get(l.id) || porChave.get(chaveRole(l)) || null;
+    l.detalhe = d;
+    l.categoria = (d && d.categoria) || traduzirCategoria(l.categoriaOrig != null ? l.categoriaOrig : l.categoria);
+    l.fixaManual = d ? d.fixa : null;
+  }
+}
+
+/** Divisões (Me devem) ligadas a uma compra. */
+function divisoesDe(l){
+  const k = chaveRole(l);
+  const ids = new Set((S.reg.divisoes || [])
+    .filter(x => (x.id && x.id === l.id) || x.chave === k).map(x => x.receivable));
+  return (S.reg.devem || []).filter(r => ids.has(String(r.id)));
+}
+
+/** Todas as categorias: as fixas e as criadas, sem repetir. */
+function todasCategorias(){
+  const extra = (S.reg.categorias || []).map(c => c.nome)
+    .filter(n => !CATEGORIAS_BASE.some(b => b.toLowerCase() === n.toLowerCase()));
+  return CATEGORIAS_BASE.filter(c => c !== "Outros").concat(extra.sort((a,b)=>a.localeCompare(b,"pt-BR")), ["Outros"]);
+}

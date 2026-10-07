@@ -155,6 +155,21 @@ Select id_fixed_expense, nm_invoice, nm_alias, vl_amount, nr_day, fl_third_party
 From silver.ritmo.vw_fixed_expenses
 Order By nm_alias, dt_start_month`,
 
+  // card da compra: categoria/gasto fixo, divisões e categorias criadas
+  detalhes: `
+Select id_transaction, nm_merchant, vl_amount, dt_transaction, nm_category, fl_fixed_expense,
+    Date_Format(ts_inserted, 'yyyy-MM-dd HH:mm:ss') As ts_inserted
+From silver.ritmo.vw_transaction_details`,
+
+  divisoes: `
+Select id_transaction, nm_merchant, vl_amount, dt_transaction, id_receivable
+From silver.ritmo.vw_transaction_splits`,
+
+  categorias: `
+Select id_category, nm_category
+From silver.ritmo.vw_categories
+Order By nm_category`,
+
   // cartões ligados/desligados na aba Cartões (última escolha de cada um)
   cartoes: `
 Select id_card, nm_card, tp_card, nm_bank, fl_enabled
@@ -222,6 +237,12 @@ const TIPOS = {
   flag: {
     sql: "BOOLEAN",
     ok: v => (v === true || v === "true" || v === 1 || v === "1") ? "true" : "false",
+  },
+  // três estados: true, false ou NULL (automático)
+  flagOuNulo: {
+    sql: "BOOLEAN",
+    ok: v => (v == null || v === "") ? null
+      : (v === true || v === "true" || v === 1 || v === "1") ? "true" : "false",
   },
   uuid: {
     sql: "STRING",
@@ -336,6 +357,36 @@ const OPS = {
       ["dt_end_month",     "mes"],
       ["nm_billing",       "cobranca"],
       ["fl_deleted",       "flag"],
+    ],
+  },
+  detalhes: {
+    tabela: "bronze.ritmo.tb_transaction_details",
+    colunas: [
+      ["id_transaction",   "texto"],
+      ["nm_merchant",      "texto", true],
+      ["vl_amount",        "valor", true],
+      ["dt_transaction",   "data",  true],
+      ["nm_category",      "texto"],
+      ["fl_fixed_expense", "flagOuNulo"],
+    ],
+  },
+  divisoes: {
+    tabela: "bronze.ritmo.tb_transaction_splits",
+    colunas: [
+      ["id_transaction", "texto"],
+      ["nm_merchant",    "texto", true],
+      ["vl_amount",      "valor", true],
+      ["dt_transaction", "data",  true],
+      ["id_receivable",  "uuid",  true],
+      ["fl_deleted",     "flag"],
+    ],
+  },
+  categorias: {
+    tabela: "bronze.ritmo.tb_categories",
+    colunas: [
+      ["id_category", "slug",  true],
+      ["nm_category", "texto", true],
+      ["fl_deleted",  "flag"],
     ],
   },
   cartoes: {

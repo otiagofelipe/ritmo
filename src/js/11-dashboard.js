@@ -652,6 +652,7 @@ function renderExtrato(){
     porDia.get(k).itens.push(l);
   }
 
+  const naTela = [];     // índice das linhas desenhadas: tocar abre o card da compra
   $("m-lista").innerHTML = [...porDia.values()].map(({d,itens})=>
     `<div class="daymark">${p2(d.getDate())}/${p2(d.getMonth()+1)}${
        String(d.getFullYear())!==String(S.mesSel).slice(0,4) ? "/"+String(d.getFullYear()).slice(2) : ""}
@@ -666,7 +667,9 @@ function renderExtrato(){
         /* Valor na mesma linha do nome, com uma guia pontilhada no
            meio, e o resto embaixo. A lista tem largura de leitura e se
            centraliza, senão em tela larga o valor fica longe do nome. */
-        return `<div class="tx${futuro?" futura":""}${l.role?" role":""}${l.parcela?" parcela":""}">
+        naTela.push(l);
+        return `<div class="tx${futuro?" futura":""}${l.role?" role":""}${l.parcela?" parcela":""}${l.pendente?"":" abre"}" data-ix="${naTela.length-1}"${
+          l.pendente?"":` role="button" tabindex="0" aria-label="Gerenciar ${esc(l.desc)}"`}>
           <input type="checkbox" class="chk-role" data-id="${esc(l.id)}" data-chave="${esc(chaveRole(l))}"
             ${ehRole(l)?" checked":""} title="${l.role?"Veio marcado do Databricks":"Marcar como rolê"}">
           ${marca(l.conta)}
@@ -689,6 +692,11 @@ function renderExtrato(){
       }).join("")
   ).join("");
 
+  $("m-lista").querySelectorAll(".tx.abre").forEach(el=>{
+    const abrir = e => { if(e.target.closest(".chk-role")) return; abrirCompra(naTela[+el.dataset.ix]); };
+    el.onclick = abrir;
+    el.onkeydown = e => { if((e.key==="Enter" || e.key===" ") && e.target===el){ e.preventDefault(); abrir(e); } };
+  });
   $("m-lista").querySelectorAll(".chk-role").forEach(cb=>cb.onchange=()=>{
     const id = cb.dataset.chave;
     // desmarcar precisa registrar exclusão, senão o is_entertainment
