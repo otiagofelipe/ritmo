@@ -58,7 +58,7 @@ function abrirCompra(l){
 
       <div class="cp-acoes">
         <button type="button" class="cp-ac cp-ac-cat${st.abrirCat?" aberto":""}" aria-haspopup="listbox" aria-expanded="${st.abrirCat}"
-          title="Trocar a categoria"><em></em><span class="cp-ac-t"></span></button>
+          title="Trocar a categoria"><em></em><span class="cp-ac-lin"><span class="cp-ac-t"></span><svg class="cp-ac-seta" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg></span></button>
         <button type="button" class="cp-ac${st.role?" on":""}" data-tg="role" role="switch" aria-checked="${st.role}"
           title="Conta no total do rolê"><em>🎉</em><span class="cp-ac-t">Rolê</span></button>
         <button type="button" class="cp-ac${fixaEfetiva?" on":""}" data-tg="fixa" role="switch" aria-checked="${fixaEfetiva}"
@@ -94,6 +94,7 @@ function abrirCompra(l){
     box.querySelector(".fx-x").onclick = fecharModal;
     box.querySelector("#cp-cancelar").onclick = fecharModal;
     box.querySelector("#cp-salvar").onclick = salvar;
+    atualizarSalvar();
 
     // ── categoria: o botão abre a lista com busca logo abaixo das ações
     const bCat = box.querySelector(".cp-ac-cat");
@@ -155,13 +156,13 @@ function abrirCompra(l){
       const nome = document.createElement("input");
       nome.className = "cp-pes-n"; nome.placeholder = "Nome"; nome.value = d.pessoa; nome.maxLength = 60;
       nome.setAttribute("aria-label", "Nome da pessoa");
-      nome.addEventListener("input", () => { d.pessoa = nome.value; av.textContent = (nome.value.trim().charAt(0) || "?").toUpperCase(); });
+      nome.addEventListener("input", () => { d.pessoa = nome.value; av.textContent = (nome.value.trim().charAt(0) || "?").toUpperCase(); atualizarSalvar(); });
       const tag = document.createElement("button");
       tag.type = "button"; tag.className = "cp-tag" + (d.pago ? " pg" : "");
       tag.textContent = d.pago ? "pago" : "em aberto";
       tag.title = d.pago ? "Toque para marcar como em aberto" : "Toque quando a pessoa pagar";
       tag.onclick = () => { d.pago = !d.pago; desenhar(); };
-      const valor = campoMoeda(d.valor, v => { d.valor = v; pintarNumeros(); });
+      const valor = campoMoeda(d.valor, v => { d.valor = v; pintarNumeros(); atualizarSalvar(); });
       valor.classList.add("cp-pes-v"); valor.setAttribute("aria-label", "Valor da pessoa");
       const rm = document.createElement("button");
       rm.type = "button"; rm.className = "modal-ic cp-rm"; rm.title = "Tirar da divisão"; rm.setAttribute("aria-label", "Tirar da divisão"); rm.textContent = "×";
@@ -197,6 +198,26 @@ function abrirCompra(l){
     }
   }
 
+  /** A divisão como ela seria gravada: só pessoas com nome e valor. */
+  function divNormal(ds){
+    return ds.map(d => ({ id: d.id || "", pessoa: String(d.pessoa||"").trim(),
+                          valor: Math.round((Number(d.valor)||0)*100)/100, pago: !!d.pago }))
+             .filter(d => d.pessoa && d.valor > 0);
+  }
+  /** Tem algo diferente do que está gravado? */
+  function mudou(){
+    if(st.categoria !== antes.categoria || st.fixa !== antes.fixa || st.role !== antes.role) return true;
+    return JSON.stringify(divNormal(st.divisoes)) !== JSON.stringify(divNormal(antes.divisoes));
+  }
+  /** Salvar fica apagado enquanto não houver mudança. */
+  function atualizarSalvar(){
+    const b = box.querySelector("#cp-salvar");
+    if(!b) return;
+    const m = mudou();
+    b.disabled = !m;
+    b.title = m ? "" : "Nada mudou ainda";
+  }
+
   /** Partes iguais entre as pessoas (e eu, se "contar comigo"); os centavos que sobram ficam comigo. */
   function igual(){
     const n = st.divisoes.length + (st.comigo ? 1 : 0);
@@ -210,6 +231,7 @@ function abrirCompra(l){
   }
 
   async function salvar(){
+    if(!mudou()) return;
     const base = { id_transaction: l.id || null, nm_merchant: l.desc, vl_amount: l.valor, dt_transaction: diaISO(l.data) };
     const chamadas = [];
 
