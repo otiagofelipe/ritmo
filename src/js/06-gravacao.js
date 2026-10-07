@@ -296,7 +296,7 @@ function despesasFixas(){
       if(fim && (!prox || compDe(prox.inicio) > somaMeses(fim, 1)))
         faixas.push({ id:"", valor:0, dia:"", inicio:somaMeses(fim, 1) });
     });
-    return { apelido:String(ult.apelido||ult.nome||""), nome:String(ult.nome||""),
+    return { chave:chaveFixa(ult), apelido:String(ult.apelido||ult.nome||""), nome:String(ult.nome||""),
              cobranca:cobrancaFixa(ult), terceiro:!!ult.terceiro, faixas };
   }).sort((a,b)=>a.apelido.localeCompare(b.apelido, "pt-BR"));
 }

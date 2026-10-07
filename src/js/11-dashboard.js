@@ -780,6 +780,23 @@ function renderFixasResumo(){
   // totais nas mesmas caixas dos Registros (Me devem / Eu devo) e da página de fixos
   $("m-fixas").innerHTML = `<div class="bl-rolo">${html}</div>`
     + caixasTotais([["meu total", meuTotal], ...(deOutros ? [["de terceiros", deOutros]] : []), ["a cobrar", aCobrar, "aberto"]]);
+  // tocar numa linha abre o card de Gastos fixos já nessa despesa
+  $("m-fixas").querySelectorAll(".lrow[data-fixa]").forEach(el=>{
+    el.classList.add("clicavel");
+    el.setAttribute("role","button"); el.tabIndex = 0;
+    el.setAttribute("aria-label", `Gerenciar ${el.querySelector(".nm")?.firstChild?.textContent.trim() || "conta fixa"}`);
+    const abrir = () => abrirFixa(el.dataset.fixa);
+    el.onclick = abrir;
+    el.onkeydown = e => { if(e.key==="Enter" || e.key===" "){ e.preventDefault(); abrir(); } };
+  });
+}
+
+/** Abre o card de Gastos fixos direto no cartão de uma despesa (pela chaveFixa). */
+let fixaAlvo = null;
+function abrirFixa(chave){
+  fixaAlvo = chave;
+  grupoAberto = "fixos"; editorMontado = null;
+  renderEditor();
 }
 
 /** Linhas de conta fixa + os três totais, compartilhado entre Dashboard e página. */
@@ -817,7 +834,7 @@ function listaFixas(lista, comVigencia){
       if(!c && !ehFixaPix(f)) aCobrar += Number(f.valor)||0;
       (f.terceiro ? deOutros += valor : meuTotal += valor);
       const dif = c && Math.abs(valor-(Number(f.valor)||0))>0.005;
-      return `<div class="lrow${f.terceiro?" de-outro":""}">
+      return `<div class="lrow${f.terceiro?" de-outro":""}" data-fixa="${esc(chaveFixa(f))}">
         <div class="nm">${esc(rotuloFixa(f))}${f.terceiro?`<span class="tag" title="De terceiro: não é meu, só passa no meu cartão">3º</span>`:""}${
           ehFixaPix(f)?`<span class="tag">Pix</span>`:""}
           <div class="sub">${f.data?`todo dia ${esc(String(f.data))} · `:""}${
