@@ -60,7 +60,12 @@
   .tb-resumo .r-vl{display:block;font-size:16px;font-weight:600;margin-top:2px}
   .tb-resumo small{display:block;font-size:10px;color:var(--rt-text-muted);margin-top:2px;white-space:nowrap}
   .r-tot{grid-column:1;min-width:0}
-  .r-saldo{grid-column:3;min-width:0;text-align:right}
+  .tb-resumo .r-saldo{grid-column:3;flex:none;align-items:stretch;gap:0;height:auto;min-width:0;width:100%;justify-self:stretch;text-align:right;display:block;padding:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer;
+    border-radius:var(--rt-radius-md);-webkit-tap-highlight-color:transparent}
+  .tb-resumo .r-saldo:focus-visible{outline:2px solid var(--rt-pink);outline-offset:3px}
+  .tb-resumo .r-saldo small{display:flex;align-items:center;justify-content:flex-end;gap:1px;color:var(--rt-blue)}
+  .tb-resumo .r-saldo small svg.ic{width:11px;height:11px;stroke-width:2.4}
+  .r-saldo:active .r-vl{opacity:.75}
   .r-sem{grid-column:2;align-self:start;width:84px;text-align:center}
   .r-sem i{display:block;font-size:11px;margin-top:1px}
   .r-trilho{display:block;height:4px;border-radius:9px;overflow:hidden;

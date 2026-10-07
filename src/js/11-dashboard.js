@@ -126,8 +126,7 @@ function renderResumo(){
      teto); benefícios (vales, com a barra do teto); outros (Eu devo e
      Me devem). */
   $("m-saldo").innerHTML = kpi({nome:"saldo do mês", valor:posso, destaque:true, acao:"holerite:mes",
-           sinal: posso<0 ? " neg" : "",
-           sub: `Salário ${BRL.format(salarioDe(S.mesSel))}`,
+           sinal: posso<0 ? " neg" : ""
            });
 
   /* Cartões e benefícios: os ligados na aba Cartões. Quem tem conta
