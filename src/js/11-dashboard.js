@@ -194,9 +194,10 @@ function renderDia(){
 
   const vis = S.vis.dia;
 
-  /* Expandido (só no celular, em linha e barras): cada dia ganha 50px e
-     a caixa rola para o lado, com todos os dias no eixo. */
-  const PX_DIA = 50;
+  /* Expandido (só no celular, em linha e barras): cada dia ganha 56px e
+     a caixa rola para o lado, com todos os dias no eixo e o valor de
+     cada dia escrito. O eixo Y fica parado na esquerda (ver eixoFixo). */
+  const PX_DIA = 56;
   const podeExpandir = window.innerWidth <= 760 && (vis==="linha" || vis==="barras");
   const expandido = podeExpandir && S.diaExpandido;
   const btExp = $("dia-expandir"), rolo = $("m-dia-rolo");
@@ -206,6 +207,18 @@ function renderDia(){
   $("dia-expandir-txt").textContent = expandido ? "recolher" : "expandir";
   rolo.classList.toggle("largo", expandido);
   $("m-dia").style.width = expandido ? (dias.length*PX_DIA)+"px" : "";
+  $("m-dia-caixa").querySelectorAll(".dia-eixo").forEach(e=>e.remove());
+
+  // total do período: mesmo lugar (logo abaixo do título) nas quatro visões
+  const totalDias = valores.reduce((a,v)=>a+v,0);
+  const comGasto = valores.filter(v=>v>0).length;
+  $("m-dia-total").textContent =
+    `total ${RS2(totalDias)} · ${comGasto} ${comGasto===1?"dia":"dias"} com gasto`;
+
+  /* Tabela: no máximo a altura que a linha e as barras ocupam; o resto
+     rola dentro dela. Mesma conta de altura do grafico(). */
+  const ALTURA_DIA = 200;
+  const altGrafico = window.innerWidth <= 760 ? Math.round(ALTURA_DIA*1.3) : ALTURA_DIA;
 
   if(vis==="calendario") return calendarioDia(dias, valores, linhas, chave, picos);
   if(vis==="tabela"){
@@ -237,8 +250,9 @@ function renderDia(){
       linhasT.push(`<tr class="semana"><td>${esc(gr.rot)}</td><td class="n">${esc(RS2(gr.soma))}</td></tr>`,
                    ...gr.linhas.reverse());
     });
-    tabelaVis("m-dia", ["Data","Gasto"], linhasT,
-      `<tr><td class="rot">Total</td><td class="n tot">${esc(RS2(valores.reduce((a,v)=>a+v,0)))}</td></tr>`);
+    tabelaVis("m-dia", ["Data","Gasto"], linhasT);
+    const tw = $("m-dia").querySelector(".tab-wrap");
+    if(tw) tw.style.maxHeight = altGrafico+"px";
     return;
   }
 
@@ -256,16 +270,42 @@ function renderDia(){
     // expandido: sem escolha por fora, o eixo mostra todos os dias que couberem
     eixoIndices: expandido ? undefined : dias.map((d,i)=>d.getDay()===1 ? i : -1).filter(i=>i>=0),
     pontos: true,             // um ponto por dia, mesmo com o mês cheio
-    rotulos:"picos", picosIndices: picos,
-    altura: 200,
+    // expandido: valor de todo dia com gasto, sem "R$" para caber no dia
+    rotulos:"picos",
+    picosIndices: expandido ? valores.map((v,i)=>v>0 ? i : -1).filter(i=>i>=0) : picos,
+    fmtRotulo: expandido ? (v => NUM2.format(v)) : undefined,
+    // expandido: faixa livre no alto para o balão do toque não ser cortado
+    topoExtra: expandido ? 54 : 0,
+    altura: ALTURA_DIA,
     vazio: "Nenhum gasto nesta fatura."
   });
+  if(expandido) eixoFixo($("m-dia"), $("m-dia-caixa"));
   // ao expandir, a rolagem começa em hoje (ou no último dia)
   if(expandido && S.diaRolarHoje){
     S.diaRolarHoje = false;
     const alvo = hoje>=0 ? hoje : dias.length-1;
     rolo.scrollLeft = Math.max(0, (alvo+0.5)*PX_DIA - rolo.clientWidth/2);
   }
+}
+
+/**
+ * Eixo Y parado enquanto o gráfico rola para o lado: copia os rótulos
+ * do eixo (text.gy) para um SVG por cima da ponta esquerda da caixa,
+ * nas mesmas coordenadas — o gráfico é desenhado na escala 1:1.
+ */
+function eixoFixo(box, caixa){
+  const svg = box.querySelector("svg");
+  if(!svg) return;
+  const rot = [...svg.querySelectorAll("text.gy")];
+  if(!rot.length) return;
+  const larg = Math.ceil(Math.max(...rot.map(t=>Number(t.getAttribute("x"))))) + 8;
+  const alt = svg.viewBox.baseVal.height;
+  const fixo = document.createElement("div");
+  fixo.className = "dia-eixo";
+  fixo.setAttribute("aria-hidden", "true");
+  fixo.style.width = larg+"px";
+  fixo.innerHTML = `<svg viewBox="0 0 ${larg} ${alt}" width="${larg}" height="${alt}">${rot.map(t=>t.outerHTML).join("")}</svg>`;
+  caixa.appendChild(fixo);
 }
 
 /**

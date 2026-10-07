@@ -53,6 +53,12 @@ body.rail-min .rail-foot{display:none}
 .main-in{max-width:1200px;margin:0 auto;container-type:inline-size;container-name:conteudo}
 
 .topbar{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-4);flex-wrap:wrap}
+/* versão publicada, no canto superior direito: confere se a página
+   aberta é mesmo a última que foi ao ar */
+.topbar{position:relative}
+.versao{position:absolute;top:-14px;right:0;font-family:var(--mono);font-size:10px;line-height:1;
+  letter-spacing:.02em;color:var(--rt-text-muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.versao:empty{display:none}
 .topbar .ttl{font-family:var(--disp);font-weight:400;font-size:clamp(34px,4vw,48px);line-height:.95;
   letter-spacing:.05em;margin-right:auto;color:#FFFFFF;
   text-shadow:0 0 22px color-mix(in srgb, var(--rt-purple) 55%, transparent)}

@@ -449,3 +449,29 @@ table.tab-fat.resumo-pes :is(th,td){text-align:center}
 .dia-rolo.largo{overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:thin;
   -webkit-overflow-scrolling:touch;padding-bottom:6px}
 .dia-rolo.largo .chart{max-width:none}
+
+/* ═══ Ritmo do mês: total, caixa do gráfico e eixo Y parado ═══ */
+/* total do período: o mesmo ponto nas quatro visões, logo abaixo do título */
+.dia-total{margin:-8px 0 10px}
+.dia-total:empty{display:none}
+.dia-caixa{position:relative}
+/* expandido: o balão do toque abre para baixo, dentro da faixa livre
+   que o gráfico reserva no alto (a caixa que rola corta o que vaza) */
+.dia-rolo.largo .chart-tip{transform:translate(-50%,0)}
+/* eixo Y por cima da ponta esquerda, com um esfumado para o gráfico
+   sumir por baixo ao rolar */
+.dia-eixo{position:absolute;left:0;top:0;z-index:4;pointer-events:none;
+  background:linear-gradient(90deg, var(--rt-surface) calc(100% - 8px), transparent)}
+.dia-eixo svg{display:block;overflow:visible}
+
+/* título dos blocos alinhado ao centro dos botões de visualização */
+.block-head:has(.vis-sel){align-items:center}
+
+/* mapa de calor compacto: dias baixos em vez de quadrados */
+.cal-mes{max-width:420px}
+.cal-sem,.cal-grade{gap:4px}
+.cal-sem span{font-size:9.5px;padding-bottom:2px}
+.cal-d{aspect-ratio:auto;height:30px;border-radius:6px;font-size:10.5px}
+.cal-leg{margin-top:6px;font-size:10px}
+.cal-leg i{width:10px;height:10px}
+.cal-dia{margin-top:var(--sp-2);padding-top:var(--sp-2)}

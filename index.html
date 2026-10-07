@@ -120,6 +120,7 @@
       <button class="burger" id="burger" aria-label="Abrir menu"><svg class="ic" viewBox="0 0 24 24"><use href="#i-menu"/></svg></button>
       <div class="ttl" id="pg-titulo">Dashboard</div>
       <div class="sync" id="sync" role="status" aria-live="polite"></div>
+      <span class="versao" id="versao" aria-label="Versão publicada"></span>
       <div class="temas" id="temas" role="group" aria-label="Paleta de cores">
         <button data-tema="retrowave" title="RetroWave" aria-label="RetroWave" aria-pressed="false"
           style="--t-bg:#0A0A2E;--t-ac:#FF006E"></button>
@@ -205,7 +206,10 @@
               <button data-v="tabela" title="Tabela" aria-label="Tabela" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24"><use href="#i-vis-tabela"/></svg></button>
               <button data-v="calendario" title="Calendário" aria-label="Calendário" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24"><use href="#i-vis-cal"/></svg></button>
             </div></div>
-        <div class="dia-rolo" id="m-dia-rolo"><div class="chart" id="m-dia"></div></div>
+        <p class="eyebrow dia-total" id="m-dia-total"></p>
+        <div class="dia-caixa" id="m-dia-caixa">
+          <div class="dia-rolo" id="m-dia-rolo"><div class="chart" id="m-dia"></div></div>
+        </div>
         <div class="dia-pe"><button type="button" class="dia-expandir" id="dia-expandir" aria-pressed="false" hidden
           title="Alargar o gráfico e rolar para o lado">
           <svg class="ic" viewBox="0 0 24 24"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/></svg><span id="dia-expandir-txt">expandir</span></button></div>

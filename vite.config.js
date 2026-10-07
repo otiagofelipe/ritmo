@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import { readdirSync, readFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { resolve } from "node:path";
 
 /* Junta src/js/*.js, em ordem de nome, num módulo só.
@@ -34,8 +35,19 @@ function ritmo() {
   };
 }
 
+/* Versão mostrada no topo da página: quando o build rodou e de qual
+   commit. Na Cloudflare (Workers Builds) o commit vem do ambiente; na
+   sua máquina, do git. */
+function commitAtual() {
+  if (process.env.WORKERS_CI_COMMIT_SHA) return process.env.WORKERS_CI_COMMIT_SHA;
+  try { return execSync("git rev-parse HEAD", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim(); }
+  catch { return ""; }
+}
+const VERSAO = { quando: new Date().toISOString(), commit: commitAtual().slice(0, 7) || "local" };
+
 export default defineConfig({
   plugins: [ritmo()],
+  define: { __RITMO_VERSAO__: JSON.stringify(VERSAO) },
   build: { outDir: "dist", assetsDir: "assets" },
   server: {
     /* no `npm run dev`, /api vai para o Worker rodando na sua máquina
