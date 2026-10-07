@@ -120,17 +120,18 @@ async function logado(req, env, ctx) {
 /* Me devem / Eu devo: as views explodem as parcelas; aqui elas voltam a
    ser um registro por id, com a lista das parcelas pagas — é o formato
    que o HTML edita. O SQL só usa nomes fixos, nunca texto da página. */
-const dividas = (view, id) => `
+const dividas = (view, id, extra = "") => `
 Select
     ${id} As id,
     dt_start_month,
     nm_person,
     nm_item,
     vl_amount,
-    qt_installments,
+    qt_installments,${extra ? `
+    ${extra},` : ""}
     Array_Join(Transform(Array_Sort(Collect_List(Case When fl_paid Then nr_installment End)), x -> Cast(x As String)), ';') As ls_paid_installments
 From silver.ritmo.${view}
-Group By ${id}, dt_start_month, nm_person, nm_item, vl_amount, qt_installments
+Group By ${id}, dt_start_month, nm_person, nm_item, vl_amount, qt_installments${extra ? `, ${extra}` : ""}
 Order By dt_start_month, nm_person`;
 
 const LEITURAS = {
@@ -146,7 +147,8 @@ Select dt_competence, vl_part1, vl_part2, vl_caju, vl_additions, vl_deductions, 
 From silver.ritmo.vw_income
 Order By dt_competence`,
 
-  devem: dividas("vw_receivables", "id_receivable"),
+  // Me devem traz a compra que gerou o registro (divisão no card da compra)
+  devem: dividas("vw_receivables", "id_receivable", "id_transaction"),
   devo:  dividas("vw_payables", "id_payable"),
 
   fixos: `
@@ -155,20 +157,12 @@ Select id_fixed_expense, nm_invoice, nm_alias, vl_amount, nr_day, fl_third_party
 From silver.ritmo.vw_fixed_expenses
 Order By nm_alias, dt_start_month`,
 
-  // card da compra: categoria/gasto fixo, divisões e categorias criadas
+  // card da compra: categoria e gasto fixo
   detalhes: `
 Select id_transaction, nm_merchant, vl_amount, dt_transaction, nm_category, fl_fixed_expense,
     Date_Format(ts_inserted, 'yyyy-MM-dd HH:mm:ss') As ts_inserted
 From silver.ritmo.vw_transaction_details`,
 
-  divisoes: `
-Select id_transaction, nm_merchant, vl_amount, dt_transaction, id_receivable
-From silver.ritmo.vw_transaction_splits`,
-
-  categorias: `
-Select id_category, nm_category
-From silver.ritmo.vw_categories
-Order By nm_category`,
 
   // cartões ligados/desligados na aba Cartões (última escolha de cada um)
   cartoes: `
@@ -328,6 +322,7 @@ const OPS = {
       ["vl_amount",            "valor",   true],
       ["qt_installments",      "inteiro", true],
       ["ls_paid_installments", "lista"],
+      ["id_transaction",       "texto"],
       ["fl_deleted",           "flag"],
     ],
   },
@@ -368,25 +363,6 @@ const OPS = {
       ["dt_transaction",   "data",  true],
       ["nm_category",      "texto"],
       ["fl_fixed_expense", "flagOuNulo"],
-    ],
-  },
-  divisoes: {
-    tabela: "bronze.ritmo.tb_transaction_splits",
-    colunas: [
-      ["id_transaction", "texto"],
-      ["nm_merchant",    "texto", true],
-      ["vl_amount",      "valor", true],
-      ["dt_transaction", "data",  true],
-      ["id_receivable",  "uuid",  true],
-      ["fl_deleted",     "flag"],
-    ],
-  },
-  categorias: {
-    tabela: "bronze.ritmo.tb_categories",
-    colunas: [
-      ["id_category", "slug",  true],
-      ["nm_category", "texto", true],
-      ["fl_deleted",  "flag"],
     ],
   },
   cartoes: {

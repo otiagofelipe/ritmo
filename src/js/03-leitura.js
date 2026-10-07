@@ -107,6 +107,7 @@ function ingerirRegistros(d){
       valor: num(r.vl_amount),
       parcelas: Math.max(0, Math.round(num(r.qt_installments))),
       pagos: pagos.join(";"),
+      transacao: txt(r.id_transaction),     // só Me devem: a compra dividida que gerou o registro
       pago: false,
       terceiro: false, data: ""
     };
@@ -134,7 +135,7 @@ function ingerirRegistros(d){
       acrescimos: num(r.vl_additions),
       descontos: -Math.abs(num(r.vl_deductions))
     })),
-    // card da compra: categoria e gasto fixo escolhidos, divisões e categorias novas
+    // card da compra: categoria e gasto fixo escolhidos
     detalhes: (d.detalhes||[]).map(r => {
       const f = txt(r.fl_fixed_expense);
       return {
@@ -145,13 +146,6 @@ function ingerirRegistros(d){
         ts: txt(r.ts_inserted)
       };
     }),
-    divisoes: (d.divisoes||[]).map(r => ({
-      id: txt(r.id_transaction),
-      chave: chaveRoleDe(r.nm_merchant, r.vl_amount, txt(r.dt_transaction).slice(0,10)),
-      receivable: txt(r.id_receivable)
-    })).filter(x => x.receivable),
-    categorias: (d.categorias||[]).map(r => ({ id: txt(r.id_category), nome: txt(r.nm_category) }))
-      .filter(c => c.id && c.nome),
     // aba Cartões: a última escolha de cada cartão
     cartoes: (d.cartoes||[]).map(r => ({
       id: txt(r.id_card), ligado: ehVerdade(r.fl_enabled)
@@ -311,17 +305,19 @@ function aplicarDetalhes(){
   }
 }
 
-/** Divisões (Me devem) ligadas a uma compra. */
+/** Divisões de uma compra: os Me devem que guardam o id_transaction dela. */
 function divisoesDe(l){
-  const k = chaveRole(l);
-  const ids = new Set((S.reg.divisoes || [])
-    .filter(x => (x.id && x.id === l.id) || x.chave === k).map(x => x.receivable));
-  return (S.reg.devem || []).filter(r => ids.has(String(r.id)));
+  if(!l.id) return [];
+  return (S.reg.devem || []).filter(r => r.transacao && r.transacao === l.id);
 }
 
-/** Todas as categorias: as fixas e as criadas, sem repetir. */
-function todasCategorias(){
-  const extra = (S.reg.categorias || []).map(c => c.nome)
-    .filter(n => !CATEGORIAS_BASE.some(b => b.toLowerCase() === n.toLowerCase()));
-  return CATEGORIAS_BASE.filter(c => c !== "Outros").concat(extra.sort((a,b)=>a.localeCompare(b,"pt-BR")), ["Outros"]);
+/**
+ * Categorias que o card oferece, das que mais aparecem nas compras para
+ * as que menos (empate e as que nunca apareceram: em ordem alfabética).
+ * Devolve [nome, quantas compras].
+ */
+function categoriasPorUso(){
+  const n = new Map(CATEGORIAS.map(([,pt]) => [pt, 0]).concat([[SEM_CATEGORIA, 0]]));
+  for(const l of S.linhas) if(l.categoria) n.set(l.categoria, (n.get(l.categoria) || 0) + 1);
+  return [...n].sort((a,b) => b[1]-a[1] || semAcento(a[0].replace(/^\S+\s/, "")).localeCompare(semAcento(b[0].replace(/^\S+\s/, ""))));
 }

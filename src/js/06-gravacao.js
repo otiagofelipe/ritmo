@@ -47,7 +47,8 @@ function paraBronze(id, r, apagado){
     return { [id==="devem"?"id_receivable":"id_payable"]: r.id,
       dt_start_month: inicioDe(r), nm_person: r.pessoa||"", nm_item: r.nome||"",
       vl_amount: Number(r.valor)||0, qt_installments: p.indet ? 0 : p.n,
-      ls_paid_installments: numerosPagos(r), ...del };
+      ls_paid_installments: numerosPagos(r),
+      ...(id==="devem" ? { id_transaction: r.transacao || null } : {}), ...del };
   }
   if(id==="fixos") return {
     id_fixed_expense: r.id, nm_invoice: r.nome, nm_alias: r.apelido||"",
@@ -74,6 +75,8 @@ function paraRegistro(id, it, mes, antigo){
     return { id: it.id || novoId(), mes: ini, mesInicio: ini,
       pessoa: String(it.pessoa||"").trim(), nome: String(it.nome||"").trim(),
       valor: Number(it.valor)||0, parcelas: it.parcelas, pagos,
+      // Me devem que veio da divisão de uma compra continua ligado a ela
+      transacao: (antigo && antigo.transacao) || "",
       pago: false, terceiro: false, data: "" };
   }
   if(id==="fixos") return { id: it.id || novoId(), mes:"*",
