@@ -92,42 +92,7 @@
   box-shadow:0 0 12px -2px color-mix(in srgb, var(--rt-pink) 55%, transparent)}
 
 /* Ritmo do mês em calendário de calor */
-.cal-mes{max-width:460px;margin:0 auto;padding:3px}
-.cal-sem,.cal-grade{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
-.cal-sem span{text-align:center;font-size:10px;letter-spacing:.08em;color:var(--rt-text-muted);padding-bottom:4px}
-.cal-d{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);
-  font-size:11px;color:var(--rt-text-secondary);border:1px solid transparent;transition:transform .12s,box-shadow .15s}
-.cal-d:active{transform:scale(.92)}
-.cal-d small{font-size:.75em;opacity:.7}
-.cal-d.n0{background:#FFFFFF0D}
-.cal-d.n1{background:color-mix(in srgb, var(--rt-pink) 22%, transparent)}
-.cal-d.n2{background:color-mix(in srgb, var(--rt-pink) 45%, transparent);color:var(--rt-text)}
-.cal-d.n3{background:color-mix(in srgb, var(--rt-pink) 70%, transparent);color:#FFFFFF}
-.cal-d.n4{background:var(--rt-pink);color:#FFFFFF;box-shadow:0 0 12px -2px var(--rt-pink)}
-.cal-d.fut{background:none;border:1px dashed var(--rt-border-strong);color:var(--rt-text-muted)}
-.cal-d.hoje{border:2px solid var(--blue-light)}
-.cal-d.esc{box-shadow:inset 0 0 0 2px #FFFFFF}
-.cal-d.n4.esc{box-shadow:inset 0 0 0 2px #FFFFFF,0 0 12px -2px var(--rt-pink)}
-.cal-leg{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin-top:10px;font-size:10.5px;color:var(--rt-text-muted)}
-.cal-leg i{width:12px;height:12px;border-radius:3px}
-.cal-leg i.n1{background:color-mix(in srgb, var(--rt-pink) 22%, transparent)}
-.cal-leg i.n2{background:color-mix(in srgb, var(--rt-pink) 45%, transparent)}
-.cal-leg i.n3{background:color-mix(in srgb, var(--rt-pink) 70%, transparent)}
-.cal-leg i.n4{background:var(--rt-pink)}
-.cal-dia{max-width:460px;margin:var(--sp-3) auto 0;padding-top:var(--sp-3);border-top:1px solid var(--rt-border)}
 /* cabeçalho do dia: o total em destaque, no mesmo neon do miolo da pizza */
-.cal-dia-cab{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;
-  padding:10px 14px;border-radius:var(--rt-radius-md);
-  background:color-mix(in srgb, var(--rt-pink) 9%, var(--rt-surface-2));
-  border:1px solid color-mix(in srgb, var(--rt-pink) 30%, transparent);
-  font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--rt-text-secondary)}
-.cal-dia-cab span{display:flex;flex-direction:column;gap:2px}
-.cal-dia-cab small{font-size:9.5px;letter-spacing:.12em;color:var(--rt-text-muted)}
-.cal-dia-cab b{font-family:var(--disp);font-size:26px;line-height:1;letter-spacing:.03em;font-weight:400;color:var(--rt-text);
-  text-shadow:0 0 12px color-mix(in srgb, var(--rt-pink) 60%, transparent)}
-.cal-it{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 6px;
-  border-top:1px solid color-mix(in srgb, var(--rt-border) 70%, transparent);font-size:13px}
-.cal-it:first-of-type{border-top:0}
 /* compra marcável como rolê (calendário e card da semana) */
 :is(.cal-it,.sem-it){position:relative;border-radius:6px;transition:background-color .15s}
 @media (hover:hover){ :is(.cal-it,.sem-it):not(.role):hover{background:var(--rt-hover)} }
@@ -142,8 +107,6 @@
 .role-pe .btn{padding:8px 18px;font-size:11.5px;animation:rt-surge .25s var(--ease)}
 .role-pe:has(.btn[hidden]){display:none}
 @keyframes rt-surge{from{opacity:0;transform:translateY(6px)}}
-.cal-it .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cal-it .vl{font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums}
 
 /* marcadores do Ritmo do mês */
 .mk-cheia,.mk-grande,.mk-anel{display:inline-block;flex:0 0 auto;border-radius:50%;vertical-align:1px}
@@ -434,44 +397,35 @@ table.tab-fat.resumo-pes :is(th,td){text-align:center}
 .tab-vis tfoot tr:hover td{background:none}
 
 
-/* ═══ Ritmo do mês expandido: o gráfico alarga e a caixa rola para o lado ═══ */
-.dia-pe{display:flex;justify-content:flex-end;margin-top:6px}
-.dia-pe:has(.dia-expandir[hidden]){display:none}
-.dia-expandir{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--rt-radius-pill);
-  font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--rt-text-secondary);border:1px solid var(--rt-border-strong);background:var(--rt-inset);
-  transition:color .15s,border-color .15s,background .15s}
+/* ═══ Ritmo do mês: total, caixa do gráfico e eixo Y parado ═══ */
+/* total do período: só o número, entre o título e os ícones */
+.dia-cab{flex-wrap:nowrap;gap:8px}
+.dia-cab h2{flex:0 0 auto}
+.dia-total{flex:1 1 auto;min-width:0;align-self:center;text-align:right;white-space:nowrap;overflow:hidden;
+  font-family:var(--mono);font-size:12px;font-weight:500;color:var(--rt-text-secondary);font-variant-numeric:tabular-nums;
+  padding-right:2px}
+.dia-cab .vis-sel{margin-left:0;flex:0 0 auto}
+/* alargar: botão redondo no mesmo estilo do seletor, ao lado dele */
+.dia-expandir{flex:0 0 auto;align-self:center;width:36px;height:36px;border-radius:var(--rt-radius-pill);
+  display:flex;align-items:center;justify-content:center;color:var(--rt-text-muted);
+  border:1px solid var(--rt-border);background:var(--rt-inset);transition:color .15s,border-color .15s,background .15s}
 .dia-expandir[hidden]{display:none}
-.dia-expandir svg.ic{width:15px;height:15px;stroke-width:2}
-.dia-expandir:hover{color:var(--rt-text);border-color:var(--rt-pink)}
+.dia-expandir svg.ic{width:16px;height:16px;stroke-width:2}
+.dia-expandir .fecha,.dia-expandir[aria-pressed="true"] .abre{display:none}
+.dia-expandir[aria-pressed="true"] .fecha{display:block}
+.dia-expandir:hover{color:var(--rt-text)}
 .dia-expandir:focus-visible{outline:2px solid var(--rt-pink);outline-offset:2px}
 .dia-expandir[aria-pressed="true"]{color:#FFFFFF;background:var(--rt-grad);border-color:transparent}
 .dia-rolo.largo{overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:thin;
   -webkit-overflow-scrolling:touch;padding-bottom:6px}
 .dia-rolo.largo .chart{max-width:none}
-
-/* ═══ Ritmo do mês: total, caixa do gráfico e eixo Y parado ═══ */
-/* total do período: o mesmo ponto nas quatro visões, logo abaixo do título */
-.dia-total{margin:-8px 0 10px}
-.dia-total:empty{display:none}
 .dia-caixa{position:relative}
-/* expandido: o balão do toque abre para baixo, dentro da faixa livre
-   que o gráfico reserva no alto (a caixa que rola corta o que vaza) */
-.dia-rolo.largo .chart-tip{transform:translate(-50%,0)}
 /* eixo Y por cima da ponta esquerda, com um esfumado para o gráfico
    sumir por baixo ao rolar */
 .dia-eixo{position:absolute;left:0;top:0;z-index:4;pointer-events:none;
-  background:linear-gradient(90deg, var(--rt-surface) calc(100% - 8px), transparent)}
+  background:linear-gradient(90deg, var(--rt-surface) calc(100% - 4px), transparent)}
 .dia-eixo svg{display:block;overflow:visible}
 
 /* título dos blocos alinhado ao centro dos botões de visualização */
 .block-head:has(.vis-sel){align-items:center}
 
-/* mapa de calor compacto: dias baixos em vez de quadrados */
-.cal-mes{max-width:420px}
-.cal-sem,.cal-grade{gap:4px}
-.cal-sem span{font-size:9.5px;padding-bottom:2px}
-.cal-d{aspect-ratio:auto;height:30px;border-radius:6px;font-size:10.5px}
-.cal-leg{margin-top:6px;font-size:10px}
-.cal-leg i{width:10px;height:10px}
-.cal-dia{margin-top:var(--sp-2);padding-top:var(--sp-2)}
