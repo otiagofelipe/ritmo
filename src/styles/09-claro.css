@@ -63,3 +63,6 @@
 :root[data-claro] .modal-veu{background:color-mix(in srgb, var(--rt-text) 35%, transparent)}
 
 
+
+/* card da compra: no claro o acento (verde no Menta) se confunde com o verde de "pago" */
+:root[data-claro] .cp-barra .eu,:root[data-claro] .cp-leg .eu,:root[data-claro] .cp-av.eu{background:var(--rt-blue);color:#FFFFFF}
