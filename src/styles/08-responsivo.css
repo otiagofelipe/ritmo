@@ -45,9 +45,10 @@
   /* fim da página livre: a barra inteira mais o "+", que salta para fora dela */
   .main{padding-bottom:calc(var(--tb-h, 128px) + 40px + var(--sp-4))}
   /* faixa de resumo, em cima dos botões */
-  /* posso gastar à esquerda; semana e Caju empilhados à direita; o meio
-     fica livre porque o "+" sobe por cima da faixa */
-  .tb-resumo{display:grid;grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr);align-items:center;gap:0 var(--sp-2);
+  /* total à esquerda, saldo do mês à direita e a semana no meio, em
+     cima: a parte de baixo do meio fica livre para o "+", que sobe por
+     cima da faixa */
+  .tb-resumo{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:start;gap:0 var(--sp-2);
     padding:8px 16px;border-bottom:1px solid var(--rt-border);
     background:linear-gradient(90deg, color-mix(in srgb, var(--rt-purple) 14%, transparent), transparent 70%)}
   .tb-resumo:empty{display:none}
@@ -56,35 +57,19 @@
   .tb-resumo i{font-style:normal;font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--rt-text);
     font-size:12px;white-space:nowrap}
   .tb-resumo i.neg{color:var(--rt-error)}
-  .r-posso{grid-column:1;min-width:0}
-  .r-posso i{display:block;font-size:15px;font-weight:600;margin-top:2px}
-  .r-dir{grid-column:3;display:flex;flex-direction:column;gap:6px;min-width:0}
-  .r-linha{display:grid;grid-template-columns:auto 1fr;align-items:baseline;gap:2px 8px}
-  .r-linha i{text-align:right}
-  .r-trilho{grid-column:1/-1;display:block;height:4px;border-radius:9px;overflow:hidden;
+  .tb-resumo .r-vl{display:block;font-size:16px;font-weight:600;margin-top:2px}
+  .tb-resumo small{display:block;font-size:10px;color:var(--rt-text-muted);margin-top:2px;white-space:nowrap}
+  .r-tot{grid-column:1;min-width:0}
+  .r-saldo{grid-column:3;min-width:0;text-align:right}
+  .r-sem{grid-column:2;align-self:start;width:84px;text-align:center}
+  .r-sem i{display:block;font-size:11px;margin-top:1px}
+  .r-trilho{display:block;height:4px;border-radius:9px;overflow:hidden;
     background:color-mix(in srgb, var(--rt-purple) 22%, transparent)}
+  .r-sem .r-trilho{margin-top:4px;height:3px}
   .r-trilho span{display:block;height:100%;border-radius:9px;background:var(--rt-grad);
     box-shadow:0 0 8px color-mix(in srgb, var(--rt-pink) 60%, transparent)}
-  /* ─── exemplos da faixa com total e saldo (data-v) ─── */
-  .tb-resumo small{display:block;font-size:10px;color:var(--rt-text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .tb-resumo.exemplo .r-posso i,.tb-resumo .r-dir-dir i,.tb-resumo .r-topo i{display:block;font-size:16px;font-weight:600;margin-top:2px}
-  .tb-resumo .r-dir-dir{text-align:right;display:block}
-  .tb-resumo .r-col{display:flex;flex-direction:column;gap:7px;min-width:0}
-  .tb-resumo .r-col:first-child{grid-column:1}
-  .tb-resumo .r-col:last-child{grid-column:3}
-  .tb-resumo .r-col:last-child .r-topo{text-align:right}
-  .tb-resumo .r-topo i{font-size:15px}
-  .tb-resumo .r-pags{grid-column:1/-1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 -16px}
-  .tb-resumo .r-pags::-webkit-scrollbar{display:none}
-  .tb-resumo .r-pag{flex:0 0 100%;scroll-snap-align:start;display:grid;grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr);
-    gap:0 var(--sp-2);padding:0 16px;align-items:center;min-height:42px}
-  .tb-resumo .r-pag>:first-child{grid-column:1}
-  .tb-resumo .r-pag>:last-child{grid-column:3}
-  .tb-resumo{position:relative}
-  .tb-resumo .r-pontos{position:absolute;top:7px;left:50%;transform:translateX(-50%);display:flex;gap:4px}
-  body.resumo-ex .painel .topo2{display:none}
-  .tb-resumo .r-pontos i{width:5px;height:5px;border-radius:50%;background:color-mix(in srgb, var(--rt-text) 25%, transparent)}
-  .tb-resumo .r-pontos i.on{background:var(--rt-pink);width:12px;border-radius:3px}
+  /* no celular total e saldo vivem na faixa: os cards do topo saem */
+  .painel .topo2{display:none}
   /* "+" no meio, saltado para fora da barra */
   .tabbar .tb-fab{flex:0 0 64px;align-self:flex-start;margin-top:-26px}
   .tabbar .tb-fab .tb-ic{width:56px;height:56px;border-radius:50%;color:#FFFFFF;background:var(--rt-grad);

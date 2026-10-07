@@ -79,11 +79,14 @@ function renderBarraCel(){
   const fx = $("tb-resumo");
   if(!fx) return;
   const c = contasDoMes();
-  const sobra = c.teto - c.gastoCaju;
-  const parte = c.teto ? Math.max(0, Math.min(1, sobra / c.teto)) : 0;
+  /* Total: a mesma conta do card de total do Dashboard (faturas + eu
+     devo − me devem + gasto no Caju). No celular ele e o saldo vivem só
+     aqui; os cards do topo ficam escondidos. */
+  const total = c.faturas + c.devo - c.devem + c.gastoCaju;
+  const quando = S.mesSel===S.mesAberto ? `dia ${TODAY.getDate()}` : "mês fechado";
   /* Semana: o que ainda cabe no target de R$ 600 da semana em curso. O
      gasto é a mesma soma do gráfico "Gastos por semana" (sem parcelas
-     nem fixos, com os botões do topo). */
+     nem fixos, com os botões do topo). Fica no meio, acima do "+". */
   const semanas = semanasDoMes(S.mesSel);
   const k = semanas.findIndex(w => TODAY>=w.ini && TODAY<=new Date(w.fim.getFullYear(),w.fim.getMonth(),w.fim.getDate(),23,59));
   let semanaHTML = `<b>semana</b><i>—</i>`;   // competência sem a semana de hoje
@@ -94,42 +97,10 @@ function renderBarraCel(){
     semanaHTML = `<b>semana</b><i class="${livre<0?"neg":""}">${esc(BRL.format(livre))}</i>
       <span class="r-trilho" title="gasto ${esc(BRL.format(gasto))} de ${esc(BRL.format(TARGET_SEMANA))}"><span style="width:${(pSem*100).toFixed(1)}%"></span></span>`;
   }
-  const cajuHTML = (nome="Caju") => `<b>${nome}</b><i class="${sobra<0?"neg":""}">${esc(BRL.format(sobra))}</i>
-        <span class="r-trilho"><span style="width:${(parte*100).toFixed(1)}%"></span></span>`;
-  /* Exemplos de faixa (data-v em #tb-resumo); sem data-v, a de sempre */
-  const total = c.faturas + c.devo - c.devem + c.gastoCaju;
-  const dinheiro2 = (v, extra="") => `<i class="${v<0?"neg":""}${extra}">${esc(BRL.format(v))}</i>`;
-  const quando = S.mesSel===S.mesAberto ? `dia ${TODAY.getDate()}` : "mês fechado";
-  const salario = salarioDe(S.mesSel);
-  const v = fx.dataset.v || "";
-  if(v === "v1"){
-    fx.innerHTML = `<div class="r-posso"><b>total</b>${dinheiro2(total)}<small>saldo ${esc(BRL.format(c.posso))}</small></div>
-      <div class="r-dir"><div class="r-linha">${semanaHTML}</div><div class="r-linha">${cajuHTML()}</div></div>`;
-  } else if(v === "v2"){
-    fx.innerHTML = `<div class="r-posso"><b>total</b>${dinheiro2(total)}<small>${quando}</small></div>
-      <div class="r-dir r-dir-dir"><b>saldo do mês</b>${dinheiro2(c.posso)}<small>salário ${esc(BRL.format(salario))}</small></div>`;
-  } else if(v === "v3"){
-    fx.innerHTML = `<div class="r-col"><div class="r-topo"><b>total</b>${dinheiro2(total)}</div><div class="r-linha">${semanaHTML}</div></div>
-      <div class="r-col"><div class="r-topo"><b>saldo do mês</b>${dinheiro2(c.posso)}</div><div class="r-linha">${cajuHTML("VR")}</div></div>`;
-  } else if(v === "v4"){
-    fx.innerHTML = `<div class="r-pags">
-        <div class="r-pag"><div class="r-posso"><b>total</b>${dinheiro2(total)}<small>${quando}</small></div>
-          <div class="r-dir r-dir-dir"><b>saldo do mês</b>${dinheiro2(c.posso)}<small>salário ${esc(BRL.format(salario))}</small></div></div>
-        <div class="r-pag"><div class="r-dir"><div class="r-linha">${semanaHTML}</div></div>
-          <div class="r-dir"><div class="r-linha">${cajuHTML("VR")}</div></div></div>
-      </div><div class="r-pontos"><i class="on"></i><i></i></div>`;
-    const pags = fx.querySelector(".r-pags"), pts = fx.querySelectorAll(".r-pontos i");
-    pags.addEventListener("scroll", ()=>{ const k = Math.round(pags.scrollLeft / pags.clientWidth);
-      pts.forEach((p,j)=>p.classList.toggle("on", j===k)); }, {passive:true});
-  } else {
-    fx.innerHTML = `<div class="r-posso"><b>saldo do mês</b><i class="${c.posso<0?"neg":""}">${esc(BRL.format(c.posso))}</i></div>
-      <div class="r-dir">
-        <div class="r-linha">${semanaHTML}</div>
-        <div class="r-linha">${cajuHTML()}</div>
-      </div>`;
-  }
-  fx.classList.toggle("exemplo", !!v);
-  document.body.classList.toggle("resumo-ex", !!v);
+  const valor = v => `<i class="r-vl${v<0?" neg":""}">${esc(BRL.format(v))}</i>`;
+  fx.innerHTML = `<div class="r-tot"><b>total</b>${valor(total)}<small>${quando}</small></div>
+    <div class="r-sem">${semanaHTML}</div>
+    <div class="r-saldo"><b>saldo do mês</b>${valor(c.posso)}</div>`;
 
   // selos: pessoas que me devem e coisas que eu devo, ainda pendentes no mês
   const pendente = i => !i.pago && (Number(i.valor)||0) > 0;
@@ -148,10 +119,6 @@ function renderBarraCel(){
   const barra = $("tabbar");
   if(barra && barra.offsetHeight) document.documentElement.style.setProperty("--tb-h", barra.offsetHeight+"px");
 }
-
-/* só no exemplo: troca a faixa de resumo por uma das variações */
-window.ritmoResumo = v => { const fx = $("tb-resumo"); if(!fx) return;
-  if(v) fx.dataset.v = v; else delete fx.dataset.v; renderBarraCel(); };
 
 /** Isola cada bloco: erro num deles não derruba a tela inteira. */
 function protegido(nome, fn){
