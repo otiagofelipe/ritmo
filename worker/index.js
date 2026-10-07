@@ -154,6 +154,12 @@ Select id_fixed_expense, nm_invoice, nm_alias, vl_amount, nr_day, fl_third_party
     dt_start_month, dt_end_month, nm_billing
 From silver.ritmo.vw_fixed_expenses
 Order By nm_alias, dt_start_month`,
+
+  // cartões ligados/desligados na aba Cartões (última escolha de cada um)
+  cartoes: `
+Select id_card, nm_card, tp_card, nm_bank, fl_enabled
+From silver.ritmo.vw_cards
+Order By tp_card, nm_card`,
 };
 
 
@@ -237,6 +243,23 @@ const TIPOS = {
       return [...new Set(itens)].sort((a, b) => a - b).join(";");
     },
   },
+  // id do catálogo de cartões da página: só letras minúsculas, números e hífen
+  slug: {
+    sql: "STRING",
+    ok: v => {
+      const s = String(v ?? "").trim().toLowerCase();
+      if (!/^[a-z0-9-]{1,40}$/.test(s)) throw new Error(`id inválido: ${v}`);
+      return s;
+    },
+  },
+  tipoCartao: {
+    sql: "STRING",
+    ok: v => {
+      const s = String(v ?? "").trim().toLowerCase();
+      if (s === "credit" || s === "benefit") return s;
+      throw new Error(`tipo de cartão inválido: ${v}`);
+    },
+  },
   cobranca: {
     sql: "STRING",
     ok: v => {
@@ -313,6 +336,16 @@ const OPS = {
       ["dt_end_month",     "mes"],
       ["nm_billing",       "cobranca"],
       ["fl_deleted",       "flag"],
+    ],
+  },
+  cartoes: {
+    tabela: "bronze.ritmo.tb_cards",
+    colunas: [
+      ["id_card",    "slug",       true],
+      ["nm_card",    "texto",      true],
+      ["tp_card",    "tipoCartao", true],
+      ["nm_bank",    "texto"],
+      ["fl_enabled", "flag"],
     ],
   },
   entertainment: {

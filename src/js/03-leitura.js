@@ -131,6 +131,10 @@ function ingerirRegistros(d){
       acrescimos: num(r.vl_additions),
       descontos: -Math.abs(num(r.vl_deductions))
     })),
+    // aba Cartões: a última escolha de cada cartão
+    cartoes: (d.cartoes||[]).map(r => ({
+      id: txt(r.id_card), ligado: ehVerdade(r.fl_enabled)
+    })).filter(c => c.id),
     // o Caju já vem pela vw_ritmo; aqui ficam só as compras lançadas
     // nesta sessão, até o próximo carregamento
     caju: []

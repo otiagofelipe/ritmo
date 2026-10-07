@@ -33,6 +33,7 @@
   <g id="i-vis-tabela"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M3 15h18"/><path d="M10 4v16"/></g>
   <g id="i-vis-cal"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17.5h2M11 17.5h2"/></g>
   <g id="i-caju"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></g>
+  <g id="i-card"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M6.5 15h4"/></g>
   <g id="i-more"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></g>
   <g id="i-edit"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></g>
   <!-- neon dos gráficos: brilho na cor da própria série (região em
@@ -74,6 +75,7 @@
       <button data-pg="dash"  data-tip="Dashboard"   aria-current="true"><svg class="ic" viewBox="0 0 24 24"><use href="#i-dash"/></svg><span class="lbl">Dashboard</span></button>
       <button data-pg="evo"   data-tip="Mês a mês"><svg class="ic" viewBox="0 0 24 24"><use href="#i-evo"/></svg><span class="lbl">Mês a mês</span></button>
       <button data-pg="caju"  data-tip="Caju"><svg class="ic" viewBox="0 0 24 24"><use href="#i-caju"/></svg><span class="lbl">Caju</span></button>
+      <button data-pg="cartoes" data-tip="Cartões"><svg class="ic" viewBox="0 0 24 24"><use href="#i-card"/></svg><span class="lbl">Cartões</span></button>
       <button data-pg="fixos" data-tip="Gastos fixos"><svg class="ic" viewBox="0 0 24 24"><use href="#i-fix"/></svg><span class="lbl">Gastos fixos</span></button>
       <button data-pg="devem" data-tip="Me devem"><svg class="ic" viewBox="0 0 24 24"><use href="#i-in"/></svg><span class="lbl">Me devem</span></button>
       <button data-pg="devo"  data-tip="Eu devo"><svg class="ic" viewBox="0 0 24 24"><use href="#i-out"/></svg><span class="lbl">Eu devo</span></button>
@@ -93,7 +95,7 @@
       <button data-pg="evo"><span class="tb-ic"><svg class="ic" viewBox="0 0 24 24"><use href="#i-evo"/></svg></span><span class="tb-lbl">Mês a mês</span></button>
       <button class="tb-fab" id="tb-lancar" aria-label="Lançar" aria-haspopup="menu" aria-expanded="false"><span class="tb-ic"><svg class="ic" viewBox="0 0 24 24"><use href="#i-plus"/></svg></span></button>
       <button data-pg="caju"><span class="tb-ic"><svg class="ic" viewBox="0 0 24 24"><use href="#i-caju"/></svg></span><span class="tb-lbl">Caju</span></button>
-      <button id="tb-mais" data-mais="fixos devem devo entradas dados" aria-haspopup="menu" aria-expanded="false"><span class="tb-ic"><svg class="ic" viewBox="0 0 24 24"><use href="#i-more"/></svg><i class="tb-ponto" id="tb-mais-ponto" hidden></i></span><span class="tb-lbl">Mais</span></button>
+      <button id="tb-mais" data-mais="cartoes fixos devem devo entradas dados" aria-haspopup="menu" aria-expanded="false"><span class="tb-ic"><svg class="ic" viewBox="0 0 24 24"><use href="#i-more"/></svg><i class="tb-ponto" id="tb-mais-ponto" hidden></i></span><span class="tb-lbl">Mais</span></button>
     </div>
   </nav>
   <div class="tb-veu" aria-hidden="true"></div>
@@ -105,6 +107,7 @@
     <button data-lancar="fixos" role="menuitem"><svg class="ic" viewBox="0 0 24 24"><use href="#i-fix"/></svg>Gastos fixos</button>
   </div>
   <div class="tb-menu" id="tb-menu" role="menu" hidden>
+    <button data-pg="cartoes" role="menuitem"><svg class="ic" viewBox="0 0 24 24"><use href="#i-card"/></svg>Cartões</button>
     <button data-pg="fixos" role="menuitem"><svg class="ic" viewBox="0 0 24 24"><use href="#i-fix"/></svg>Gastos fixos</button>
     <button data-pg="devem" role="menuitem"><svg class="ic" viewBox="0 0 24 24"><use href="#i-in"/></svg>Me devem<i class="tb-selo devem"></i></button>
     <button data-pg="devo" role="menuitem"><svg class="ic" viewBox="0 0 24 24"><use href="#i-out"/></svg>Eu devo<i class="tb-selo devo"></i></button>
@@ -276,6 +279,20 @@
         <div class="block-head"><h2>Faixas de entrada</h2>
           <button class="link-btn r" id="en-editar">adicionar / editar</button></div>
         <div class="tab-wrap alto" id="en-lista"></div>
+      </div>
+    </section>
+
+    <!-- ─────── Cartões ─────── -->
+    <section id="pg-cartoes" class="hidden">
+      <p class="ct-intro">Escolha quais cartões aparecem no acompanhamento. Os gastos só entram quando o banco
+        chega pelo pipeline; um cartão ligado sem dados aparece zerado.</p>
+      <div class="block">
+        <div class="block-head"><h2>Crédito</h2><span class="eyebrow r" id="ct-n-credito"></span></div>
+        <div class="ct-lista" id="ct-credito"></div>
+      </div>
+      <div class="block" style="margin-top:16px">
+        <div class="block-head"><h2>Benefícios</h2><span class="eyebrow r" id="ct-n-beneficio"></span></div>
+        <div class="ct-lista" id="ct-beneficio"></div>
       </div>
     </section>
 

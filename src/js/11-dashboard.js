@@ -87,7 +87,7 @@ function renderResumo(){
       abre = { id:c.id, linhas:[["Avulsos", v + prev - parc - fixo], ["Fixos", fixo], ["Parcelas", parc]] };
     }
     return kpi({
-      nome:c.titulo, selo:marca(c), valor:v+prev, tom: TOM_CARD[c.id], abre,
+      nome:c.titulo, selo:marca(c), valor:v+prev, tom: TOM_CARD[c.id] || c.cor, abre,
       sub: teto
         ? (S.soRole ? "gasto no rolê" : `${BRL.format(Math.max(teto-v,0))} disponível`)
         : (desta.length ? `${desta.length} lançamento${desta.length>1?"s":""}` : "sem lançamentos"),
@@ -123,26 +123,33 @@ function renderResumo(){
            sub: `Salário ${BRL.format(salarioDe(S.mesSel))}`,
            });
 
-  $("m-cartoes").innerHTML = CONTAS.filter(c=>!c.temTeto).map(cardConta).join("");
+  /* Cartões e benefícios: os ligados na aba Cartões. Quem tem conta
+     (Itaú, PicPay, Caju) usa a conta; os outros entram zerados até o
+     pipeline trazer aquele banco. Grupo sem nenhum ligado some. */
+  const contaDe = c => CONTAS.find(x=>x.id===c.id) || { id:c.id, titulo:c.titulo, cor:c.cor };
+  const credito = cartoesLigados("credito"), beneficio = cartoesLigados("beneficio");
+  $("m-cartoes").innerHTML = credito.map(c=>cardConta(contaDe(c))).join("");
+  $("m-cartoes").closest(".grupo-cards").hidden = !credito.length;
+  $("m-beneficios").closest(".grupo-cards").hidden = !beneficio.length;
   $("m-cartoes-tot").textContent = BRL.format(faturas);
 
   const barra = (gasto, teto) => `<div class="barra" aria-hidden="true"><i style="width:${
     teto>0 ? Math.min(100, gasto/teto*100).toFixed(1) : 0}%"></i></div>`;
   const cardBeneficio = b => {
-    const conta = b.conta ? CONTAS.find(c=>c.id===b.conta) : null;
+    const conta = CONTAS.find(c=>c.id===b.id && c.temTeto) || null;
     const gasto = conta ? gastoCaju : 0;
     const teto  = conta ? tetoCaju(S.mesSel) : 0;
     const editavel = conta ? GRUPOS.find(g=>g.grupoPlanilha===conta.id) : null;
     return kpi({
-      nome:b.titulo, selo:marca({id:b.logo, titulo:b.fornecedor, cor:b.cor}),
-      apos:`<span class="forn">${esc(b.fornecedor)}</span>`,
+      nome:b.rotulo || b.titulo, selo:marca({id:b.id, titulo:b.titulo, cor:b.cor}),
+      apos: b.rotulo ? `<span class="forn">${esc(b.titulo)}</span>` : "",
       valor:gasto, tom: conta ? TOM_CARD[conta.id] : b.cor,
       sub: (S.soRole && conta) ? "gasto no rolê" : `${BRL.format(Math.max(teto-gasto,0))} disponível`,
       pe: barra(gasto, teto),
       acao: editavel ? "grupo:"+editavel.id : null
     });
   };
-  $("m-beneficios").innerHTML = BENEFICIOS.map(cardBeneficio).join("");
+  $("m-beneficios").innerHTML = beneficio.map(cardBeneficio).join("");
 
   $("m-outros").innerHTML = ["devo","devem"]
     .map(id=>GRUPOS.find(g=>g.id===id && !g.semCard)).filter(Boolean).map(cardGrupo).join("");

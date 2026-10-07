@@ -307,3 +307,26 @@
 .escada .split{margin:0}
 .escada .nota{font-size:11px;color:var(--rt-text-muted);margin-top:var(--sp-2);line-height:1.45}
 
+
+/* ═══ aba Cartões ═══ */
+.ct-intro{margin:0 0 var(--sp-3);font-size:13px;color:var(--rt-text-secondary);max-width:640px}
+.ct-lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.ct-item{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;text-align:left;cursor:pointer;
+  background:var(--rt-surface);border:1px solid var(--rt-border);border-radius:var(--rt-radius-md);color:var(--rt-text);
+  transition:border-color .15s,background-color .15s}
+.ct-item:hover{border-color:color-mix(in srgb, var(--rt-text) 30%, var(--rt-border))}
+.ct-item:focus-visible{outline:2px solid var(--rt-pink);outline-offset:2px}
+.ct-item .marca{width:30px;height:30px;border-radius:8px;font-size:13px;flex:none}
+.ct-nome{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ct-nome b{font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ct-nome small{font-size:11px;color:var(--rt-text-muted)}
+.ct-nome small.tem{color:var(--rt-success)}
+.ct-item:not(.on) .marca,.ct-item:not(.on) .ct-nome b{opacity:.55}
+/* a chave: trilho e bolinha, acesa no degradê do tema */
+.ct-chave{flex:none;width:38px;height:22px;border-radius:999px;position:relative;
+  background:color-mix(in srgb, var(--rt-text) 14%, transparent);transition:background .2s}
+.ct-chave i{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#FFFFFF;
+  box-shadow:0 1px 3px #0000004D;transition:transform .2s var(--ease)}
+.ct-item.on .ct-chave{background:var(--rt-grad)}
+.ct-item.on .ct-chave i{transform:translateX(16px)}
+.ct-item.on{border-color:color-mix(in srgb, var(--rt-pink) 35%, var(--rt-border))}

@@ -14,6 +14,7 @@ const PAGINAS = [
   { id:"evo",   titulo:"Mês a mês",    filtros:true  },
   { id:"entradas", titulo:"Entradas",  filtros:true  },
   { id:"caju",  titulo:"Caju",         filtros:true  },
+  { id:"cartoes", titulo:"Cartões",    filtros:false },
   { id:"dados", titulo:"Dados",        filtros:false }
 ];
 var pagina = "dash";
@@ -46,6 +47,8 @@ function render(){
     $("m-titulo").textContent = "sem dados";
     $("m-lista").innerHTML = `<div class="blank">Nenhum dado carregado.
       Abra <b>Dados</b> no menu para conectar ao Databricks.</div>`;
+    // a escolha de cartões não depende dos lançamentos
+    if(pagina==="cartoes") protegido("cartões", pgCartoes);
     return;
   }
   protegido("seletor", montarSeletor);
@@ -67,6 +70,7 @@ function render(){
   if(pagina==="evo")   protegido("mês a mês",    pgEvolucao);
   if(pagina==="entradas") protegido("entradas",  pgEntradas);
   if(pagina==="caju")  protegido("caju",         pgCaju);
+  if(pagina==="cartoes") protegido("cartões",    pgCartoes);
 
   renderEditor();
 }

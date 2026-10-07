@@ -260,10 +260,12 @@
 
   /* as barras: nome e detalhe à esquerda, valor à direita */
   .painel .kpis.topo2{grid-area:ko;grid-column:2;align-self:end;grid-template-columns:1fr 1fr}
-  .topo2 .kpi{flex-direction:row;align-items:center;gap:var(--sp-3);padding:0 var(--sp-4);height:var(--barra);min-height:0}
+  .topo2 .kpi{flex-direction:row;align-items:center;gap:10px;padding:0 18px;height:var(--barra);min-height:0;overflow:hidden}
   .topo2 .kpi .nm{margin:0;flex:0 0 auto}
   .topo2 .kpi .sb{margin:0;padding:0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .topo2 .kpi .vl{order:3;margin:0 0 0 auto;font-size:26px;line-height:1}
+  .topo2 .kpi .vl{order:3;margin:0 0 0 auto;font-size:min(26px, 10cqi);line-height:1}
+  /* barra estreita (gráfico apertado por 3 cartões): sai o "dia N" */
+  @container (max-width:270px){ .topo2 .tot-quando{display:none} }
   /* degradê das barras: as cores do tema (as mesmas do --rt-grad dos
      botões), da primeira à segunda, com a borda no mesmo degradê. Sem
      brilho por fora: só um realce suave atrás do valor */
@@ -300,3 +302,4 @@
 
 /* gráfico semanal num bloco próprio */
 .semana-bloco .block-head{margin-bottom:var(--sp-2)}
+.painel .grupo-cards[hidden]{display:none}
