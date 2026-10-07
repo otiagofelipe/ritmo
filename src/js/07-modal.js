@@ -447,29 +447,29 @@ function editorDividas(g, box){
 
     box.innerHTML = `<div class="fx-ed">
       ${topo(g.titulo, rotuloFatura(mes), false)}
-      <div class="fx-itens cd-lista"></div>
-      <button type="button" class="fx-novo"><svg class="ic" viewBox="0 0 24 24"><use href="#i-plus"/></svg>Novo registro</button>
-      ${caixasTotais([["neste mês", total], ["em aberto", aberto, "aberto"]])}
+      ${barraPago(id, todos)}
+      <div class="lst-lista"></div>
+      ${rodapeLista([["neste mês", total], ["em aberto", aberto, "aberto"]], "Novo registro")}
     </div>`;
 
-    const caixa = box.querySelector(".fx-itens");
+    const caixa = box.querySelector(".lst-lista");
     if(!todos.length) caixa.innerHTML = `<div class="blank">Nada anotado nesta competência.</div>`;
     vig.forEach(i=>{
       const r = crus[i.refIdx];
-      const t = document.createElement("template"); t.innerHTML = cartaoDivida(id, i, "button");
+      const t = document.createElement("template"); t.innerHTML = linhaDivida(id, i, "button");
       const b = t.content.firstElementChild;
       b.onclick = () => { aberta = { orig:r, d:copia(r) }; desenhar(); };
       caixa.appendChild(b);
     });
     // fixos por Pix: tocar abre o card de Gastos fixos, onde eles se editam
     pix.forEach(i=>{
-      const t = document.createElement("template"); t.innerHTML = cartaoDivida(id, i, "button");
+      const t = document.createElement("template"); t.innerHTML = linhaDivida(id, i, "button");
       const b = t.content.firstElementChild;
       b.onclick = () => { grupoAberto = "fixos"; editorMontado = null; renderEditor(); };
       caixa.appendChild(b);
     });
 
-    box.querySelector(".fx-novo").onclick = () => {
+    box.querySelector(".lst-mais").onclick = () => {
       aberta = { orig:null, d:{ pessoa:"", nome:"", valor:0, parcelas:1, mesInicio:mes, pagos:"" } };
       desenhar();
     };
@@ -582,36 +582,6 @@ const lancamentosCaju = mes => S.linhas
   .filter(x=>x.conta && x.conta.id==="caju" && daCompetencia(x, mes))
   .sort((a,b)=>(b.data?b.data.getTime():0)-(a.data?a.data.getTime():0));
 const diaBR = d => d ? `${p2(d.getDate())}/${p2(d.getMonth()+1)}` : "—";
-const SEMANA_CURTA = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
-
-/** Ícone do lugar pelo nome; o que não reconhece fica com o prato (é vale-refeição). */
-const ICONES_CAJU = [
-  [/posto|gasolina|combustivel|shell|ipiranga|petrobras|\bbr\b/, "⛽"],
-  [/padaria|panificadora|\bpao\b|confeitaria/, "🥐"],
-  [/\bmc\b|mcdonald|burger|\bbk\b|lanche|hamburg/, "🍔"],
-  [/pizza/, "🍕"],
-  [/sushi|japones|temaki/, "🍣"],
-  [/cafe|coffee|starbucks|cafeteria/, "☕"],
-  [/sorvete|acai|gelato|doce/, "🍨"],
-  [/ifood|rappi|delivery|99food/, "🛵"],
-  [/mercado|supermerc|carrefour|pao de acucar|extra|assai|atacad|hortifruti|sacolao/, "🛒"],
-  [/bar\b|boteco|cervej|chopp/, "🍺"]
-];
-function iconeCaju(nome){
-  const n = semAcento(nome);
-  const achou = ICONES_CAJU.find(([re]) => re.test(n));
-  return achou ? achou[1] : "🍽️";
-}
-/** Uma linha do Caju: ícone, nome com dia da semana e data embaixo, valor à direita. */
-function linhaCaju(l){
-  const pend = String(l.id).startsWith("caju-pendente:");
-  const quando = l.data ? `${SEMANA_CURTA[l.data.getDay()]} ${diaBR(l.data)}` : "—";
-  const v = BRL.format(Number(l.valor)||0).replace("R$", "").replace(/\s+/g, "");
-  return `<div class="cj-ln"><span class="cj-ic" aria-hidden="true">${iconeCaju(l.desc)}</span>
-    <span class="cj-n"><b>${esc(l.desc || "—")}</b><small>${esc(quando)}${pend
-      ? ` · <span class="cj-pend" title="Lançado aqui, ainda não chegou na base">a sincronizar</span>` : ""}</small></span>
-    <span class="cj-v">${esc(v)}</span></div>`;
-}
 const isoDia = d => d ? `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}` : "";
 
 /**
@@ -641,31 +611,13 @@ function editorCaju(g, box){
     const mes = S.mesSel;
     const ls = lancamentosCaju(mes);
     const gasto = soma(ls), teto = tetoCaju(mes), livre = teto - gasto;
-    // a competência do Caju é o próprio mês-calendário: o traço de hoje só aparece nele
-    const [a, m] = String(mes).split("-").map(Number);
-    const nDias = new Date(a, m, 0).getDate();
-    const noMes = TODAY.getFullYear() === a && TODAY.getMonth()+1 === m;
-    const pct = teto > 0 ? gasto / teto * 100 : 0;
-    const ritmo = teto * TODAY.getDate() / nDias;
-    box.innerHTML = `<div class="fx-ed cj-ed">
+    box.innerHTML = `<div class="fx-ed">
       ${topo("Caju", rotuloFatura(mes), false)}
-      ${teto > 0 ? `<div class="cj-vale">
-        <div class="cj-barra${pct > 100 ? " estourou" : ""}"><i style="width:${Math.min(100, pct).toFixed(1)}%"></i>${noMes
-          ? `<span class="cj-hoje" style="left:${(TODAY.getDate() / nDias * 100).toFixed(1)}%"
-              title="Gastando o vale por igual, hoje seriam ${esc(BRL.format(ritmo))}"></span>` : ""}</div>
-        <div class="cj-leg"><span>${Math.round(pct)}% do vale de ${esc(BRL.format(teto))}</span>${noMes ? `<span>dia ${TODAY.getDate()}</span>` : ""}</div>
-      </div>` : ""}
-      <div class="cj-itens"></div>
-      <div class="cj-rodape">
-        <div><small>Gasto</small><b>${esc(BRL.format(gasto))}</b></div>
-        ${teto ? `<div class="${livre < 0 ? "neg" : "livre"}"><small>Disponível</small><b>${esc(BRL.format(livre))}</b></div>` : ""}
-        <button type="button" class="cj-mais" title="Lançar gastos" aria-label="Lançar gastos"><svg class="ic" viewBox="0 0 24 24"><use href="#i-plus"/></svg></button>
-      </div>
+      ${barraCaju(mes, gasto, teto)}
+      <div class="lst-lista">${ls.length ? ls.map(linhaCaju).join("") : `<div class="blank">Nada gasto no Caju nesta competência.</div>`}</div>
+      ${rodapeLista([["gasto", gasto], ...(teto ? [["disponível", livre, livre < 0 ? "neg" : "livre"]] : [])], "Lançar gastos")}
     </div>`;
-    const caixa = box.querySelector(".cj-itens");
-    caixa.innerHTML = ls.length ? ls.map(linhaCaju).join("")
-      : `<div class="blank">Nada gasto no Caju nesta competência.</div>`;
-    box.querySelector(".cj-mais").onclick = () => { lancando = true; desenhar(); };
+    box.querySelector(".lst-mais").onclick = () => { lancando = true; desenhar(); };
     box.querySelector(".fx-x").onclick = fechar;
   }
 
