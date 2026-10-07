@@ -241,7 +241,7 @@
    baixas, lado a lado, na largura toda. */
 @container conteudo (min-width:900px){
   .painel{grid-template-columns:calc(var(--cols,3)*var(--card) + (var(--cols,3) - 1)*var(--sp-3)) minmax(0,1fr);
-    grid-template-areas:"rc ." "kc sem" "rb sem" "kb sem" "ro sem" "ko sem" "tp tp";
+    grid-template-areas:"rc ." "kc sem" "rb sem" "kb sem" "ro sem" "ko sem";
     column-gap:var(--sp-5);row-gap:0}
   .painel-cards,.painel .grupo-cards{display:contents}
   .grupo-cards[data-g=c]>.grupo-rot{grid-area:rc}
@@ -251,13 +251,18 @@
   .grupo-cards[data-g=o]>.grupo-rot{grid-area:ro}
   .grupo-cards[data-g=o]>.kpis{grid-area:ko}
   .grupo-cards:not([data-g=c])>.grupo-rot{margin-top:var(--sp-3)}
+  /* as barras ficam no pé da coluna do gráfico, terminando com os
+     "outros"; o gráfico encolhe para dar lugar a elas (--barras) */
+  .painel{--barra:48px;--barras:calc(var(--barra) + var(--sp-3))}
+  .painel[data-barras=pilha]{--barras:calc(2*var(--barra) + var(--sp-2) + var(--sp-3))}
   .painel .semana-bloco{grid-area:sem;align-self:stretch;contain:size;min-height:240px;
-    display:flex;flex-direction:column}
+    margin-bottom:var(--barras);display:flex;flex-direction:column}
   .painel .semana-bloco>.chart{flex:1;min-height:0;overflow:auto}
 
   /* as barras: nome e detalhe à esquerda, valor à direita */
-  .painel .kpis.topo2{grid-area:tp;margin-top:var(--sp-4);grid-template-columns:1fr 1fr}
-  .topo2 .kpi{flex-direction:row;align-items:center;gap:var(--sp-3);padding:10px var(--sp-4);min-height:0}
+  .painel .kpis.topo2{grid-area:ko;grid-column:2;align-self:end;grid-template-columns:1fr 1fr}
+  .painel[data-barras=pilha] .kpis.topo2{grid-template-columns:1fr;gap:var(--sp-2)}
+  .topo2 .kpi{flex-direction:row;align-items:center;gap:var(--sp-3);padding:0 var(--sp-4);height:var(--barra);min-height:0}
   .topo2 .kpi .nm{margin:0;flex:0 0 auto}
   .topo2 .kpi .sb{margin:0;padding:0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .topo2 .kpi .vl{order:3;margin:0 0 0 auto;font-size:26px;line-height:1}
