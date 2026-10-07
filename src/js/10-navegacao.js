@@ -94,12 +94,42 @@ function renderBarraCel(){
     semanaHTML = `<b>semana</b><i class="${livre<0?"neg":""}">${esc(BRL.format(livre))}</i>
       <span class="r-trilho" title="gasto ${esc(BRL.format(gasto))} de ${esc(BRL.format(TARGET_SEMANA))}"><span style="width:${(pSem*100).toFixed(1)}%"></span></span>`;
   }
-  fx.innerHTML = `<div class="r-posso"><b>saldo do mês</b><i class="${c.posso<0?"neg":""}">${esc(BRL.format(c.posso))}</i></div>
-    <div class="r-dir">
-      <div class="r-linha">${semanaHTML}</div>
-      <div class="r-linha"><b>Caju</b><i class="${sobra<0?"neg":""}">${esc(BRL.format(sobra))}</i>
-        <span class="r-trilho"><span style="width:${(parte*100).toFixed(1)}%"></span></span></div>
-    </div>`;
+  const cajuHTML = (nome="Caju") => `<b>${nome}</b><i class="${sobra<0?"neg":""}">${esc(BRL.format(sobra))}</i>
+        <span class="r-trilho"><span style="width:${(parte*100).toFixed(1)}%"></span></span>`;
+  /* Exemplos de faixa (data-v em #tb-resumo); sem data-v, a de sempre */
+  const total = c.faturas + c.devo - c.devem + c.gastoCaju;
+  const dinheiro2 = (v, extra="") => `<i class="${v<0?"neg":""}${extra}">${esc(BRL.format(v))}</i>`;
+  const quando = S.mesSel===S.mesAberto ? `dia ${TODAY.getDate()}` : "mês fechado";
+  const salario = salarioDe(S.mesSel);
+  const v = fx.dataset.v || "";
+  if(v === "v1"){
+    fx.innerHTML = `<div class="r-posso"><b>total</b>${dinheiro2(total)}<small>saldo ${esc(BRL.format(c.posso))}</small></div>
+      <div class="r-dir"><div class="r-linha">${semanaHTML}</div><div class="r-linha">${cajuHTML()}</div></div>`;
+  } else if(v === "v2"){
+    fx.innerHTML = `<div class="r-posso"><b>total</b>${dinheiro2(total)}<small>${quando}</small></div>
+      <div class="r-dir r-dir-dir"><b>saldo do mês</b>${dinheiro2(c.posso)}<small>salário ${esc(BRL.format(salario))}</small></div>`;
+  } else if(v === "v3"){
+    fx.innerHTML = `<div class="r-col"><div class="r-topo"><b>total</b>${dinheiro2(total)}</div><div class="r-linha">${semanaHTML}</div></div>
+      <div class="r-col"><div class="r-topo"><b>saldo do mês</b>${dinheiro2(c.posso)}</div><div class="r-linha">${cajuHTML("VR")}</div></div>`;
+  } else if(v === "v4"){
+    fx.innerHTML = `<div class="r-pags">
+        <div class="r-pag"><div class="r-posso"><b>total</b>${dinheiro2(total)}<small>${quando}</small></div>
+          <div class="r-dir r-dir-dir"><b>saldo do mês</b>${dinheiro2(c.posso)}<small>salário ${esc(BRL.format(salario))}</small></div></div>
+        <div class="r-pag"><div class="r-dir"><div class="r-linha">${semanaHTML}</div></div>
+          <div class="r-dir"><div class="r-linha">${cajuHTML("VR")}</div></div></div>
+      </div><div class="r-pontos"><i class="on"></i><i></i></div>`;
+    const pags = fx.querySelector(".r-pags"), pts = fx.querySelectorAll(".r-pontos i");
+    pags.addEventListener("scroll", ()=>{ const k = Math.round(pags.scrollLeft / pags.clientWidth);
+      pts.forEach((p,j)=>p.classList.toggle("on", j===k)); }, {passive:true});
+  } else {
+    fx.innerHTML = `<div class="r-posso"><b>saldo do mês</b><i class="${c.posso<0?"neg":""}">${esc(BRL.format(c.posso))}</i></div>
+      <div class="r-dir">
+        <div class="r-linha">${semanaHTML}</div>
+        <div class="r-linha">${cajuHTML()}</div>
+      </div>`;
+  }
+  fx.classList.toggle("exemplo", !!v);
+  document.body.classList.toggle("resumo-ex", !!v);
 
   // selos: pessoas que me devem e coisas que eu devo, ainda pendentes no mês
   const pendente = i => !i.pago && (Number(i.valor)||0) > 0;
@@ -118,6 +148,10 @@ function renderBarraCel(){
   const barra = $("tabbar");
   if(barra && barra.offsetHeight) document.documentElement.style.setProperty("--tb-h", barra.offsetHeight+"px");
 }
+
+/* só no exemplo: troca a faixa de resumo por uma das variações */
+window.ritmoResumo = v => { const fx = $("tb-resumo"); if(!fx) return;
+  if(v) fx.dataset.v = v; else delete fx.dataset.v; renderBarraCel(); };
 
 /** Isola cada bloco: erro num deles não derruba a tela inteira. */
 function protegido(nome, fn){

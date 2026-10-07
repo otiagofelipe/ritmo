@@ -65,6 +65,26 @@
     background:color-mix(in srgb, var(--rt-purple) 22%, transparent)}
   .r-trilho span{display:block;height:100%;border-radius:9px;background:var(--rt-grad);
     box-shadow:0 0 8px color-mix(in srgb, var(--rt-pink) 60%, transparent)}
+  /* ─── exemplos da faixa com total e saldo (data-v) ─── */
+  .tb-resumo small{display:block;font-size:10px;color:var(--rt-text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tb-resumo.exemplo .r-posso i,.tb-resumo .r-dir-dir i,.tb-resumo .r-topo i{display:block;font-size:16px;font-weight:600;margin-top:2px}
+  .tb-resumo .r-dir-dir{text-align:right;display:block}
+  .tb-resumo .r-col{display:flex;flex-direction:column;gap:7px;min-width:0}
+  .tb-resumo .r-col:first-child{grid-column:1}
+  .tb-resumo .r-col:last-child{grid-column:3}
+  .tb-resumo .r-col:last-child .r-topo{text-align:right}
+  .tb-resumo .r-topo i{font-size:15px}
+  .tb-resumo .r-pags{grid-column:1/-1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 -16px}
+  .tb-resumo .r-pags::-webkit-scrollbar{display:none}
+  .tb-resumo .r-pag{flex:0 0 100%;scroll-snap-align:start;display:grid;grid-template-columns:minmax(0,1fr) 72px minmax(0,1fr);
+    gap:0 var(--sp-2);padding:0 16px;align-items:center;min-height:42px}
+  .tb-resumo .r-pag>:first-child{grid-column:1}
+  .tb-resumo .r-pag>:last-child{grid-column:3}
+  .tb-resumo{position:relative}
+  .tb-resumo .r-pontos{position:absolute;top:7px;left:50%;transform:translateX(-50%);display:flex;gap:4px}
+  body.resumo-ex .painel .topo2{display:none}
+  .tb-resumo .r-pontos i{width:5px;height:5px;border-radius:50%;background:color-mix(in srgb, var(--rt-text) 25%, transparent)}
+  .tb-resumo .r-pontos i.on{background:var(--rt-pink);width:12px;border-radius:3px}
   /* "+" no meio, saltado para fora da barra */
   .tabbar .tb-fab{flex:0 0 64px;align-self:flex-start;margin-top:-26px}
   .tabbar .tb-fab .tb-ic{width:56px;height:56px;border-radius:50%;color:#FFFFFF;background:var(--rt-grad);
