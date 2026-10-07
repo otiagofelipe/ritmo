@@ -43,7 +43,9 @@ function renderResumoPessoas(id, pre, itens){
   const por = new Map();
   for(const i of itens){
     const p = rotuloPessoa(i) || "—";
-    const r = por.get(p) || { pago:0, falta:0 };
+    const r = por.get(p) || { pago:0, falta:0, semPessoa:true, fixa:false };
+    if(String(i.pessoa||"").trim()) r.semPessoa = false;
+    if(i.fixaPix) r.fixa = true;
     const v = Number(i.valor)||0;
     if(i.pago) r.pago += v; else r.falta += v;
     por.set(p, r);
@@ -61,7 +63,9 @@ function renderResumoPessoas(id, pre, itens){
   box.innerHTML = `<div class="rs-tab">
     <div class="rs-cab"><span>${quem}</span><span>${verbo} / falta pagar</span><span>Status</span></div>
     <div class="rs-corpo">${linhas.map(([p,r])=>{ const ok = r.falta<=0.004;
-      return `<div class="rs-ln"><span class="rs-q"><span class="lst-ic av ${ok ? "pago" : "pend"}" aria-hidden="true">${inicial(p)}</span><b>${esc(p)}</b></span>
+      return `<div class="rs-ln"><span class="rs-q">${r.semPessoa
+        ? `<span class="lst-ic" aria-hidden="true">${iconeGasto(p, r.fixa ? "📌" : "🧾")}</span>`
+        : `<span class="lst-ic av ${ok ? "pago" : "pend"}" aria-hidden="true">${inicial(p)}</span>`}<b>${esc(p)}</b></span>
         <span class="rs-v">${par(r.pago, r.falta)}</span><span class="rs-st">${statusLinha(ok)}</span></div>`; }).join("")}</div>
     <div class="rs-ln rs-tot"><span class="rs-q"><b>Total</b></span><span class="rs-v">${par(tp, tf)}</span><span class="rs-st"></span></div>
   </div>`;
@@ -129,29 +133,61 @@ function linhaDivida(id, i, tag="div"){
       Array.from({length:i.parcela.n}, (_,k)=>`<i class="${pagas.has(k+1) ? "ok" : ""}${k+1===i.parcela.i ? " at" : ""}"></i>`).join("")}</span>`;
   } else if(i.parcela) pts = ` · ${i.parcela.i}/${i.parcela.n}`;
   return linhaLista({ tag, cls: i.pago ? "pago" : "pend",
-    ic: i.fixaPix ? "📌" : inicial(pessoa || desc), icCls: i.fixaPix ? "" : "av " + (i.pago ? "pago" : "pend"),
+    ic: iconeGasto(desc || pessoa, i.fixaPix ? "📌" : "🧾"),
     titulo, sub: `<span>${esc(det)}</span>${pts}`, valor: Number(i.valor)||0, status: statusLinha(i.pago) });
 }
 
 const SEMANA_CURTA = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
-/** Ícone do lugar pelo nome; o que não reconhece fica com o prato (é vale-refeição). */
-const ICONES_CAJU = [
+
+/* Ícone pelo gasto (a descrição: onde, o quê), nunca pela pessoa. Um
+   mapa só para Caju, Gastos fixos, Me devem e Eu devo; cada lista tem o
+   seu ícone para o que não reconhece. */
+const ICONES_GASTO = [
   [/posto|gasolina|combustivel|shell|ipiranga|petrobras|\bbr\b/, "⛽"],
   [/padaria|panificadora|\bpao\b|confeitaria/, "🥐"],
   [/\bmc\b|mcdonald|burger|\bbk\b|lanche|hamburg/, "🍔"],
   [/pizza/, "🍕"],
   [/sushi|japones|temaki/, "🍣"],
+  [/churrasco|churrascaria|carne|acougue/, "🍖"],
   [/cafe|coffee|starbucks|cafeteria/, "☕"],
   [/sorvete|acai|gelato|doce/, "🍨"],
   [/ifood|rappi|delivery|99food/, "🛵"],
-  [/mercado|supermerc|carrefour|pao de acucar|extra|assai|atacad|hortifruti|sacolao/, "🛒"],
-  [/bar\b|boteco|cervej|chopp/, "🍺"]
+  [/mercado|supermerc|carrefour|pao de acucar|extra|assai|atacad|hortifruti|sacolao|feira/, "🛒"],
+  [/\bbar\b|boteco|cervej|chopp|balada/, "🍺"],
+  [/internet|fibra|vivo|claro|\btim\b|\boi\b|\bnet\b|wifi/, "🌐"],
+  [/celular|telefone/, "📱"],
+  [/\bluz\b|energia|enel|eletro|cemig|cpfl/, "💡"],
+  [/agua|sabesp|saneamento/, "💧"],
+  [/\bgas\b|comgas|ultragaz/, "🔥"],
+  [/aluguel|condominio|iptu|imovel/, "🏠"],
+  [/netflix|prime video|disney|hbo|\bmax\b|globoplay|youtube|streaming|paramount|crunchyroll/, "📺"],
+  [/spotify|deezer|musica|apple music/, "🎵"],
+  [/academia|smart ?fit|bluefit|gym|crossfit|wellhub|gympass|totalpass/, "🏋️"],
+  [/seguro/, "🛡️"],
+  [/icloud|google one|dropbox|nuvem|chatgpt|openai|claude|anthropic|adobe|microsoft|office/, "☁️"],
+  [/escola|faculdade|curso|ingles|idioma|mensalidade/, "🎓"],
+  [/plano de saude|unimed|amil|sulamerica|odonto|consulta|medico|exame/, "🩺"],
+  [/farmacia|drogaria|droga ?raia|drogasil|remedio/, "💊"],
+  [/pet|racao|veterin/, "🐾"],
+  [/ipva|estacionamento|sem parar|veloe|oficina|mecanico|carro/, "🚗"],
+  [/uber|\b99\b|taxi|onibus|metro|bilhete/, "🚕"],
+  [/viagem|passagem|hotel|airbnb|hospedagem|aereo|latam|gol\b|azul\b|voo/, "✈️"],
+  [/show|ingresso|ticket|evento|festival/, "🎟️"],
+  [/cinema|filme/, "🎬"],
+  [/presente|aniversario|gift/, "🎁"],
+  [/roupa|renner|zara|riachuelo|\bc&a\b|shein|tenis|calcado/, "👕"],
+  [/notebook|computador|celular novo|iphone|samsung|eletronico|fone|tv\b|monitor/, "💻"],
+  [/emprestimo|divida|parcela|pix/, "💸"],
+  [/restaurante|almoco|jantar|comida|marmita/, "🍽️"]
 ];
-function iconeCaju(nome){
-  const n = semAcento(nome);
-  const achou = ICONES_CAJU.find(([re]) => re.test(n));
-  return achou ? achou[1] : "🍽️";
+function iconeGasto(texto, padrao="🧾"){
+  const n = semAcento(texto);
+  const achou = n && ICONES_GASTO.find(([re]) => re.test(n));
+  return achou ? achou[1] : padrao;
 }
+const iconeCaju = nome => iconeGasto(nome, "🍽️");
+const iconeFixa = nome => iconeGasto(nome, "📌");
+
 /** Uma linha do Caju: ícone do lugar, nome com dia da semana e data embaixo, valor à direita. */
 function linhaCaju(l){
   const pend = String(l.id).startsWith("caju-pendente:");
@@ -160,29 +196,6 @@ function linhaCaju(l){
     sub: esc(quando) + (pend ? ` · <span class="lst-pend" title="Lançado aqui, ainda não chegou na base">a sincronizar</span>` : "") });
 }
 
-/** Ícone da conta fixa pelo nome; o que não reconhece fica com o alfinete. */
-const ICONES_FIXA = [
-  [/internet|fibra|vivo|claro|\btim\b|\boi\b|net\b|wifi/, "🌐"],
-  [/celular|telefone|plano/, "📱"],
-  [/luz|energia|enel|eletro|cemig|light\b|cpfl/, "💡"],
-  [/agua|sabesp|saneamento/, "💧"],
-  [/\bgas\b|comgas|ultragaz/, "🔥"],
-  [/aluguel|condominio|iptu|imovel|casa/, "🏠"],
-  [/netflix|prime|disney|hbo|\bmax\b|globoplay|youtube|streaming|tv\b|paramount|crunchyroll/, "📺"],
-  [/spotify|deezer|musica|apple music/, "🎵"],
-  [/academia|smart ?fit|bluefit|gym|crossfit|wellhub|gympass|totalpass/, "🏋️"],
-  [/seguro|porto|azul seguros/, "🛡️"],
-  [/icloud|google one|dropbox|drive|nuvem|chatgpt|openai|claude|anthropic|software|adobe|microsoft|office/, "☁️"],
-  [/escola|faculdade|curso|ingles|idioma|mensalidade/, "🎓"],
-  [/carro|ipva|estacionamento|sem parar|veloe|tag/, "🚗"],
-  [/plano de saude|unimed|amil|sulamerica|bradesco saude|odonto/, "🩺"],
-  [/pet|racao|veterin/, "🐾"]
-];
-function iconeFixa(nome){
-  const n = semAcento(nome);
-  const achou = ICONES_FIXA.find(([re]) => re.test(n));
-  return achou ? achou[1] : "📌";
-}
 /** Barra dos Gastos fixos: quanto do mês já foi cobrado (ou pago por Pix). */
 function barraFixas(lista){
   let total = 0, foi = 0;

@@ -315,16 +315,19 @@
     <!-- ─────── Me devem ─────── -->
     <section id="pg-devem" class="hidden">
       <div class="kpis" id="dv-kpis"></div>
-      <div class="block" style="margin-top:16px">
-        <div class="block-head"><h2>Registros</h2>
-          <button class="link-btn r" id="dv-editar">adicionar / editar</button></div>
-        <div class="cd-wrap" id="dv-lista"></div>
-        <div id="m-editor-devem"></div>
-      </div>
-      <div class="block" style="margin-top:16px">
-        <div class="block-head"><h2>Resumo</h2>
-          <span class="eyebrow r">por pessoa</span></div>
-        <div class="cd-wrap" id="dv-resumo"></div>
+      <!-- no computador, Registros e Resumo lado a lado (Registros mais largo: os nomes levam a descrição) -->
+      <div class="dois-lados largo">
+        <div class="block">
+          <div class="block-head"><h2>Registros</h2>
+            <button class="link-btn r" id="dv-editar">adicionar / editar</button></div>
+          <div class="cd-wrap" id="dv-lista"></div>
+          <div id="m-editor-devem"></div>
+        </div>
+        <div class="block">
+          <div class="block-head"><h2>Resumo</h2>
+            <span class="eyebrow r">por pessoa</span></div>
+          <div class="cd-wrap" id="dv-resumo"></div>
+        </div>
       </div>
     </section>
 

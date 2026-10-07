@@ -465,5 +465,12 @@ button.lst-it:focus-visible{outline:2px solid var(--rt-pink);outline-offset:-2px
 }
 
 /* Eu devo no computador: Registros e Resumo lado a lado, metade cada */
-.dois-lados{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px;align-items:start}
-@container conteudo (max-width:760px){ .dois-lados{grid-template-columns:minmax(0,1fr)} }
+.dois-lados{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
+.dois-lados.largo{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+/* os dois blocos sempre com a mesma altura: os totais descem para o pé de cada um */
+.dois-lados>.block{display:flex;flex-direction:column}
+.dois-lados .cd-wrap{flex:1;display:flex;flex-direction:column}
+.dois-lados .lst-rodape{margin-top:auto}
+.dois-lados .rs-tab{flex:1}
+.dois-lados .rs-tot{margin-top:auto}
+@container conteudo (max-width:760px){ .dois-lados,.dois-lados.largo{grid-template-columns:minmax(0,1fr)} }
