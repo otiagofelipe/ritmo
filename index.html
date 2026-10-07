@@ -175,7 +175,7 @@
       <!-- Topo do Dashboard: cards em grupos (total e saldo, cartões,
            benefícios, outros). No computador os grupos ficam à esquerda e,
            à direita, o "Gastos por semana" com total e saldo embaixo -->
-      <div class="painel">
+      <div class="painel" id="m-painel">
         <div class="kpis topo2">
           <div class="kpi destaque tot-card">
             <div class="nm">total <span class="tot-quando" id="m-progresso"></span></div>
@@ -186,15 +186,15 @@
           <div class="topo2-saldo" id="m-saldo"></div>
         </div>
         <div class="painel-cards">
-          <section class="grupo-cards" aria-labelledby="g-cartoes">
+          <section class="grupo-cards" data-g="c" aria-labelledby="g-cartoes">
             <div class="grupo-rot"><span class="eyebrow" id="g-cartoes">cartões</span><b class="grupo-tot" id="m-cartoes-tot"></b></div>
             <div class="kpis" id="m-cartoes"></div>
           </section>
-          <section class="grupo-cards" aria-labelledby="g-beneficios">
+          <section class="grupo-cards" data-g="b" aria-labelledby="g-beneficios">
             <div class="grupo-rot"><span class="eyebrow" id="g-beneficios">benefícios</span></div>
             <div class="kpis" id="m-beneficios"></div>
           </section>
-          <section class="grupo-cards" aria-labelledby="g-outros">
+          <section class="grupo-cards" data-g="o" aria-labelledby="g-outros">
             <div class="grupo-rot"><span class="eyebrow" id="g-outros">outros</span></div>
             <div class="kpis" id="m-outros"></div>
           </section>

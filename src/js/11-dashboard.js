@@ -148,6 +148,9 @@ function renderResumo(){
     .map(id=>GRUPOS.find(g=>g.id===id && !g.semCard)).filter(Boolean).map(cardGrupo).join("");
 
   ["m-saldo","m-cartoes","m-beneficios","m-outros"].forEach(ligarAcoes);
+  /* a coluna dos cards tem a largura do maior grupo (até 3 por linha) */
+  const maiorGrupo = Math.max(1, ...["m-cartoes","m-beneficios","m-outros"].map(id=>$(id).children.length));
+  $("m-painel").style.setProperty("--cols", Math.min(3, maiorGrupo));
 
   // os números do herói agora vivem todos em m-split, um sob o outro
   $("m-escada").innerHTML = "";
@@ -473,12 +476,40 @@ function renderSemanas(){
   const boxS = $("m-semanas");
   boxS.classList.remove("modo-fixo");
   boxS.style.height = "";
+  /* No computador o bloco ocupa a altura dos cartões e benefícios (ver
+     .painel no CSS): o gráfico desenha na altura que sobrou para ele. */
+  const encaixado = semanaEncaixada();
   faixasSemanas(boxS, semanas, valores, agora, media);
   if(vis==="faixas") return;
-  const alt = boxS.offsetHeight >= 80 ? Math.ceil(boxS.offsetHeight) : 0;   // 0: página escondida
+  // encaixado, a caixa já é a altura final: tira a folga da legenda das colunas
+  const medida = encaixado ? boxS.clientHeight - (vis==="pizza" ? 0 : 14) : boxS.offsetHeight;
+  const alt = medida >= 80 ? Math.floor(medida) : 0;   // 0: página escondida
   if(alt) boxS.style.height = alt+"px";
   if(vis==="pizza") pizzaSemanas(boxS, semanas, valores, agora, alt || 220, media);
   else colunasSemanas(boxS, semanas, valores, agora, media, alt);
+}
+
+/**
+ * O "Gastos por semana" está encaixado ao lado dos cards (computador)?
+ * Nesse caso a altura vem da grade, não do conteúdo: quando ela muda
+ * (um card abre, a janela muda), o gráfico é redesenhado nela.
+ */
+let observaSemana = null, altSemana = [0, 0];
+function semanaEncaixada(){
+  const bloco = $("m-semanas").closest(".semana-bloco");
+  if(!bloco) return false;
+  if(!observaSemana && window.ResizeObserver){
+    const tam = () => [bloco.clientWidth, bloco.clientHeight];
+    altSemana = tam();
+    observaSemana = new ResizeObserver(()=>{
+      const [w, h] = tam();
+      if(Math.abs(w - altSemana[0]) < 4 && Math.abs(h - altSemana[1]) < 4) return;
+      altSemana = [w, h];
+      if(getComputedStyle(bloco).contain.includes("size")) requestAnimationFrame(()=>protegido("semanas", renderSemanas));
+    });
+    observaSemana.observe(bloco);
+  }
+  return getComputedStyle(bloco).contain.includes("size");
 }
 
 /**
