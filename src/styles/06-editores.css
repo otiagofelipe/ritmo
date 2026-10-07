@@ -275,3 +275,42 @@ input.fx-fatura{cursor:pointer}
                   0 0 70px -18px color-mix(in srgb, var(--rt-purple) 45%, transparent)}
 }
 
+
+/* ═══ card da compra ═══ */
+.cp-meta{display:flex;align-items:center;gap:8px;margin:-4px 0 var(--sp-2);font-size:12px;color:var(--rt-text-secondary)}
+.cp-cats{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.cp-cat{padding:6px 12px;border-radius:var(--rt-radius-pill);font-size:12.5px;color:var(--rt-text-secondary);
+  border:1px solid var(--rt-border-strong);transition:border-color .12s,color .12s,background-color .12s}
+.cp-cat:hover{color:var(--rt-text);border-color:color-mix(in srgb, var(--rt-pink) 45%, var(--rt-border-strong))}
+.cp-cat.on{color:#FFFFFF;background:var(--rt-grad);border-color:transparent}
+.cp-nova-campo{display:inline-flex;gap:4px;align-items:center}
+.cp-nova-campo input{width:170px;padding:6px 10px;font-size:12.5px;border-radius:var(--rt-radius-pill);
+  background:var(--rt-sunken);border:1px solid var(--rt-border-strong);color:var(--rt-text)}
+.cp-nova-campo input:focus{outline:none;border-color:var(--rt-pink)}
+.cp-ok{padding:6px 12px;border-radius:var(--rt-radius-pill);font-size:12px;font-weight:600;color:#FFFFFF;background:var(--rt-grad)}
+.cp-tg{display:flex;align-items:center;gap:12px;width:100%;padding:10px 4px;text-align:left;color:var(--rt-text);
+  border-top:1px solid color-mix(in srgb, var(--rt-border) 70%, transparent)}
+.cp-tg:first-of-type{border-top:none}
+.cp-tg-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.cp-tg-t b{font-weight:500;font-size:13.5px}
+.cp-tg-t small{font-size:11px;color:var(--rt-text-muted)}
+.cp-tg.on .ct-chave{background:var(--rt-grad)}
+.cp-tg.on .ct-chave i{transform:translateX(16px)}
+.cp-tg:focus-visible{outline:2px solid var(--rt-pink);outline-offset:2px;border-radius:var(--rt-radius-md)}
+.link-btn.cp-auto{display:inline-block;margin:0 0 var(--sp-2) 4px;padding:2px 0;border:none;background:none;font-size:11.5px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--rt-blue)}
+.link-btn.cp-auto:hover{text-decoration:underline}
+.erow.cp-div{display:grid;grid-template-columns:minmax(0,1fr) 128px 32px auto;gap:var(--sp-2);align-items:end;margin:0 0 var(--sp-2)}
+.erow.cp-div .efield{width:auto}
+.erow.cp-div input.num{width:100%}
+.cp-rm{height:38px}
+.cp-pago{align-self:center;font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--rt-success);
+  border:1px solid color-mix(in srgb, var(--rt-success) 50%, transparent);border-radius:var(--rt-radius-sm);padding:1px 5px}
+.cp-div-acoes{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-bottom:var(--sp-2)}
+.cp-comigo{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--rt-text-secondary);cursor:pointer}
+.cp-comigo input{width:16px;height:16px;margin:0}
+.esoma.sub .p.neg{color:var(--rt-error)}
+
+/* lista de gastos: a compra abre o card */
+.tx.abre{cursor:pointer}
+@media(hover:hover){ .tx.abre:hover{background:color-mix(in srgb, var(--rt-text) 5%, transparent)} }
+.tx.abre:focus-visible{outline:2px solid var(--rt-pink);outline-offset:-2px}

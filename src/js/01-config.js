@@ -228,6 +228,39 @@ const cartoesDoTipo = tipo => CATALOGO_CARTOES.filter(c => c.tipo === tipo)
 const cartoesLigados = tipo => cartoesDoTipo(tipo).filter(cartaoLigado);
 
 /**
+ * Categorias de compra. As fixas ficam aqui; as que você cria no card da
+ * compra vão para bronze.ritmo.tb_categories e entram depois destas.
+ */
+const CATEGORIAS_BASE = ["Mercado","Restaurante","Delivery","Transporte","Casa",
+  "Saúde","Lazer","Assinaturas","Compras","Outros"];
+
+/**
+ * Tradução da categoria da Pluggy (em inglês) para as nossas. Vale a
+ * primeira regra que casar; o que não casar com nenhuma vira "Outros".
+ * Também casa nomes em português, que alguns bancos já mandam.
+ */
+const MAPA_CATEGORIA = [
+  [/food delivery|\bdelivery\b|ifood|rappi/i,                                                  "Delivery"],
+  [/grocer|supermarket|supermerc|\bmercado\b|hortifruti|padaria|bakery/i,                    "Mercado"],
+  [/eating out|restaurant|food and drink|\bbars?\b|\bcaf[eé]|restaur|aliment|lanche/i,      "Restaurante"],
+  [/taxi|ride.?hail|transport|gas station|\bfuel|parking|\btolls?\b|automotive|vehicle|car rental|bicycle|\bbus\b|\buber\b|combust|estaciona|ped[aá]gio/i, "Transporte"],
+  [/streaming|digital service|subscription|assinatura|software/i,                           "Assinaturas"],
+  [/housing|\brent\b|utilit|\bwater\b|electric|^gas$|internet|mobile|telecom|aluguel|condom|energia|[aá]gua|telefon/i, "Casa"],
+  [/health|dentist|pharmac|optometr|hospital|clinic|laborat|wellness|\bgyms?\b|fitness|sport|farm[aá]c|sa[uú]de|academia/i, "Saúde"],
+  [/leisure|entertain|gaming|cinema|theater|concert|travel|accommodation|airline|airport|hotel|lazer|viagem/i, "Lazer"],
+  [/shopping|electronic|clothing|\bpets?\b|bookstore|\bstores?\b|compras|vestu|eletr[oô]n|livrar/i, "Compras"]
+];
+
+/** Categoria da Pluggy → a nossa (vazia continua vazia). */
+function traduzirCategoria(c){
+  const s = String(c||"").trim();
+  if(!s) return "";
+  if(CATEGORIAS_BASE.includes(s)) return s;
+  const r = MAPA_CATEGORIA.find(([re]) => re.test(s));
+  return r ? r[1] : "Outros";
+}
+
+/**
  * Contas correntes não têm fatura: entram no extrato pela data, mas
  * ficam fora dos cards de cartão e do total, porque um Pix enviado
  * costuma ser transferência, não gasto novo.
