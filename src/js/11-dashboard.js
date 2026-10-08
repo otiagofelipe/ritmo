@@ -759,6 +759,13 @@ async function salvarRoles(){
   }
 }
 
+/** Fatura da 1ª e da última parcela, em mm/aa: "03/26 – 12/26". */
+function periodoParcelas(l){
+  const comp = l.competencia || S.mesSel;
+  const mmaa = c => { const [a, m] = String(c||"").split("-"); return a && m ? `${m}/${a.slice(2)}` : "—"; };
+  return `${mmaa(somaMeses(comp, 1 - l.parcela.i))} – ${mmaa(somaMeses(comp, l.parcela.n - l.parcela.i))}`;
+}
+
 /** Parcelas do cartão que caem nesta fatura. */
 function renderParcelas(){
   // ordem da compra original, da mais recente para a mais antiga
@@ -780,7 +787,7 @@ function renderParcelas(){
       const { i, n } = l.parcela, r = resta(l);
       return `<div class="pc-ln">${marca(l.conta, true)}<b title="${esc(l.desc)}">${esc(l.desc)}</b><span class="pc-v">${esc(BRL.format(l.valor))}</span>
         <span class="pc-tr" aria-label="parcela ${i} de ${n}">${Array.from({length:n}, (_,k)=>`<i class="${k+1<i?"f":k+1===i?"at":""}"></i>`).join("")}</span>
-        <small><span>${i} de ${n}</span><span>${r > 0.004 ? `faltam ${esc(BRL.format(r))}` : "acaba neste mês"}</span></small></div>`;
+        <small><span>${i} de ${n} · ${esc(periodoParcelas(l))}</span><span>${r > 0.004 ? `faltam ${esc(BRL.format(r))}` : "acaba neste mês"}</span></small></div>`;
     }).join("") + `</div>`
     + rodapeLista([["total no mês", soma(linhas)], ...[...porConta.entries()].map(([t,v])=>[t, v])]);
 }
