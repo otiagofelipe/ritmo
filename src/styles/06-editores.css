@@ -390,7 +390,7 @@ input.num.cp-pes-v:focus{outline:none;border-color:var(--rt-pink)}
   box-shadow:0 0 6px color-mix(in srgb, var(--rt-text) 60%, transparent)}
 .lst-leg{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--rt-text-muted)}
 .lst-lista{display:flex;flex-direction:column}
-.cd-wrap > .lst-lista{max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+.cd-wrap > .lst-lista{max-height:min(56vh,520px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-gutter:stable;padding-right:12px;
   scrollbar-color:color-mix(in srgb, var(--rt-pink) 45%, var(--rt-border)) transparent}
 .lst-it{display:flex;align-items:center;gap:12px;width:100%;padding:10px 2px;text-align:left;color:inherit;
   border-bottom:1px solid color-mix(in srgb, var(--rt-border) 70%, transparent)}
