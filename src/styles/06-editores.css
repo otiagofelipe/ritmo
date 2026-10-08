@@ -498,3 +498,20 @@ button.lst-it:focus-visible{outline:2px solid var(--rt-pink);outline-offset:-2px
   .dv-g b{font-size:12.5px}
   .dv-ln .lst-v{font-size:13px}
 }
+
+/* alternador do topo dos cards: Registros / Resumo (Lançamentos / Resumo no Caju) */
+.vista{display:flex;gap:4px;padding:4px;margin:0 0 var(--sp-3);border-radius:12px;background:var(--rt-surface-2)}
+.vista button{flex:1;padding:8px 10px;border-radius:9px;font-size:12.5px;font-weight:600;letter-spacing:.02em;text-align:center;
+  color:var(--rt-text-muted);transition:background-color .15s,color .15s}
+.vista button:hover{color:var(--rt-text)}
+.vista button[aria-selected="true"]{background:var(--rt-surface);color:var(--rt-text);
+  box-shadow:0 0 0 1px color-mix(in srgb, var(--rt-pink) 40%, var(--rt-border)),0 4px 14px -6px color-mix(in srgb, var(--rt-pink) 60%, transparent)}
+.vista button:focus-visible{outline:2px solid var(--rt-pink);outline-offset:1px}
+/* resumo do Caju no card: os quatro números da aba */
+.res-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:var(--sp-3)}
+.res-kpis>div{min-width:0;padding:10px 12px;border-radius:10px;border:1px solid var(--rt-border);background:color-mix(in srgb, var(--rt-surface-2) 25%, transparent)}
+.res-kpis small{display:block;font-size:9.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--rt-text-muted)}
+.res-kpis b{display:block;font-family:var(--disp);font-weight:400;font-size:24px;line-height:1.15;margin-top:2px;color:var(--rt-text);white-space:nowrap}
+.res-kpis span{display:block;font-size:11px;color:var(--rt-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res-kpis .livre b{color:var(--c-devem)}
+.res-kpis .neg b{color:var(--rt-error)}
