@@ -660,17 +660,19 @@ function renderExtrato(){
   }
 
   const naTela = [];     // índice das linhas desenhadas: tocar abre o card da compra
-  $("m-lista").innerHTML = [...porDia.values()].map(({d,itens})=>
+  $("m-lista").innerHTML = `<div class="gx gx-cab" aria-hidden="true"><span class="gx-c">Cartão</span><span class="gx-d">Data</span>
+      <span class="gx-h">Hora</span><span class="gx-n">Descrição</span><span class="gx-v">Valor</span><span class="gx-r">Rolê</span>
+      <span class="gx-cat">Categoria</span></div>`
+    + [...porDia.values()].map(({d,itens})=>
     `<div class="daymark">${p2(d.getDate())}/${p2(d.getMonth()+1)}${
        String(d.getFullYear())!==String(S.mesSel).slice(0,4) ? "/"+String(d.getFullYear()).slice(2) : ""}
        <span class="dsem">${DIA_SEM[d.getDay()]}</span> · ${BRL0.format(Math.round(soma(itens)))}</div>`
     + itens.map(l=>{
         const futuro = l.data>TODAY;
         /* Uma linha por compra. No computador, em colunas: cartão · data ·
-           hora · descrição · valor · rolê (a caixinha) · categoria. No
-           celular: ícone da categoria, nome com cartão, hora e categoria
-           embaixo, o valor e o 🎉 do rolê depois dele. */
-        const [catEm, catNome] = partesCategoria(l.categoria || SEM_CATEGORIA);
+           hora · descrição · valor · rolê · categoria. No celular: o banco à
+           esquerda, nome com hora e categoria embaixo, o valor e o 🎉 do
+           rolê depois dele. O rolê é sempre o 🎉: apagado quando não é. */
         const semCat = !l.categoria || l.categoria === SEM_CATEGORIA;
         const tags = [
           l.parcela ? `<span class="gx-tag" title="Compra feita nesta data, parcelada">${l.parcela.i}/${l.parcela.n}</span>` : "",
@@ -680,7 +682,6 @@ function renderExtrato(){
         naTela.push(l);
         return `<div class="gx${futuro?" futura":""}${ehRole(l)?" role":""}${l.pendente?"":" abre"}" data-ix="${naTela.length-1}"${
           l.pendente?"":` role="button" tabindex="0" aria-label="Gerenciar ${esc(l.desc)}"`}>
-          <span class="gx-ic" aria-hidden="true">${esc(catEm || "🏷️")}</span>
           <span class="gx-c" title="${esc(l.metodo||"")}">${marca(l.conta)}</span>
           <span class="gx-d">${p2(l.data.getDate())}/${p2(l.data.getMonth()+1)}</span>
           <span class="gx-h">${esc(l.hora || "")}</span>
@@ -689,7 +690,7 @@ function renderExtrato(){
           <label class="gx-r" title="${l.role?"Veio marcado do Databricks":"Marcar como rolê"}">
             <input type="checkbox" class="chk-role" data-id="${esc(l.id)}" data-chave="${esc(chaveRole(l))}"${ehRole(l)?" checked":""}
               aria-label="Rolê"><span aria-hidden="true">🎉</span></label>
-          <span class="gx-cat"><span class="gx-chip${semCat?" sem":""}">${esc(catNome)}</span></span>
+          <span class="gx-cat"><span class="gx-chip${semCat?" sem":""}">${esc(l.categoria || SEM_CATEGORIA)}</span></span>
         </div>`;
       }).join("")
   ).join("");
@@ -777,7 +778,7 @@ function renderParcelas(){
   for(const l of linhas){ const t = l.conta ? l.conta.titulo : "Outros"; porConta.set(t, (porConta.get(t)||0) + l.valor); }
   $("m-parcelas").innerHTML = `<div class="bl-rolo lst-lista">` + ord.map(l=>{
       const { i, n } = l.parcela, r = resta(l);
-      return `<div class="pc-ln">${marca(l.conta, true)}<b title="${esc(l.desc)}">${esc(l.desc)}</b><span class="pc-v">${esc(valorCurto(l.valor))}</span>
+      return `<div class="pc-ln">${marca(l.conta, true)}<b title="${esc(l.desc)}">${esc(l.desc)}</b><span class="pc-v">${esc(BRL.format(l.valor))}</span>
         <span class="pc-tr" aria-label="parcela ${i} de ${n}">${Array.from({length:n}, (_,k)=>`<i class="${k+1<i?"f":k+1===i?"at":""}"></i>`).join("")}</span>
         <small><span>${i} de ${n}</span><span>${r > 0.004 ? `faltam ${esc(BRL.format(r))}` : "acaba neste mês"}</span></small></div>`;
     }).join("") + `</div>`
@@ -795,7 +796,7 @@ function renderFixasResumo(){
   // as mesmas linhas do card de Gastos fixos, só com o dia embaixo do nome
   $("m-fixas").innerHTML = barraFixas(vigentes)
     + `<div class="bl-rolo lst-lista">${vigentes.slice().sort((a,b)=>ordemDia(a.data)-ordemDia(b.data))
-        .map(f=>linhaFixa(f, { tag:"button", soDia:true })).join("")}</div>`
+        .map(f=>linhaFixa(f, { tag:"button", soDia:true, comRS:true })).join("")}</div>`
     + rodapeLista([["meu total", meuTotal], ...(deOutros ? [["de terceiros", deOutros]] : []), ["a cobrar", aCobrar, "aberto"]]);
   // tocar numa linha abre o card de Gastos fixos já nessa despesa
   $("m-fixas").querySelectorAll("[data-fixa]").forEach(el=>{

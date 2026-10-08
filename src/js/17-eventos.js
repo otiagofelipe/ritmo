@@ -221,7 +221,8 @@ document.querySelectorAll("[data-ir]").forEach(b=>b.onclick=()=>irPara(b.dataset
   $(botao).onclick=()=>{ S.editando = S.editando===quadro ? null : quadro; render(); };
 });
 
-[["fx-editar","fixos"],["dv-editar","devem"],["dd-editar","devo"],["cj-editar","caju2"]].forEach(([botao,grupo])=>{
+// Me devem, Eu devo e Caju: o + de cada lista abre o card
+[["fx-editar","fixos"]].forEach(([botao,grupo])=>{
   $(botao).onclick=()=>{
     grupoAberto = grupoAberto===grupo ? null : grupo;
     renderEditor();
