@@ -86,11 +86,11 @@ const inicial = t => esc((String(t||"").trim().charAt(0) || "?").toUpperCase());
 const statusLinha = pago => selo(pago ? "pago" : "pendente");
 
 /** Molde da linha. `ic`, `sub` e `status` já vêm em HTML. */
-function linhaLista({ tag="div", cls="", ic, icCls="", titulo, sub="", valor, status="" }){
+function linhaLista({ tag="div", cls="", ic, icCls="", titulo, sub="", valor, status="", comRS=false }){
   return `<${tag}${tag==="button"?' type="button"':""} class="lst-it${cls?" "+cls:""}">
     <span class="lst-ic${icCls?" "+icCls:""}" aria-hidden="true">${ic}</span>
     <span class="lst-n"><b>${esc(titulo)}</b>${sub?`<small>${sub}</small>`:""}</span>
-    <span class="lst-v">${valor == null ? "" : esc(valorCurto(valor))}${status}</span></${tag}>`;
+    <span class="lst-v">${valor == null ? "" : esc(comRS ? BRL.format(Number(valor)||0) : valorCurto(valor))}${status}</span></${tag}>`;
 }
 
 /** Barra de cima: quanto já foi (gasto do vale, ou pago), com um traço opcional. */
@@ -249,7 +249,7 @@ function barraFixas(lista){
     dir: `${lista.length} conta${lista.length===1?"":"s"}` });
 }
 /** Uma conta fixa vigente: ícone, apelido com dia e cobrança embaixo, valor e status. */
-function linhaFixa(f, { tag="div", comVigencia=false, soDia=false }={}){
+function linhaFixa(f, { tag="div", comVigencia=false, soDia=false, comRS=false }={}){
   const c = cobrancaDaFixa(f), st = statusFixa(f, c);
   const valor = c ? Math.abs(c.valor) : (Number(f.valor)||0);
   const dif = c && Math.abs(valor-(Number(f.valor)||0))>0.005;
@@ -258,7 +258,7 @@ function linhaFixa(f, { tag="div", comVigencia=false, soDia=false }={}){
     comVigencia ? vigenciaTexto(f) : "", dif ? `previsto ${BRL.format(f.valor)}` : ""].filter(Boolean).join(" · ");
   const tags = (f.terceiro?`<span class="tag" title="De terceiro: não é meu, só passa no meu cartão">3º</span>`:"") + (ehFixaPix(f)?`<span class="tag">Pix</span>`:"");
   return linhaLista({ tag, cls: f.terceiro ? "de-outro" : "", ic: iconeFixa(rotuloFixa(f)), titulo: rotuloFixa(f),
-    sub: (tags ? tags : "") + `<span>${esc(det)}</span>`, valor, status: selo(st) })
+    sub: (tags ? tags : "") + `<span>${esc(det)}</span>`, valor, status: selo(st), comRS })
     .replace('class="lst-it', `data-fixa="${esc(chaveFixa(f))}" class="lst-it`);
 }
 

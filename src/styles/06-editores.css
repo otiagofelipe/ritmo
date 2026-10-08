@@ -419,16 +419,17 @@ button.lst-it:focus-visible{outline:2px solid var(--rt-pink);outline-offset:-2px
 
 /* resumo por pessoa: quem · pagou / falta pagar · status, e o total no fim */
 .rs-tab{display:flex;flex-direction:column}
-.rs-cab,.rs-ln{display:grid;grid-template-columns:minmax(0,1fr) auto 104px;align-items:center;gap:12px}
+/* pagou / falta pagar e o status centralizados nas colunas deles */
+.rs-cab,.rs-ln{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) 104px;align-items:center;gap:12px}
 .rs-cab{padding:0 2px 10px;border-bottom:1px solid var(--rt-border);font-size:9.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--rt-text-muted)}
-.rs-cab span:nth-child(2){text-align:right}
+.rs-cab span:nth-child(2){text-align:center}
 .rs-cab span:last-child{text-align:center}
 .rs-corpo{display:flex;flex-direction:column}
 .rs-ln{padding:10px 2px;border-bottom:1px solid color-mix(in srgb, var(--rt-border) 70%, transparent)}
 .rs-corpo .rs-ln:last-child{border-bottom:0}
 .rs-q{display:flex;align-items:center;gap:10px;min-width:0}
 .rs-q b{font-weight:500;font-size:14px;color:var(--rt-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rs-v{display:flex;align-items:baseline;justify-content:flex-end;gap:6px;font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rs-v{display:flex;align-items:baseline;justify-content:center;gap:6px;font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .rs-v i{font-style:normal;color:var(--rt-text-muted)}
 .rs-pg{color:var(--rt-success)}
 .rs-ft{color:var(--rt-text)}
@@ -437,6 +438,8 @@ button.lst-it:focus-visible{outline:2px solid var(--rt-pink);outline-offset:-2px
 .rs-tot .rs-q b{color:var(--rt-text-secondary)}
 @media (max-width:640px){
   .rs-cab,.rs-ln{grid-template-columns:minmax(0,1fr) auto 84px;gap:8px}
+  .rs-cab span:nth-child(2){text-align:right}
+  .rs-v{justify-content:flex-end}
   .rs-v{font-size:11.5px;gap:4px}
   .rs-q{gap:8px}
   .rs-q .lst-ic{width:28px;height:28px;font-size:12px}
