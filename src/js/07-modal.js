@@ -435,42 +435,25 @@ function editorDividas(g, box){
       <button type="button" class="modal-ic fx-x" title="Fechar" aria-label="Fechar">×</button>
     </div>`;
 
+  let vista = "registros";      // o topo alterna entre os registros e o resumo por pessoa
+
   function lista(){
     const mes = S.mesSel;
-    const doMes = itensDoMes(id, mes).filter(i=>!i.fixaPix && crus[i.refIdx]);
-    const vig = doMes.slice().sort((a,b)=>(a.pago-b.pago) || nomeDe(a).localeCompare(nomeDe(b)));
-    // contas fixas pagas por Pix: entram em Eu devo e aparecem aqui, mas se editam em Gastos fixos
-    const pix = id==="devo" ? itensDoMes(id, mes).filter(i=>i.fixaPix) : [];
-    const todos = [...vig, ...pix];
-    const total = todos.reduce((a,i)=>a+(Number(i.valor)||0), 0);
-    const aberto = todos.filter(i=>!i.pago).reduce((a,i)=>a+(Number(i.valor)||0), 0);
-
+    // o mesmo que o "Registros" da aba: barra, cabeçalho, linhas e totais com o +
     box.innerHTML = `<div class="fx-ed">
       ${topo(g.titulo, rotuloFatura(mes), false)}
-      ${barraPago(id, todos)}
-      ${todos.length ? cabDivida(id) : ""}
-      <div class="lst-lista"></div>
-      ${rodapeLista([["neste mês", total], ["em aberto", aberto, "aberto"]], "Novo registro")}
+      ${vistaHTML(vista, [["registros","Registros"],["resumo","Resumo"]])}
+      ${vista === "resumo" ? resumoPessoasHTML(id, itensDoMes(id, mes)) : registrosHTML(id, registrosDividas(id, mes))}
     </div>`;
-
-    const caixa = box.querySelector(".lst-lista");
-    if(!todos.length) caixa.innerHTML = `<div class="blank">Nada anotado nesta competência.</div>`;
-    vig.forEach(i=>{
-      const r = crus[i.refIdx];
-      const t = document.createElement("template"); t.innerHTML = linhaDivida(id, i, "button");
-      const b = t.content.firstElementChild;
+    box.querySelectorAll("[data-vista]").forEach(b=>{ b.onclick = () => { vista = b.dataset.vista; desenhar(); }; });
+    box.querySelectorAll("[data-ref]").forEach(b=>{
+      const r = crus[Number(b.dataset.ref)];
       b.onclick = () => { aberta = { orig:r, d:copia(r) }; desenhar(); };
-      caixa.appendChild(b);
     });
     // fixos por Pix: tocar abre o card de Gastos fixos, onde eles se editam
-    pix.forEach(i=>{
-      const t = document.createElement("template"); t.innerHTML = linhaDivida(id, i, "button");
-      const b = t.content.firstElementChild;
-      b.onclick = () => { grupoAberto = "fixos"; editorMontado = null; renderEditor(); };
-      caixa.appendChild(b);
-    });
-
-    box.querySelector(".lst-mais").onclick = () => {
+    box.querySelectorAll("[data-pix]").forEach(b=>{ b.onclick = () => { grupoAberto = "fixos"; editorMontado = null; renderEditor(); }; });
+    const mais = box.querySelector(".lst-mais");
+    if(mais) mais.onclick = () => {
       aberta = { orig:null, d:{ pessoa:"", nome:"", valor:0, parcelas:1, mesInicio:mes, pagos:"" } };
       desenhar();
     };
@@ -575,6 +558,12 @@ function editorDividas(g, box){
     if(!orig) pes.focus();
   }
 
+  // vindo da aba: abre direto no registro tocado, ou num novo pelo +
+  if(!aberta && dividaAlvo != null){
+    if(dividaAlvo === "novo") aberta = { orig:null, d:{ pessoa:"", nome:"", valor:0, parcelas:1, mesInicio:S.mesSel, pagos:"" } };
+    else if(crus[dividaAlvo]) aberta = { orig:crus[dividaAlvo], d:copia(crus[dividaAlvo]) };
+  }
+  dividaAlvo = null;
   desenhar();
 }
 
@@ -597,7 +586,9 @@ const isoDia = d => d ? `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate
 function editorCaju(g, box){
   // pelo "+" do celular: abre direto no lançamento; salvar fecha e avisa
   const modoRapido = rapido === g.id; rapido = null;
-  let lancando = modoRapido;
+  // o + da aba Caju abre direto no lançamento, com Voltar para a lista
+  let lancando = modoRapido || cajuLancar; cajuLancar = false;
+  let vista = "lancamentos";     // o topo alterna entre os lançamentos e o resumo
   const desenhar = () => { box.scrollTop = 0; lancando ? form() : lista(); };
   const fechar = () => { grupoAberto = null; renderEditor(); };
 
@@ -610,15 +601,15 @@ function editorCaju(g, box){
 
   function lista(){
     const mes = S.mesSel;
-    const ls = lancamentosCaju(mes);
-    const gasto = soma(ls), teto = tetoCaju(mes), livre = teto - gasto;
     box.innerHTML = `<div class="fx-ed">
       ${topo("Caju", rotuloFatura(mes), false)}
-      ${barraCaju(mes, gasto, teto)}
-      <div class="lst-lista">${ls.length ? ls.map(linhaCaju).join("") : `<div class="blank">Nada gasto no Caju nesta competência.</div>`}</div>
-      ${rodapeLista([["gasto", gasto], ...(teto ? [["disponível", livre, livre < 0 ? "neg" : "livre"]] : [])], "Lançar gastos")}
+      ${vistaHTML(vista, [["lancamentos","Lançamentos"],["resumo","Resumo"]])}
+      ${vista === "resumo" ? resumoCajuHTML(mes) + `<div class="chart" id="cj-graf-card"></div>` : lancamentosCajuHTML(mes)}
     </div>`;
-    box.querySelector(".lst-mais").onclick = () => { lancando = true; desenhar(); };
+    if(vista === "resumo") graficoCaju("cj-graf-card", mes);
+    box.querySelectorAll("[data-vista]").forEach(b=>{ b.onclick = () => { vista = b.dataset.vista; desenhar(); }; });
+    const mais = box.querySelector(".lst-mais");
+    if(mais) mais.onclick = () => { lancando = true; desenhar(); };
     box.querySelector(".fx-x").onclick = fechar;
   }
 

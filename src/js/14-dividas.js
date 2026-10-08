@@ -27,7 +27,7 @@ function pgQuadro(id){
         : kpi({nome:"pessoas", cor:CORES.suave, valor:devendo.size, fmt:n=>String(n),
                sub:`de ${pessoas.size} na lista`}));
 
-  montarLista(id, pre, itens, total, pago);
+  montarLista(id, pre);
 
   renderResumoPessoas(id, pre, itens);
   if(id==="devo") renderFuturoDevo();
@@ -40,6 +40,11 @@ function pgQuadro(id){
 function renderResumoPessoas(id, pre, itens){
   const box = $(pre+"-resumo");
   if(!box) return;
+  box.innerHTML = resumoPessoasHTML(id, itens);
+}
+
+/** O resumo por pessoa (quem · pagou / falta pagar · status · total): na aba e no card. */
+function resumoPessoasHTML(id, itens){
   const por = new Map();
   for(const i of itens){
     const p = rotuloPessoa(i) || "—";
@@ -50,17 +55,15 @@ function renderResumoPessoas(id, pre, itens){
     if(i.pago) r.pago += v; else r.falta += v;
     por.set(p, r);
   }
-  if(!por.size){
-    box.innerHTML = `<div class="blank">${S.soRole ? "O filtro de rolê zera este quadro." : "Ninguém nesta competência."}</div>`;
-    return;
-  }
+  if(!por.size)
+    return `<div class="blank">${S.soRole ? "O filtro de rolê zera este quadro." : "Ninguém nesta competência."}</div>`;
   const linhas = [...por.entries()].sort((a,b)=>b[1].falta-a[1].falta || a[0].localeCompare(b[0]));
   const tp = linhas.reduce((a,[,r])=>a+r.pago,0), tf = linhas.reduce((a,[,r])=>a+r.falta,0);
   // uma linha por pessoa: quem · pagou / falta pagar · status; no fim o total
   const quem = id==="devem" ? "Quem me deve" : "A quem devo";
   const verbo = id==="devem" ? "Pagou" : "Paguei";
   const par = (pg, ft) => `<span class="rs-pg">${esc(BRL.format(pg))}</span><i>/</i><span class="rs-ft">${esc(BRL.format(ft))}</span>`;
-  box.innerHTML = `<div class="rs-tab">
+  return `<div class="rs-tab">
     <div class="rs-cab"><span>${quem}</span><span>${verbo} / falta pagar</span><span>Status</span></div>
     <div class="rs-corpo">${linhas.map(([p,r])=>{ const ok = r.falta<=0.004;
       return `<div class="rs-ln"><span class="rs-q">${r.semPessoa
@@ -104,6 +107,38 @@ function rodapeLista(pares, mais=""){
     `<div${cls?` class="${cls}"`:""}><small>${esc(n)}</small><b>${esc(BRL.format(v))}</b></div>`).join("")}${mais
     ? `<button type="button" class="lst-mais" title="${esc(mais)}" aria-label="${esc(mais)}"><svg class="ic" viewBox="0 0 24 24"><use href="#i-plus"/></svg></button>` : ""}</div>`;
 }
+
+/** Registros de Me devem / Eu devo numa competência, na ordem do card e da aba:
+    pendentes primeiro, por nome; no Eu devo, as contas fixas por Pix no fim. */
+function registrosDividas(id, mes){
+  const crus = S.reg[chavePlanilha(id)] || [];
+  const nome = i => String(i.pessoa||"").trim() || String(i.nome||"").trim() || "sem nome";
+  const doMes = itensDoMes(id, mes);
+  const vig = doMes.filter(i=>!i.fixaPix && crus[i.refIdx])
+    .sort((a,b)=>(a.pago-b.pago) || nome(a).localeCompare(nome(b)));
+  return [...vig, ...(id==="devo" ? doMes.filter(i=>i.fixaPix) : [])];
+}
+/** Barra, cabeçalho, linhas e totais (com o + de novo registro). Cada linha
+    leva data-ref (o registro) ou data-pix (conta fixa, que se edita em Gastos fixos). */
+function registrosHTML(id, todos){
+  const total = todos.reduce((a,i)=>a+(Number(i.valor)||0), 0);
+  const pago = todos.filter(i=>i.pago).reduce((a,i)=>a+(Number(i.valor)||0), 0);
+  return barraPago(id, todos)
+    + (todos.length
+        ? cabDivida(id) + `<div class="lst-lista">${todos.map(i=>linhaDivida(id, i, "button")
+            .replace('class="lst-it', `${i.fixaPix ? 'data-pix="1"' : `data-ref="${i.refIdx}"`} class="lst-it`)).join("")}</div>`
+        : `<div class="blank">${S.soRole ? "O filtro de rolê zera este quadro." : "Nada anotado nesta competência."}</div>`)
+    + rodapeLista([["neste mês", total], ["em aberto", total-pago, "aberto"], ["já pago", pago, "pago"]], "Novo registro");
+}
+/** Abre o card de Me devem / Eu devo direto num registro (índice) ou num novo ("novo"). */
+let dividaAlvo = null;
+function abrirDivida(id, alvo){
+  dividaAlvo = alvo; grupoAberto = id; editorMontado = null;
+  renderEditor();
+}
+/** Alternador do topo dos cards: Registros / Resumo. */
+const vistaHTML = (atual, opcoes) => `<div class="vista" role="tablist">${opcoes.map(([k,t])=>
+  `<button type="button" role="tab" data-vista="${k}" aria-selected="${k===atual}">${esc(t)}</button>`).join("")}</div>`;
 
 /** Barra do Me devem / Eu devo: quanto do mês já foi pago. */
 function barraPago(id, itens){
@@ -214,11 +249,11 @@ function barraFixas(lista){
     dir: `${lista.length} conta${lista.length===1?"":"s"}` });
 }
 /** Uma conta fixa vigente: ícone, apelido com dia e cobrança embaixo, valor e status. */
-function linhaFixa(f, { tag="div", comVigencia=false }={}){
+function linhaFixa(f, { tag="div", comVigencia=false, soDia=false }={}){
   const c = cobrancaDaFixa(f), st = statusFixa(f, c);
   const valor = c ? Math.abs(c.valor) : (Number(f.valor)||0);
   const dif = c && Math.abs(valor-(Number(f.valor)||0))>0.005;
-  const det = [f.data ? `todo dia ${f.data}` : "",
+  const det = soDia ? (f.data ? `todo dia ${f.data}` : "sem dia") : [f.data ? `todo dia ${f.data}` : "",
     c ? `${ehFixaPix(f)?"pago":"cobrado"} ${p2(c.data.getDate())}/${p2(c.data.getMonth()+1)}` : (ehFixaPix(f) ? "via Pix" : "aguardando"),
     comVigencia ? vigenciaTexto(f) : "", dif ? `previsto ${BRL.format(f.valor)}` : ""].filter(Boolean).join(" · ");
   const tags = (f.terceiro?`<span class="tag" title="De terceiro: não é meu, só passa no meu cartão">3º</span>`:"") + (ehFixaPix(f)?`<span class="tag">Pix</span>`:"");
@@ -263,19 +298,14 @@ const textoParcela = i => i.parcela
 
 /* ═══ leitura ═══ */
 
-function montarLista(id, pre, itens, total, pago){
-  if(!itens.length){
-    $(pre+"-lista").innerHTML = `<div class="blank">${S.soRole
-      ? "O filtro de rolê zera este quadro."
-      : "Nada anotado nesta competência. Use “adicionar / editar”."}</div>`;
-    return;
-  }
-
-  $(pre+"-lista").innerHTML = barraPago(id, itens)
-    + cabDivida(id)
-    + `<div class="lst-lista">${itens.map(i=>linhaDivida(id, i)).join("")}</div>`
-    + rodapeLista([["neste mês", total], ["em aberto", total-pago, "aberto"], ["já pago", pago, "pago"]]);
-
+function montarLista(id, pre){
+  // o mesmo que o card mostra: tocar numa linha abre o registro no card; o + cria um novo
+  const box = $(pre+"-lista");
+  box.innerHTML = registrosHTML(id, registrosDividas(id, S.mesSel));
+  box.querySelectorAll("[data-ref]").forEach(b=>{ b.onclick = () => abrirDivida(id, Number(b.dataset.ref)); });
+  box.querySelectorAll("[data-pix]").forEach(b=>{ b.onclick = () => { grupoAberto = "fixos"; editorMontado = null; renderEditor(); }; });
+  const mais = box.querySelector(".lst-mais");
+  if(mais) mais.onclick = () => abrirDivida(id, "novo");
 }
 
 /** Parcelas de "Eu devo" que ainda vão cair nas próximas competências. */

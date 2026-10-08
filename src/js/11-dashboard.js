@@ -666,41 +666,36 @@ function renderExtrato(){
        <span class="dsem">${DIA_SEM[d.getDay()]}</span> · ${BRL0.format(Math.round(soma(itens)))}</div>`
     + itens.map(l=>{
         const futuro = l.data>TODAY;
-        const cor = l.conta ? l.conta.cor : CORES.suave;
-        /* Valor na mesma linha do nome, com uma guia pontilhada no
-           meio: em tela larga ele ficava do outro lado do mundo, e
-           alinhar à direita continua sendo o que deixa a coluna de
-           números legível. */
-        /* Valor na mesma linha do nome, com uma guia pontilhada no
-           meio, e o resto embaixo. A lista tem largura de leitura e se
-           centraliza, senão em tela larga o valor fica longe do nome. */
+        /* Uma linha por compra. No computador, em colunas: cartão · data ·
+           hora · descrição · valor · rolê (a caixinha) · categoria. No
+           celular: ícone da categoria, nome com cartão, hora e categoria
+           embaixo, o valor e o 🎉 do rolê depois dele. */
+        const [catEm, catNome] = partesCategoria(l.categoria || SEM_CATEGORIA);
+        const semCat = !l.categoria || l.categoria === SEM_CATEGORIA;
+        const tags = [
+          l.parcela ? `<span class="gx-tag" title="Compra feita nesta data, parcelada">${l.parcela.i}/${l.parcela.n}</span>` : "",
+          futuro ? `<span class="gx-tag">a vencer</span>` : "",
+          l.pendente ? `<span class="gx-tag" title="Gravado no Databricks; entra na lista normal no próximo carregamento">recém-lançado</span>` : ""
+        ].join("");
         naTela.push(l);
-        return `<div class="tx${futuro?" futura":""}${l.role?" role":""}${l.parcela?" parcela":""}${l.pendente?"":" abre"}" data-ix="${naTela.length-1}"${
+        return `<div class="gx${futuro?" futura":""}${ehRole(l)?" role":""}${l.pendente?"":" abre"}" data-ix="${naTela.length-1}"${
           l.pendente?"":` role="button" tabindex="0" aria-label="Gerenciar ${esc(l.desc)}"`}>
-          <input type="checkbox" class="chk-role" data-id="${esc(l.id)}" data-chave="${esc(chaveRole(l))}"
-            ${ehRole(l)?" checked":""} title="${l.role?"Veio marcado do Databricks":"Marcar como rolê"}">
-          ${marca(l.conta)}
-          <div class="tx-main">
-            <div class="tx-topo">
-              <span class="tx-desc">${esc(l.desc)}</span>
-              <span class="tx-guia"></span>
-              <span class="tx-val">${BRL.format(l.valor)}</span>
-            </div>
-            <div class="tx-meta">
-              ${l.categoria?`<span class="pill" style="background:${cor}22;color:${cor}">${esc(l.categoria)}</span>`:""}
-              <span>${esc(l.metodo)}</span>
-              ${l.hora?`<span>${esc(l.hora)}</span>`:""}
-              ${l.parcela?`<span class="pill parc" title="Compra feita nesta data, parcelada">parcela ${l.parcela.i}/${l.parcela.n}</span>`:""}
-              ${futuro?`<span class="pill">a vencer</span>`:""}
-              ${l.pendente?`<span class="pill" title="Gravado no Databricks; entra na lista normal no próximo carregamento">recém-lançado</span>`:""}
-            </div>
-          </div>
+          <span class="gx-ic" aria-hidden="true">${esc(catEm || "🏷️")}</span>
+          <span class="gx-c" title="${esc(l.metodo||"")}">${marca(l.conta)}</span>
+          <span class="gx-d">${p2(l.data.getDate())}/${p2(l.data.getMonth()+1)}</span>
+          <span class="gx-h">${esc(l.hora || "")}</span>
+          <span class="gx-n"><b>${esc(l.desc)}</b>${tags}</span>
+          <span class="gx-v">${BRL.format(l.valor)}</span>
+          <label class="gx-r" title="${l.role?"Veio marcado do Databricks":"Marcar como rolê"}">
+            <input type="checkbox" class="chk-role" data-id="${esc(l.id)}" data-chave="${esc(chaveRole(l))}"${ehRole(l)?" checked":""}
+              aria-label="Rolê"><span aria-hidden="true">🎉</span></label>
+          <span class="gx-cat"><span class="gx-chip${semCat?" sem":""}">${esc(catNome)}</span></span>
         </div>`;
       }).join("")
   ).join("");
 
-  $("m-lista").querySelectorAll(".tx.abre").forEach(el=>{
-    const abrir = e => { if(e.target.closest(".chk-role")) return; abrirCompra(naTela[+el.dataset.ix]); };
+  $("m-lista").querySelectorAll(".gx.abre").forEach(el=>{
+    const abrir = e => { if(e.target.closest(".gx-r")) return; abrirCompra(naTela[+el.dataset.ix]); };
     el.onclick = abrir;
     el.onkeydown = e => { if((e.key==="Enter" || e.key===" ") && e.target===el){ e.preventDefault(); abrir(e); } };
   });
@@ -712,7 +707,7 @@ function renderExtrato(){
     else          { S.roles.delete(id); S.rolesFora.add(id); }
     // compras iguais (mesma descrição, valor e dia) andam juntas
     $("m-lista").querySelectorAll(".chk-role").forEach(o=>{
-      if(o.dataset.chave===id){ o.checked = cb.checked; o.closest(".tx").classList.toggle("role", cb.checked); }
+      if(o.dataset.chave===id){ o.checked = cb.checked; o.closest(".gx").classList.toggle("role", cb.checked); }
     });
 
     /* O botão conta o que mudou nesta sessão, não o total marcado.
@@ -773,15 +768,20 @@ function renderParcelas(){
     $("m-parcelas").innerHTML = `<div class="blank">Nenhuma parcela nesta fatura.</div>`;
     return;
   }
-  // o selo já diz o banco; no lugar do nome dele vai a data da compra
-  const dia = d => `${p2(d.getDate())}/${p2(d.getMonth()+1)}/${String(d.getFullYear()).slice(2)}`;
-  $("m-parcelas").innerHTML = `<div class="bl-rolo">` + linhas.map(l=>
-    `<div class="lrow">${marca(l.conta, true)}
-     <div class="nm">${esc(l.desc)}
-       <div class="sub">parcela ${l.parcela.i} de ${l.parcela.n} · ${esc(dia(l.data))}</div></div>
-     <div class="vl">${BRL.format(l.valor)}</div></div>`).join("") + `</div>`
-    + `<div class="ltotal"><span class="nm">total</span>
-       <span class="vl">${BRL.format(soma(linhas))}</span></div>`;
+  /* Uma linha por compra: o valor da parcela, uma trilha com uma marca
+     por parcela (as já pagas, a deste mês acesa) e quanto ainda falta
+     depois desta. Quem mais falta pagar vem primeiro. */
+  const resta = l => Math.max(0, l.parcela.n - l.parcela.i) * l.valor;
+  const ord = linhas.slice().sort((a,b)=>resta(b)-resta(a) || b.valor-a.valor);
+  const porConta = new Map();
+  for(const l of linhas){ const t = l.conta ? l.conta.titulo : "Outros"; porConta.set(t, (porConta.get(t)||0) + l.valor); }
+  $("m-parcelas").innerHTML = `<div class="bl-rolo lst-lista">` + ord.map(l=>{
+      const { i, n } = l.parcela, r = resta(l);
+      return `<div class="pc-ln">${marca(l.conta, true)}<b title="${esc(l.desc)}">${esc(l.desc)}</b><span class="pc-v">${esc(valorCurto(l.valor))}</span>
+        <span class="pc-tr" aria-label="parcela ${i} de ${n}">${Array.from({length:n}, (_,k)=>`<i class="${k+1<i?"f":k+1===i?"at":""}"></i>`).join("")}</span>
+        <small><span>${i} de ${n}</span><span>${r > 0.004 ? `faltam ${esc(BRL.format(r))}` : "acaba neste mês"}</span></small></div>`;
+    }).join("") + `</div>`
+    + rodapeLista([["total no mês", soma(linhas)], ...[...porConta.entries()].map(([t,v])=>[t, v])]);
 }
 
 /** Bloco resumido de contas fixas no Dashboard. */
@@ -791,18 +791,16 @@ function renderFixasResumo(){
     $("m-fixas").innerHTML = `<div class="blank">Nenhuma conta fixa vigente nesta competência.</div>`;
     return;
   }
-  const { html, meuTotal, deOutros, aCobrar } = listaFixas(vigentes);
-  // totais nas mesmas caixas dos Registros (Me devem / Eu devo) e da página de fixos
-  $("m-fixas").innerHTML = `<div class="bl-rolo">${html}</div>`
-    + caixasTotais([["meu total", meuTotal], ...(deOutros ? [["de terceiros", deOutros]] : []), ["a cobrar", aCobrar, "aberto"]]);
+  const { meuTotal, deOutros, aCobrar } = listaFixas(vigentes);
+  // as mesmas linhas do card de Gastos fixos, só com o dia embaixo do nome
+  $("m-fixas").innerHTML = barraFixas(vigentes)
+    + `<div class="bl-rolo lst-lista">${vigentes.slice().sort((a,b)=>ordemDia(a.data)-ordemDia(b.data))
+        .map(f=>linhaFixa(f, { tag:"button", soDia:true })).join("")}</div>`
+    + rodapeLista([["meu total", meuTotal], ...(deOutros ? [["de terceiros", deOutros]] : []), ["a cobrar", aCobrar, "aberto"]]);
   // tocar numa linha abre o card de Gastos fixos já nessa despesa
-  $("m-fixas").querySelectorAll(".lrow[data-fixa]").forEach(el=>{
-    el.classList.add("clicavel");
-    el.setAttribute("role","button"); el.tabIndex = 0;
-    el.setAttribute("aria-label", `Gerenciar ${el.querySelector(".nm")?.firstChild?.textContent.trim() || "conta fixa"}`);
-    const abrir = () => abrirFixa(el.dataset.fixa);
-    el.onclick = abrir;
-    el.onkeydown = e => { if(e.key==="Enter" || e.key===" "){ e.preventDefault(); abrir(); } };
+  $("m-fixas").querySelectorAll("[data-fixa]").forEach(el=>{
+    el.setAttribute("aria-label", `Gerenciar ${el.querySelector(".lst-n b")?.textContent.trim() || "conta fixa"}`);
+    el.onclick = () => abrirFixa(el.dataset.fixa);
   });
 }
 

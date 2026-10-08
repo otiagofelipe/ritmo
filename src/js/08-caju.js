@@ -14,15 +14,40 @@ function pgCaju(){
     + kpi({nome:"média por compra", cor:CORES.suave, valor: ls.length ? gasto/ls.length : 0,
            sub: ls.length ? `maior: ${BRL.format(Math.max(...ls.map(l=>Number(l.valor)||0)))}` : "—"});
 
-  $("cj-lista").innerHTML = ls.length
-    ? barraCaju(mes, gasto, teto)
-      + `<div class="lst-lista">${ls.map(linhaCaju).join("")}</div>`
-      + rodapeLista([["gasto no mês", gasto], ...(teto ? [["disponível", sobra, sobra<0 ? "neg" : "livre"]] : [])])
-    : `<div class="blank">Nada gasto no Caju nesta competência. Use “adicionar”.</div>`;
+  // o mesmo que o card do Caju mostra; o + abre o card já no lançamento
+  $("cj-lista").innerHTML = lancamentosCajuHTML(mes);
+  const mais = $("cj-lista").querySelector(".lst-mais");
+  if(mais) mais.onclick = () => { cajuLancar = true; grupoAberto = "caju2"; editorMontado = null; renderEditor(); };
 
-  // gasto x vale nas últimas 12 faturas até a selecionada
+  graficoCaju("cj-grafico", mes);
+}
+
+/** Lançamentos do Caju: barra do vale, linhas e totais com o + de lançar (card e aba). */
+function lancamentosCajuHTML(mes){
+  const ls = lancamentosCaju(mes);
+  const gasto = soma(ls), teto = tetoCaju(mes), livre = teto - gasto;
+  return barraCaju(mes, gasto, teto)
+    + `<div class="lst-lista">${ls.length ? ls.map(linhaCaju).join("") : `<div class="blank">Nada gasto no Caju nesta competência.</div>`}</div>`
+    + rodapeLista([["gasto no mês", gasto], ...(teto ? [["disponível", livre, livre < 0 ? "neg" : "livre"]] : [])], "Lançar gastos");
+}
+
+/** Resumo do Caju no card: os mesmos quatro números da aba. */
+function resumoCajuHTML(mes){
+  const ls = lancamentosCaju(mes);
+  const gasto = soma(ls), teto = tetoCaju(mes), sobra = teto - gasto;
+  const item = (n, v, sub, cls="") => `<div class="${cls}"><small>${esc(n)}</small><b>${esc(v)}</b><span>${esc(sub)}</span></div>`;
+  return `<div class="res-kpis">
+    ${item("gasto no mês", BRL.format(gasto), `${ls.length} lançamento${ls.length===1?"":"s"}`)}
+    ${item("vale do mês", BRL.format(teto), teto ? "cadastrado em Entradas" : "sem vale em Entradas")}
+    ${item("disponível", BRL.format(sobra), teto ? `${Math.round(Math.min(gasto/teto,9.99)*100)}% do vale usado` : "—", sobra < 0 ? "neg" : "livre")}
+    ${item("média por compra", BRL.format(ls.length ? gasto/ls.length : 0), ls.length ? `maior: ${BRL.format(Math.max(...ls.map(l=>Number(l.valor)||0)))}` : "—")}
+  </div>`;
+}
+
+/** Gasto x vale nas últimas 12 faturas até a selecionada (aba e card). */
+function graficoCaju(alvo, mes){
   const meses = S.faturas.filter(m=>m<=mes).slice(-12);
-  grafico("cj-grafico", {
+  grafico(alvo, {
     titulo:"gasto e vale do caju",
     labels: meses.map(mesCurto),
     series: [
@@ -34,6 +59,9 @@ function pgCaju(){
     vazio: "Sem competências para comparar."
   });
 }
+
+/** O + da aba Caju abre o card já no lançamento. */
+let cajuLancar = false;
 
 /* Contexto do formulário aberto. Remontar a cada render() apagaria o
    que ainda não foi salvo — bastava um chip mudar, o app rebuscar a
