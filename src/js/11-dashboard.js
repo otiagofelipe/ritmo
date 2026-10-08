@@ -759,10 +759,10 @@ async function salvarRoles(){
   }
 }
 
-/** Fatura da 1ª e da última parcela, em mm/aa: "03/26 – 12/26". */
+/** Fatura da 1ª e da última parcela: "mar/26 – dez/26". */
 function periodoParcelas(l){
   const comp = l.competencia || S.mesSel;
-  const mmaa = c => { const [a, m] = String(c||"").split("-"); return a && m ? `${m}/${a.slice(2)}` : "—"; };
+  const mmaa = c => { const [a, m] = String(c||"").split("-"); return a && m ? `${MES[Number(m)-1]}/${a.slice(2)}` : "—"; };
   return `${mmaa(somaMeses(comp, 1 - l.parcela.i))} – ${mmaa(somaMeses(comp, l.parcela.n - l.parcela.i))}`;
 }
 
